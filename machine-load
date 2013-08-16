@@ -1,0 +1,10 @@
+#!/bin/bash
+
+PROCESSES=5
+MACHINES="$*"
+
+for machine in $MACHINES; do
+	echo =======; echo $machine; echo =======;
+	ssh $machine ps -e --sort -pcpu -o uname -o pcpu -o pmem -o args | head -n $(($PROCESSES+1));
+	echo;
+done

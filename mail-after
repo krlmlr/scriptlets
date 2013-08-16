@@ -1,0 +1,23 @@
+#!/bin/bash
+
+COMMAND=("$@")
+for i in "${COMMAND[@]}"
+do
+	COMMANDSTRING="${COMMANDSTRING} '"${i//"'"/"'\''"}"'"
+done;
+COMMANDSTRING="${COMMANDSTRING} 2>&1"
+
+DATA=$(mktemp)
+TIME=$(mktemp)
+
+{
+	echo "${USER}@${HOSTNAME}:${PWD/$HOME/~}\$ $*" > $TIME
+	COMMAND=("$@" "2>&1")
+	$(which time) -v $(which sh) -c "$COMMANDSTRING" 2>> $TIME
+} | tee /dev/stderr | uuencode $1.log > $DATA
+
+head -n 3 $TIME
+
+cat $TIME $DATA | mail -s "$1: Exit code $?" ${USER}@ethz.ch
+
+rm $TIME $DATA
