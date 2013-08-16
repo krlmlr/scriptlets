@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd $(dirname "$1")
+FILE="$(basename $1)"
+
+R --vanilla -e 'library(knitr); render_markdown(strict=T); opts_chunk$set(tidy=FALSE); spin("'$FILE'")' > /dev/null && cat "${FILE%.*}".md

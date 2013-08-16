@@ -1,0 +1,8 @@
+#!/bin/bash
+set -m
+xrandr --output LVDS1 --output VIRTUAL1 --mode 1920x1200 --right-of LVDS1 --output VIRTUAL2 --mode 1920x1200 --right-of VIRTUAL1 --rotate left
+trap "xrandr --output LVDS1 --output VIRTUAL1 --off --output VIRTUAL2 --off" EXIT
+screenclone -b -x 1:0 -x 2:1 &
+sleep 1
+xrandr -d :8 --output DP-2 --right-of DP-1 --rotate left
+fg

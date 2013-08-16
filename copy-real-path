@@ -1,0 +1,6 @@
+#!/bin/sh
+
+TEXT=$1
+shift
+
+echo -n "$TEXT" | xclip $@
