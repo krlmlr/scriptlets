@@ -25,7 +25,7 @@ Executes a script and e-mails the status and output to the current user after co
 
 ##slecho
 
-Echos each of its parameters on a single line.
+Echoes each of its parameters on a single line.
 
 ##soR
 
