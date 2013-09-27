@@ -1,0 +1,4 @@
+#!/bin/bash
+set -m
+xrandr --output LVDS1 --output VIRTUAL1 --off --output VIRTUAL2 --off
+killall screenclone
