@@ -1,0 +1,3 @@
+#!/bin/sh
+
+thunderbird -compose "attachment=file:///$(readlink -f "$1")"
