@@ -1,3 +1,8 @@
 #!/bin/sh
 
-thunderbird -compose "attachment='file:///$(while [ -n "$1" ]; do readlink -f "$1"; shift; done | sed -r ':a;N;$!ba;s-\n-,file:///-g')'"
+if [ -n "$1" ]
+then
+  ATTACH="attachment='file:///$(while [ -n "$1" ]; do readlink -f "$1"; shift; done | sed -r ':a;N;$!ba;s-\n-,file:///-g')'"
+fi
+
+thunderbird -compose "$ATTACH"
