@@ -4,7 +4,7 @@ killall -w -q screenclone
 xrandr --output LVDS1 --output VIRTUAL1 --mode 1920x1200 --right-of LVDS1 --output VIRTUAL2 --mode 1920x1200 --right-of VIRTUAL1 --rotate left
 screenclone -b -x 1:0 -x 2:1 &
 
-# hard-coded by screenclone
+# HACK: screenclone starts bumblebee which chooses display 8 by default.
 CLONEDISPLAYNR=8
 CLONEDISPLAY=:$CLONEDISPLAYNR
 
