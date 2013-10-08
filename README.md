@@ -1,7 +1,11 @@
 scriptlets
 ==========
 
-A collection of tiny but helpful shell scripts for personal use. Licensed under GPL v3.
+A collection of tiny but helpful shell scripts for personal use.
+Tested with current Ubuntu.
+Licensed under [GPL v3]().
+
+To install all scripts to `~/bin` (by creating symbolic links), type `make`.
 
 ##copy-real-path
 
