@@ -3,10 +3,10 @@ set -m
 killall -w -q screenclone
 xrandr --output LVDS1 --output VIRTUAL1 --mode 1920x1200 --right-of LVDS1 --output VIRTUAL2 --mode 1920x1200 --right-of VIRTUAL1 --rotate left
 screenclone -b -x 1:0 -x 2:1 &
-sleep 1
 
 # hard-coded by screenclone
 CLONEDISPLAYNR=8
 CLONEDISPLAY=:$CLONEDISPLAYNR
 
+while [ ! -e /tmp/.X${CLONEDISPLAYNR}-lock ]; do sleep 0.1; done
 xrandr -d $CLONEDISPLAY --output DP-2 --right-of DP-1 --rotate left
