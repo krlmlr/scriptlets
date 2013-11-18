@@ -1,0 +1,8 @@
+#!/bin/sh
+
+make -j $(grep -c ^processor /proc/cpuinfo) "$@"
+ERRORS=$?
+if [ "$ERRORS" -gt 0 ]; then
+  echo "Errors occurred: $ERRORS" >> /dev/stderr
+  exit $ERRORS
+fi

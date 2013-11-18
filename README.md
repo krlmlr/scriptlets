@@ -28,6 +28,13 @@ Connects to remote machines and shows the top 5 processes by CPU consumption.
 
 Executes a script and e-mails the status and output to the current user after completion.
 
+##pmake
+
+Parallel `make`, uses number of CPU cores as number of jobs.
+
+##retry
+Execute command until success, with increasing time intervals.
+
 ##slecho
 
 Echoes each of its parameters on a single line.
