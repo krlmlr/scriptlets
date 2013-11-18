@@ -43,3 +43,6 @@ Creates a new mail in Thunderbird with attachments (given as parameters).
 ##xpra-attach-ssh
 
 A simple wrapper around `xpra attach`, useful to [integrate xpra with GNU Screen](http://krlmlr.github.io/2013/08/07/integrating-xpra-with-screen/).
+
+
+Copyright 2013 Kirill Müller.
