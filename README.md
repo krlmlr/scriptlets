@@ -33,7 +33,7 @@ Executes a script and e-mails the status and output to the current user after co
 Parallel `make`, uses number of CPU cores as number of jobs.
 
 ##retry
-Execute command until success, with increasing time intervals.
+Execute command until success, with increasing time intervals between failures.
 
 ##slecho
 
