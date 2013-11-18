@@ -1,6 +1,6 @@
 all: install
 
-IGNORE=Makefile
+IGNORE=Makefile README.md
 
 INSTALL_FILES=$(filter-out $(IGNORE),$(wildcard *))
 
