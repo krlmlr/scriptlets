@@ -16,6 +16,10 @@ Copies its argument to the clipboard.
 Start multi-monitor output [on an Optimus card, using bumblebee](http://askubuntu.com/a/303897/30266).
 Needs tweaking to adapt to your screen setup.
 
+##git-mmv
+
+Allows you to write `git mmv` to move several Git-controlled files at once, with the usual `mmv` syntax.
+
 ##i4 and i4c
 
 Indent current clipboard contents by four spaces and copy back to clipboard, the latter script places two hashes in front.
