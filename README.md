@@ -23,6 +23,8 @@ Use `ghpsd init` for creating an empty `gh-pages` subdirectory that will hold th
 
 It works by cloning a copy of the repo into a shadow subdirectory named `.gh-pages` (which is added to `.gitignore`, too); this makes updating the `gh-pages` branch work seamless.  Call `ghpsd checkout` to recreate the hidden `.gh-pages` folder, this clones locally and does not require network access.
 
+You can also add the call `ghpsd merge` to your commit hook.
+
 ##git-mmv
 
 Allows you to write `git mmv` to move several Git-controlled files at once, with the usual `mmv` syntax.
