@@ -1,7 +1,32 @@
 #!/bin/sh
 
 set -e
-set -x
+
+CheckCleanWC() {
+  if [ -n "$(git status --porcelain)" ]; then
+    echo "Working copy must be clean. Exiting." 1>&2
+    exit 1
+  fi
+}
+
+CreateSubdir() {
+  mkdir gh-pages
+  touch gh-pages/.gitignore
+  git add gh-pages
+  git commit -m "add stub for GitHub pages"
+}
+
+InitCheckoutDir() {
+  rm -rf .gh-pages
+  touch .gitignore
+  if ! egrep -q "^/\.gh-pages$" .gitignore; then sed -i -e '$a\' .gitignore; echo "/.gh-pages" >> .gitignore; fi
+  git add .gitignore
+  git commit -m "ignore .gh-pages"
+
+  git clone --local . .gh-pages
+  cd .gh-pages
+  git checkout gh-pages --
+}
 
 if [ ! -d .git ]; then
   echo "Must be in root of Git repository." 1>&2
@@ -15,66 +40,54 @@ shift
 
 case $COMMAND in
   init)
-    if [ -n "$(git status --porcelain)" ]; then
-      echo "Working copy must be clean. Exiting." 1>&2
-      exit 1
-    fi
-
     if [ "$1" = "-f" ]; then PUSH_FORCE=-f; fi
-    mkdir gh-pages
 
-    touch .gitignore
-    if ! egrep -q "^/gh-pages-checkout$" .gitignore; then sed -i -e '$a\' .gitignore; echo "/gh-pages-checkout" >> .gitignore; fi
-    git add .gitignore
-    git commit -m "ignore gh-pages-checkout"
+    CheckCleanWC
+    CreateSubdir
 
-    echo "# gh-pages" > gh-pages/README.md
-    git add gh-pages/README.md
-    git commit -m "add stub for GitHub pages"
+    git branch $PUSH_FORCE gh-pages
 
-    git clone --local . gh-pages-checkout
-    cd gh-pages-checkout
-    git push origin master:gh-pages $PUSH_FORCE
-    git fetch --all
-    git checkout gh-pages --
-    git checkout .
-    git push -u origin --all
+    InitCheckoutDir
+
     find -mindepth 1 -maxdepth 1 -not "(" -name gh-pages -or -name .git ")" -exec git rm -r \{\} \+
     cd gh-pages
     find -mindepth 1 -maxdepth 1 -exec git mv \{\} .. \;
     cd ..
     rmdir gh-pages
-    git commit -m "initial setup"
+    git commit -m "initial setup of gh-pages branch"
     git push
     ;;
+
   repair)
     git reset origin/master
-    rm -rf gh-pages-checkout/
+    rm -rf .gh-pages/
     git checkout .
     git clean -f -d
     ;;
+
   merge)
-    if [ -n "$(git status --porcelain)" ]; then
-      echo "Working copy must be clean. Exiting." 1>&2
-      exit 1
-    fi
+    CheckCleanWC
 
-    cd gh-pages-checkout
-    if [ -n "$(git status --porcelain)" ]; then
-      echo "Working copy in gh-pages-checkout must be clean. Exiting." 1>&2
-      exit 1
-    fi
+    cd .gh-pages
+    CheckCleanWC
 
-    git checkout gh-pages --
-    git fetch --all
-    git pull
+    git checkout -q gh-pages --
+    git fetch --all -q
+    git pull -q
     git merge -s recursive -X subtree=gh-pages origin/master --no-edit
-    git push origin gh-pages
+    git push origin gh-pages -q
     ;;
+
+  checkout)
+    CheckCleanWC
+    InitCheckoutDir
+    ;;
+
   "")
     echo "Must specify command" 1>&2
     exit 1
     ;;
+
   *)
     echo "Unknown command: $COMMAND" 1>&2
     exit 1
