@@ -13,8 +13,11 @@ Copies its argument to the clipboard.
 
 ##extmon-start and extmon-stop
 
-Start multi-monitor output [on an Optimus card, using bumblebee](http://askubuntu.com/a/303897/30266).
-Needs tweaking to adapt to your screen setup.
+Start multi-monitor output [on an Optimus card, using bumblebee](http://askubuntu.com/a/303897/30266).  Needs tweaking to adapt to your screen setup.
+
+##ghpsd
+
+GitHub Pages in a separate directory. Allows efficiently maintaining and synchronizing the contents of the `gh-pages` branch in a [subdirectory of the main branch](http://rafeca.com/2012/01/17/automate-your-release-flow/).  Supports subcommands `init`, `repair` (in case you want to undo `init`, works only before pushing), and `merge`.
 
 ##git-mmv
 
