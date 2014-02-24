@@ -1,2 +1,2 @@
 #!/bin/sh
-compare $2 $1 png:- | ( montage -geometry +4+4 $2 - $1 png:-; kill -PIPE $$; ) | display -title "$1 -- $2"
+compare $1 $2 png:- | ( montage -geometry +4+4 $1 - $2 png:-; kill -PIPE $$; ) | display -title "$1 -- $2"
