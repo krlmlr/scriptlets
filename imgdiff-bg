@@ -1,0 +1,4 @@
+#!/bin/sh
+TMPNAME=$(mktemp imgdiff-XXXXXXXX.png)
+compare $2 $1 png:- | montage -geometry +4+4 $2 - $1 png:- > $TMPNAME
+display -title "$1 -- $2" $TMPNAME &

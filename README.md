@@ -33,6 +33,10 @@ Allows you to write `git mmv` to move several Git-controlled files at once, with
 
 Indent current clipboard contents by four spaces and copy back to clipboard, the latter script places two hashes in front.
 
+##imgdiff and imgdiff-bg
+
+Compare two images side by side and show differences in a middle pane. Requires ImageMagick. The `-bg` script exits immediately. Usage: `git difftool -x imgdiff-bg -y <image files>`. ([Source](http://www.akikoskinen.info/image-diffs-with-git))
+
 ##machine-load
 
 Connects to remote machines and shows the top 5 processes by CPU consumption.
