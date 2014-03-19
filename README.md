@@ -29,6 +29,11 @@ You can also add the call `ghpsd merge` to your commit hook.
 
 Allows you to write `git mmv` to move several Git-controlled files at once, with the usual `mmv` syntax.
 
+##git-merge-into
+
+Merges the current branch into another branch without altering the current working copy.  Assumes that Git plays well in working copies created by hard-linking
+all files.
+
 ##i4 and i4c
 
 Indent current clipboard contents by four spaces and copy back to clipboard, the latter script places two hashes in front.
