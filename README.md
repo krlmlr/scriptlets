@@ -11,6 +11,10 @@ To install all scripts to `~/bin` (by creating symbolic links), type `make`.
 
 Copies its argument to the clipboard.
 
+##encfs-local
+
+`encfs` command with support for relative paths.
+
 ##extmon-start and extmon-stop
 
 Start multi-monitor output [on an Optimus card, using bumblebee](http://askubuntu.com/a/303897/30266).  Needs tweaking to adapt to your screen setup.

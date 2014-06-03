@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+ROOT=$(readlink -f "$1")
+MOUNT=$(readlink -f "$2")
+
+encfs "${ROOT}" "${MOUNT}"
+
