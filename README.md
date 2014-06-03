@@ -7,6 +7,10 @@ Licensed under [GPL v3](http://www.gnu.org/copyleft/gpl.html).
 
 To install all scripts to `~/bin` (by creating symbolic links), type `make`.
 
+##bkg
+
+Execute command in the background and show desktop notification *in case of error*.
+
 ##copy-real-path
 
 Copies its argument to the clipboard.
