@@ -65,6 +65,9 @@ Parallel `make`, uses number of CPU cores as number of jobs.
 ##retry
 Execute command until success, with increasing time intervals between failures.
 
+##rstudio-here
+Start RStudio with an `.Rproj` project file found in the current directory.
+
 ##slecho
 
 Echoes each of its parameters on a single line.
