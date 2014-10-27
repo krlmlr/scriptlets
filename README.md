@@ -7,7 +7,13 @@ Licensed under [GPL v3](http://www.gnu.org/copyleft/gpl.html).
 
 To install all scripts to `~/bin` (by creating symbolic links), type `make`.
 
-##bkg
+##Notifications
+
+###n
+
+Execute command in the foreground and show desktop notification after completion.
+
+###bkg
 
 Execute command in the background and show desktop notification *in case of error*.
 

@@ -10,7 +10,7 @@ DoRun() {
 
 SCRIPT=$*
 if [ "$SCRIPT" = "" ]; then
-  echo "Usage: bkg <command> <parameters...>" >> /dev/stderr
+  echo "Usage: $0 <command> <parameters...>" >> /dev/stderr
   exit 1
 fi
 
