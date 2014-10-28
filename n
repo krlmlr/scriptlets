@@ -4,7 +4,9 @@ DoRun() {
   if sh -c "$SCRIPT"; then
     notify-send -i emblem-default "$0: $SCRIPT"
   else
+    exitcode=$?
     notify-send -u critical "$0: $SCRIPT"
+    return $exitcode
   fi
 }
 
