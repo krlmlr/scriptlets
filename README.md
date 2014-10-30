@@ -17,6 +17,16 @@ Execute command in the foreground and show desktop notification after completion
 
 Execute command in the background and show desktop notification *in case of error*.
 
+##Open my GUI here
+
+###rstudio-here
+
+Start RStudio with an `.Rproj` project file found in the current directory.
+
+###texstudio-here
+
+Start a new instance of texstudio with a `.txss` session file found in the current directory.
+
 ##copy-real-path
 
 Copies its argument to the clipboard.
@@ -70,9 +80,6 @@ Parallel `make`, uses number of CPU cores as number of jobs.
 
 ##retry
 Execute command until success, with increasing time intervals between failures.
-
-##rstudio-here
-Start RStudio with an `.Rproj` project file found in the current directory.
 
 ##slecho
 

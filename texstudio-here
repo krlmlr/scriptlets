@@ -1,0 +1,3 @@
+#!/bin/sh
+
+texstudio --start-always "$(find -name '*.txss' -print -quit)" &
