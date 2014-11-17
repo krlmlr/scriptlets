@@ -1,3 +1,3 @@
 #!/bin/sh
 
-rstudio "$(find -name '*.Rproj' -print -quit)" &
+rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" &
