@@ -22,6 +22,7 @@ Execute command in the background and show desktop notification *in case of erro
 ###rstudio-here
 
 Start RStudio with an `.Rproj` project file found in the current directory.
+If no project file is found, it is created using `devtools::use_rstudio()`
 
 ###texstudio-here
 

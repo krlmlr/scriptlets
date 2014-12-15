@@ -1,3 +1,10 @@
 #!/bin/sh
 
+set -e
+
+RPROJ_FILE="$(find -maxdepth 1 -name '*.Rproj' -print -quit)"
+if [ "$RPROJ_FILE" = "" ]; then
+  Rscript -e "devtools::use_rstudio()"
+fi
+
 rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" &
