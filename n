@@ -1,7 +1,7 @@
 #!/bin/sh
 
 DoRun() {
-  if sh -c "$SCRIPT"; then
+  if $SCRIPT; then
     notify-send -i emblem-default "$0: $SCRIPT"
   else
     exitcode=$?
@@ -10,11 +10,10 @@ DoRun() {
   fi
 }
 
-SCRIPT=$*
+SCRIPT="$@"
 if [ "$SCRIPT" = "" ]; then
   echo "Usage: $0 <command> <parameters...>" >> /dev/stderr
   exit 1
 fi
 
 DoRun
-
