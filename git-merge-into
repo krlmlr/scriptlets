@@ -3,7 +3,7 @@
 set -e
 
 if [ -z "$1" ]; then
-  echo "Usage: $0 <target-branch>"
+  echo "Usage: $0 <target-branch> ..."
   exit 1
 fi
 
