@@ -9,5 +9,5 @@ fi
 
 while true; do
   $COMMAND || echo "$0: continuing after error in $COMMAND"
-  inotifywait .
+  inotifywait . -e CREATE,MODIFY,DELETE
 done
