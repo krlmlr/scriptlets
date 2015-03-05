@@ -8,6 +8,6 @@ if [ "$COMMAND" = "" ]; then
 fi
 
 while true; do
-  $@ || echo "$0: continuing after error in $@"
+  $COMMAND || echo "$0: continuing after error in $COMMAND"
   inotifywait .
 done
