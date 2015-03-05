@@ -98,5 +98,9 @@ Creates a new mail in Thunderbird with attachments (given as parameters).
 
 A simple wrapper around `xpra attach`, useful to [integrate xpra with GNU Screen](http://krlmlr.github.io/2013/08/07/integrating-xpra-with-screen/).
 
+##rpt
 
-Copyright 2013 Kirill Müller.
+Repeat a command (default: `make`) as soon as the contents of the current working directory change.
+
+
+Copyright 2015 Kirill Müller.
