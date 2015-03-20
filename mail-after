@@ -14,7 +14,7 @@ TIME=$(mktemp)
 	echo "${USER}@${HOSTNAME}:${PWD/$HOME/~}\$ $*" > $TIME
 	COMMAND=("$@" "2>&1")
 	$(which time) -v $(which sh) -c "$COMMANDSTRING" 2>> $TIME
-} | tee /dev/stderr | uuencode $1.log > $DATA
+} | tee /dev/stderr | (uuencode $1.log || cat) > $DATA
 
 head -n 3 $TIME
 
