@@ -4,7 +4,7 @@ set -e
 
 RPROJ_FILE="$(find -maxdepth 1 -name '*.Rproj' -print -quit)"
 if [ "$RPROJ_FILE" = "" ]; then
-  Rscript -e "devtools::use_rstudio()"
+  Rscript -e "devtools::use_rstudio()" || echo "Version: 1.0" > $(basename $PWD).Rproj
 fi
 
 rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" &
