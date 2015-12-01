@@ -2,12 +2,12 @@
 
 set -e
 
-COMMAND=$@
-if [ "$COMMAND" = "" ]; then
-  COMMAND=make
+if [ "$#" = "0" ]; then
+  $0 make
+  exit $?
 fi
 
 while true; do
-  $COMMAND || echo "$0: continuing after error in $COMMAND"
+  "$@" || echo "$0: continuing after error in $COMMAND"
   inotifywait . -r -e CREATE,MODIFY,DELETE
 done
