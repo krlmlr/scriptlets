@@ -8,7 +8,7 @@ if [ -z "$1" ]; then
 fi
 
 GITDIR=$(git rev-parse --show-toplevel)
-TMPDIR="${GITDIR}.git.merge"
+TMPDIR="${GITDIR}/.git/merge-into"
 
 mkdir "${TMPDIR}"
 
@@ -24,13 +24,9 @@ SOURCE_BRANCH="$(git branch | sed -n -r '/^\* (.*)$/ {s//\1/;p}')"
 TARGET_BRANCH="$1"
 shift
 
-find "${GITDIR}" -mindepth 1 -maxdepth 1 -print0 | xargs -0 cp -r -l -t "${TMPDIR}/"
+git clone . -b "${TARGET_BRANCH}" "${TMPDIR}"
 cd "${TMPDIR}"
-echo "Working directory: ${TMPDIR}" 1>&2
-git reset HEAD
-git checkout .
-git clean -f -d -x
-git checkout "${TARGET_BRANCH}"
+git branch "${SOURCE_BRANCH}" "origin/${SOURCE_BRANCH}"
 git merge "${SOURCE_BRANCH}" "$@"
 git push "${GITDIR}" "${TARGET_BRANCH}"
 cd "${GITDIR}"
