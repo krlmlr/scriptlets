@@ -61,6 +61,7 @@ add() {
   location="$2"
   if [ -z "$name" -o -z "$location" ]; then usage; fi
   if has_name; then fatal "rsync remote already exists: $name"; fi
+  check_no_trailing_slash
 
   echo "$name $location" >> "$config"
   exit 0
