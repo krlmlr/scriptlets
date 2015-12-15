@@ -1,0 +1,96 @@
+#!/bin/bash
+
+set -e
+#set -x
+
+main() {
+  opt="$1"
+  if [ -z "$opt" ]; then
+    opt=list
+  else
+    shift
+  fi
+
+  $opt "$@" || usage
+}
+
+usage() {
+  echo "Usage:"
+  echo "        $0"
+  echo "        $0 add <name> <rsync-location>"
+  echo "        $0 remove <name>"
+  echo "        $0 pull <name>"
+  echo "        $0 push <name>"
+  exit 1
+}
+
+fatal() {
+  echo "$0: $1" 1>&2
+  exit 1
+}
+
+has_name() {
+  name="$1"
+  if ! ( echo "$name" | egrep -q "^[a-zA-Z0-9]+$" ) then
+    fatal "remote name must consist only of characters and digits"
+  fi
+  egrep -q "^$name " "$config"
+}
+
+check_has_name() {
+  if ! has_name "$name"; then fatal "rsync remote does not exist: $name"; fi
+}
+
+get_location() {
+  check_has_name
+  sed -n "/^$name / s/^$name //p;d" "$config"
+}
+
+list() {
+  cat "$config"
+  exit 0
+}
+
+add() {
+  name="$1"
+  location="$2"
+  if [ -z "$name" -o -z "$location" ]; then usage; fi
+  if has_name "$name"; then fatal "rsync remote already exists: $name"; fi
+
+  echo "$name $location" >> "$config"
+  exit 0
+}
+
+remove() {
+  name="$1"
+  if [ -z "$name" ]; then usage; fi
+  check_has_name
+
+  sed -in "/^$name / d;p" "$config"
+  exit 0
+}
+
+pull() {
+  if [ -n "$(git status --porcelain)" ]; then
+    fatal "repository must be clean"
+  fi
+  name="$1"
+  shift
+  if [ -z "$name" ]; then usage; fi
+  location=$(get_location)
+  rsync -a --exclude='.git/' "$location" "$gitdir" "$@"
+}
+
+push() {
+  name="$1"
+  shift
+  if [ -z "$name" ]; then usage; fi
+  location=$(get_location)
+  rsync -a --exclude='.git/' "$gitdir" "$location" "$@"
+}
+
+gitdir=$(git rev-parse --show-toplevel)
+config="${gitdir}/.git/rsync"
+[ -f "$config" ] || touch "$config"
+
+main "$@"
