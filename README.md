@@ -56,8 +56,7 @@ Allows you to write `git mmv` to move several Git-controlled files at once, with
 
 ##git-merge-into
 
-Merges the current branch into another branch without altering the current working copy.  Assumes that Git plays well in working copies created by hard-linking
-all files.
+Merges the current branch into another branch without altering the current working copy.
 
 ##i4 and i4c
 
