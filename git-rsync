@@ -41,6 +41,12 @@ check_has_name() {
   if ! has_name "$name"; then fatal "rsync remote does not exist: $name"; fi
 }
 
+check_no_trailing_slash() {
+  if echo "$location" | egrep -q "/$"; then
+    fatal "location must not contain trailing slash"
+  fi
+}
+
 get_location() {
   check_has_name
   sed -n "/^$name / s/^$name //p;d" "$config"
@@ -78,7 +84,7 @@ pull() {
   shift
   if [ -z "$name" ]; then usage; fi
   location=$(get_location)
-  rsync -a --exclude='.git/' "$location" "$gitdir" "$@"
+  rsync -a --exclude='.git/' "$location/" "$gitdir" "$@"
 }
 
 push() {
@@ -86,7 +92,7 @@ push() {
   shift
   if [ -z "$name" ]; then usage; fi
   location=$(get_location)
-  rsync -a --exclude='.git/' "$gitdir" "$location" "$@"
+  rsync -a --exclude='.git/' "$gitdir/" "$location" "$@"
 }
 
 gitdir=$(git rev-parse --show-toplevel)
