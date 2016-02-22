@@ -10,4 +10,4 @@ StripTrailingWhitespace: Yes
 " > $(basename $PWD).Rproj
 fi
 
-rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" &
+rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" 2> /dev/null 1> /dev/null &
