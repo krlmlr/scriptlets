@@ -4,7 +4,8 @@ set -e
 
 RPROJ_FILE="$(find -maxdepth 1 -name '*.Rproj' -print -quit)"
 if [ "$RPROJ_FILE" = "" ]; then
-  Rscript -e "devtools::use_rstudio()" || echo "Version: 1.0
+  Rscript -e "devtools::use_rstudio()" || true
+  echo "Version: 1.0
 AutoAppendNewline: Yes
 StripTrailingWhitespace: Yes
 " > $(basename $PWD).Rproj
