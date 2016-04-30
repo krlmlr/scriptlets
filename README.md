@@ -50,6 +50,10 @@ It works by cloning a copy of the repo into a shadow subdirectory named `.gh-pag
 
 You can also add the call `ghpsd merge` to your commit hook.
 
+##gh-mirror
+
+Mirrors GitHub issues in a subdirectory of `.git` for offline use.
+
 ##git-mmv
 
 Allows you to write `git mmv` to move several Git-controlled files at once, with the usual `mmv` syntax.

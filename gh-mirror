@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+set -x
+
+repo=$(git remote -v | sed -r -n '/^origin.*fetch/ {s/^.*github[.]com.(.*)[.]git .*$/\1/;P}')
+toplevel=$(git rev-parse --show-toplevel)
+
+cd "${toplevel}/.git"
+wget -e robots=off -m -l 3 -E -k -p -np --cut-dirs=2 https://github.com/${repo}/issues/
