@@ -7,4 +7,4 @@ repo=$(git remote -v | sed -r -n '/^origin.*fetch/ {s/^.*github[.]com.(.*)[.]git
 toplevel=$(git rev-parse --show-toplevel)
 
 cd "${toplevel}/.git"
-wget -e robots=off -m -l 2 -E -k -p -np --cut-dirs=2 --regex-type pcre --accept-regex '^.*/(?:issues|issues/[0-9]*|pull/[0-9]+|pulls)$' https://github.com/${repo}/
+wget -e robots=off -m -l 2 -E -k -p -np --cut-dirs=2 --regex-type pcre --accept-regex '^.*/(?:issues(?:|[?]page=.*)|issues/[0-9]*|pull/[0-9]+|pulls(?:|[?]page=.*))$' https://github.com/${repo}/
