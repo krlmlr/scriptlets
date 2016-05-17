@@ -52,7 +52,7 @@ You can also add the call `ghpsd merge` to your commit hook.
 
 ##gh-mirror
 
-Mirrors GitHub issues in a subdirectory of `.git` for offline use.
+Mirrors GitHub issues in a subdirectory of `.git` for offline use. A low-tech wrapper for `wget`.
 
 ##git-mmv
 
