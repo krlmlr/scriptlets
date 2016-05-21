@@ -7,7 +7,7 @@ until "$@"; do
     sleep ${NEXT_WAIT_TIME}
 
     NEXT_WAIT_TIME=$((${NEXT_WAIT_TIME} * 2))
-    if [[ ${NEXT_WAIT_TIME} -ge ${MAX_SLEEP} ]]; then
+    if [ ${NEXT_WAIT_TIME} -ge ${MAX_SLEEP} ]; then
         NEXT_WAIT_TIME=${MAX_SLEEP}
     fi
 done
