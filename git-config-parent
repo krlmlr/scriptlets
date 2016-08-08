@@ -3,4 +3,6 @@
 set -e
 set -x
 
-git config --local --add include.path ../../.gitconfig
+if ! git config --list | grep -q "include[.]path=[.][.]/[.][.]/[.]gitconfig"; then
+  git config --local --add include.path ../../.gitconfig
+fi
