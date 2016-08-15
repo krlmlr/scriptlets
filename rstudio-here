@@ -12,7 +12,7 @@ StripTrailingWhitespace: Yes
 fi
 
 if ! [ -d .Rproj.user/.git ]; then
-   git init .Rproj.user; ( cd .Rproj.user; git commit -m "initial" --allow-empty; echo "*" > .git/info/exclude )
+   git init .Rproj.user; ( cd .Rproj.user; git config user.name user; git config user.email user@email.com; git commit -m "initial" --allow-empty; echo "*" > .git/info/exclude )
 fi
 
 rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" 2> /dev/null 1> /dev/null &
