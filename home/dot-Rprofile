@@ -1,4 +1,4 @@
-options(repos=c(CRAN="file://home/muelleki/CRAN"))
+options(repos=c(CRAN="file:///opt/cran"))
 if (requireNamespace("ulimit", quietly = TRUE)) invisible(ulimit::memory_limit(6000))
 if (interactive()) {
   cat("Working directory:", getwd(), "\n")
