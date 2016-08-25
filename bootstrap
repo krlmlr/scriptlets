@@ -6,6 +6,6 @@ set -x
 cd
 mkdir -p git
 cd git
-git clone git@github.com:krlmlr/scriptlets.git
+git clone https://github.com/krlmlr/scriptlets.git
 cd scriptlets
 make
