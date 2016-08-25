@@ -4,6 +4,6 @@ set -e
 
 cd ~/git/scriptlets
 git fetch --quiet
-git diff --shortstat
+git diff --shortstat origin/master
 git pull --rebase --quiet
 make --quiet
