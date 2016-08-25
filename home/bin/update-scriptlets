@@ -3,6 +3,6 @@
 set -e
 
 cd ~/git/scriptlets
-git fetch
-git pull --rebase
-make
+git fetch --quiet
+git pull --rebase --quiet
+make --quiet
