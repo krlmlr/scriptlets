@@ -6,4 +6,9 @@ cd ~/git/scriptlets
 git fetch --quiet
 git diff --shortstat origin/master
 git pull --rebase --quiet
-make --quiet
+
+if [ "$2" == "--force" -o "$2" == "-f" ]; then
+	make force-install --quiet
+else
+	make --quiet
+fi
