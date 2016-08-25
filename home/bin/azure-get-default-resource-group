@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+
+azure group list --json | jq ".[0].name"
