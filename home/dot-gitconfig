@@ -1,5 +1,82 @@
-[include]
-	path = ~/git/gitconfig/all
+[alias]
+	a = add
+	ac = commit --all --verbose
+	acm = commit --all --message
+	ap = add --patch
+	b = branch
+	bm = branch --merged
+	bn = branch --no-merged
+	bv = branch -v
+	bvv = branch -vv
+	ci = commit -v
+	cia = commit --amend -v
+	ciao = commit --amend --no-edit
+	cim = commit --message
+	cif = !sh -c 'git commit --fixup=$1' -
+	cir = !sh -c 'git commit --reuse-message=${1:-HEAD}' -
+	co = checkout
+	cob = checkout -b
+	cop = checkout --patch
+	d = diff
+	dw = diff --word-diff
+	dc = diff --cached
+	dcw = diff --cached --word-diff
+	dm = !sh -c 'diffuse -m "$@" &' -
+	f = fetch --prune
+	fa = fetch --all --prune
+	ffs = flow feature start
+	ffp = flow feature publish
+	fff = flow feature finish
+	frs = flow release start
+	frp = flow release publish
+	frf = flow release finish
+	l = log --numstat
+	lf = log --numstat --first-parent
+	lp = log --patch
+	lfp = log --patch -m --first-parent
+	m = merge
+	ma = merge --abort
+	mf = merge --ff
+	ph = push
+	phf = push --force
+	phu = push --set-upstream
+	pl = pull
+	plr = pull --rebase
+	q = reset
+	qh = reset HEAD
+	qhp = reset HEAD^
+	r = rebase
+	ri = rebase --interactive --autosquash
+	ra = rebase --abort
+	rc = rebase --continue
+	rs = rebase --skip
+	rma = rebase master
+	rmi = rebase master --interactive --autosquash
+	s = status
+[color]
+	ui = auto
+	branch = auto
+	diff = auto
+	interactive = auto
+	status = auto
+[merge "ours"]
+	driver = /bin/true
+[rerere]
+	enabled = true
+[push]
+	default = matching
+	followTags = true
+[pull]
+	ff = only
+[merge]
+	conflictstyle = diff3
+	ff = false
+[credential]
+	helper = cache --timeout=86400
+[gitflow "feature.finish"]
+	no-ff = true
+[gitflow "bugfix.finish"]
+	no-ff = true
 [filter "lfs"]
 	required = true
 	clean = git-lfs clean %f
