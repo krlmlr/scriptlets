@@ -1,2 +1,4 @@
 alias gf="git flow"
 alias g="git"
+
+export MAKEFLAGS=-j $(nproc)
