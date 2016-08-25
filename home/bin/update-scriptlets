@@ -4,7 +4,7 @@ set -e
 
 cd ~/git/scriptlets
 git fetch --quiet
-git diff --shortstat origin/master
+git diff --numstat origin/master
 git pull --rebase --quiet
 
 if [ "$2" == "--force" -o "$2" == "-f" ]; then
