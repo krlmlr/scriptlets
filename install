@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -e
+
+IGNORE="Makefile README.md"
+
+SOURCE_DIR=home
+
+INSTALL_FILES=$(cd ${SOURCE_DIR} && find * -type f | sed 's#dot/#.#g')
+
+INSTALL_DIR=~
+
+for f in ${INSTALL_FILES}; do
+	if [ ! -h ${INSTALL_DIR}/$f -o "$(readlink -- "${INSTALL_DIR}/$f")" != "${PWD}/${SOURCE_DIR}/$f" ]; then
+		ln --force --verbose --symbolic "${PWD}/${SOURCE_DIR}/$f" "${INSTALL_DIR}/$f" || true
+	fi
+done
