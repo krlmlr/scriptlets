@@ -7,7 +7,7 @@ git fetch --quiet
 git diff --numstat origin/master
 git pull --rebase --quiet
 
-if [ "$2" = "--force" -o "$2" = "-f" ]; then
+if [ "$1" = "--force" -o "$1" = "-f" ]; then
 	make force-install --quiet
 else
 	make --quiet
