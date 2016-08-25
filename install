@@ -6,12 +6,17 @@ IGNORE="Makefile README.md"
 
 SOURCE_DIR=home
 
-INSTALL_FILES=$(cd ${SOURCE_DIR} && find * -type f | sed 's#dot/#.#g')
+INSTALL_FILES=$(cd ${SOURCE_DIR} && find * -type f)
 
 INSTALL_DIR=~
 
+LN_ARGS="$@"
+
 for f in ${INSTALL_FILES}; do
-	if [ ! -h ${INSTALL_DIR}/$f -o "$(readlink -- "${INSTALL_DIR}/$f")" != "${PWD}/${SOURCE_DIR}/$f" ]; then
-		ln --force --verbose --symbolic "${PWD}/${SOURCE_DIR}/$f" "${INSTALL_DIR}/$f" || true
+	target_file=$(echo ${INSTALL_DIR}/$f | sed 's#dot/#.#g')
+	source_file=${PWD}/${SOURCE_DIR}/$f
+	
+	if [ ! -h ${target_file} -o "$(readlink -- ${target_file})" != ${source_file} ]; then
+		ln ${LN_ARGS} --verbose --symbolic ${source_file} ${target_file} || true
 	fi
 done
