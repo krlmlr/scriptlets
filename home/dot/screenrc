@@ -1,0 +1,9 @@
+defscrollback 100000
+hardstatus alwayslastline '%{= kG}[ %{y}%H %{g}][%15= %>%-Lw%40>%{r}(%{W}%n*%f %t%?(%u)%?%{r})%{g}%+Lw%-22< ][%{c} %Y-%m-%d %c %{g}]'
+
+altscreen on
+
+screen -t top 8 nice top
+
+source .screenrc-xpra
+#source .screenrc-ssh-agent
