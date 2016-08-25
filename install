@@ -17,6 +17,7 @@ for f in ${INSTALL_FILES}; do
 	source_file=${PWD}/${SOURCE_DIR}/$f
 	
 	if [ ! -h ${target_file} -o "$(readlink -- ${target_file})" != ${source_file} ]; then
+		mkdir -p $(dirname ${target_file})
 		ln ${LN_ARGS} --verbose --symbolic ${source_file} ${target_file} || true
 	fi
 done
