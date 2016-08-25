@@ -18,6 +18,6 @@ TIME=$(mktemp)
 
 head -n 3 $TIME
 
-cat $TIME $DATA | mail -s "$(echo -n $* | head -c 80): Exit code $?" ${USER}
+cat $TIME $DATA | mail -s "$(echo -n $* | head -c 80): $(sed -n '2p' $TIME)" ${USER}
 
 rm $TIME $DATA
