@@ -2,4 +2,4 @@
 
 set -e
 
-azure group list --json | jq ".[0].name"
+azure group list --json | jq --raw-output ".[0].name"

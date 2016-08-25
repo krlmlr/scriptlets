@@ -1,5 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+set -x
 
-azure vm set -z Standard_D${1}_v2 -n ${HOSTNAME} -g $(azure-get-default-resource-group)
+machine_name=${2-${HOSTNAME}}
+
+azure vm set -z Standard_D${1}_v2 -n ${machine_name} -g $(azure-get-default-resource-group)
