@@ -5,7 +5,11 @@ A collection of tiny but helpful shell scripts for personal use.
 Tested with current Ubuntu.
 Licensed under [GPL v3](http://www.gnu.org/copyleft/gpl.html).
 
-To install all scripts to `~/bin` (by creating symbolic links), clone the project and type `make`.
+To install all scripts to `~/bin` (by creating symbolic links), clone the project and type `make`. Or run the [`bootstrap`](bootstrap) script:
+
+```sh
+curl -s https://raw.githubusercontent.com/krlmlr/scriptlets/master/bootstrap | sh
+```
 
 ##Notifications
 
