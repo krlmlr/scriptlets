@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -18,6 +18,8 @@ for f in ${INSTALL_FILES}; do
 	
 	if [ ! -h ${target_file} -o "$(readlink -- ${target_file})" != ${source_file} ]; then
 		mkdir -p $(dirname ${target_file})
-		ln ${LN_ARGS} --verbose --symbolic ${source_file} ${target_file} || true
+		if [ ! "${target_file}" == */.dummy ]; then
+			ln ${LN_ARGS} --verbose --symbolic ${source_file} ${target_file} || true
+		fi
 	fi
 done
