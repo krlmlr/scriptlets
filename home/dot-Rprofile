@@ -1,0 +1,40 @@
+options(repos=c(CRAN="file://home/muelleki/CRAN"))
+if (requireNamespace("ulimit", quietly = TRUE)) invisible(ulimit::memory_limit(6000))
+if (interactive()) {
+  cat("Working directory:", getwd(), "\n")
+  library(magrittr)
+
+#  assign("dt", getNamespace("devtools"), .Internal(getNamespaceRegistry()))
+  
+}
+options(
+  devtools.name = "Kirill Müller",
+  devtools.desc.author = 'person("Kirill", "Müller", role = c("aut", "cre"), email = "krlmlr+r@mailbox.org")',
+  devtools.desc.license = "GPL-3",
+  devtools.desc = list(Encoding = "UTF-8", Version = "0.0-0", Date = Sys.Date(), URLNote = "https://github.com/krlmlr/", BugReports = "https://github.com/krlmlr/", URL = "http://krlmlr.github.io/"),
+  devtools.install.args = "--install-tests",
+  devtools.revdep.libpath = "~/R-revdep",
+
+  warnPartialMatchAttr = TRUE,
+  warnPartialMatchDollar = TRUE,
+  #warnPartialMatchArgs = TRUE,
+  max.print = 100L,
+  keep.source = TRUE,
+  keep.source.pkgs = TRUE,
+
+  mc.cores = 4,
+
+  tibble.max_extra_cols = 30L,
+
+  testthat.summary.omit_dots = TRUE
+)
+#Sys.setenv(MAKE="make -k -j 4")
+# shinyapps::setAccountInfo(name='krlmlr', token='6091E980A02C603B72A33AED65628373', secret='RYnsTizZFKM/MHKOlwSDYW8lVqwsTk12MX8s+xXj')
+
+options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
+options(deparse.max.lines = 2)
+
+if (file.exists(".Rprofile.local")) {
+  source(".Rprofile.local", chdir = TRUE)
+}
+
