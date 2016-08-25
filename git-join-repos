@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -e
+set -x
+
+if [ -z "$1" -o -z "$2" ]; then
+  echo "Usage: $0 <target-dir> <source-dir> ..."
+  exit 1
+fi
+
+target_dir=$(realpath "$1")
+shift
+
+#
+git init "$target_dir"
+pushd "$target_dir"
+touch .gitignore
+git add .gitignore
+git commit -m "initial"
+popd
+
+join_dir="$target_dir/.git/join"
+mkdir -p "$join_dir"
+
+# Copy repos to .git/join and filter-branch
+
+source_dirs="$@"
+for source_dir in $source_dirs
+do
+  source_name="$(basename "$source_dir")"
+  source_repo="$join_dir/$source_name"
+#
+  cp -r "$source_name" "$join_dir"
+  pushd "$source_repo"
+#
+    git filter-branch --prune-empty --tree-filter "rm -rf .gitmodules; mkdir .q; mv * .??* .q; mv .q '"$source_name"'"
+  popd
+done
+
+pushd "$target_dir"
+  for source_dir in $source_dirs
+  do
+    source_name="$(basename "$source_dir")"
+    source_repo="$join_dir/$source_name"
+    git remote add my_remote "$join_dir/$source_name"
+#
+    git fetch my_remote
+    git merge my_remote/master --no-edit
+    git remote remove my_remote
+  done
+popd
+
