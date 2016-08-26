@@ -1,0 +1,1 @@
+screen -t xpra 9 xpra start $DISPLAY --no-daemon --socket-dir=/tmp/xpra-$USER
