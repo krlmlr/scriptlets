@@ -50,6 +50,7 @@
 	ra = rebase --abort
 	rc = rebase --continue
 	rs = rebase --skip
+	rp = rebase --preserve-merges
 	rma = rebase master
 	rmi = rebase master --interactive --autosquash
 	s = status
