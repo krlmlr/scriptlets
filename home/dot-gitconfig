@@ -37,6 +37,7 @@
 	m = merge
 	ma = merge --abort
 	mf = merge --ff
+	mu = merge-update
 	ph = push
 	phf = push --force
 	phu = push --set-upstream

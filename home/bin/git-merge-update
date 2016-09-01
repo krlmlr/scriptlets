@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+command=$(git show --format=%s | head -n 1)
+
+if [[ "$command" != "git merge "* ]]; then
+  echo "Last log entry doesn't start with 'git merge', initializing new" 1>&2
+  command="git merge"
+fi
+
+command="${command} $@"
+
+echo "> ${command}"
+${command} -m "${command}"

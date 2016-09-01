@@ -66,6 +66,10 @@ Allows you to write `git mmv` to move several Git-controlled files at once, with
 
 Merges the current branch into another branch without altering the current working copy.
 
+##git-merge-update
+
+Simplifies maintenance of "development" branches that contain several feature/bugfix branches.
+
 ##git-rsync
 
 Allows repeated Git-less synchronization with remote locations via `rsync`.
