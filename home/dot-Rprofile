@@ -1,4 +1,8 @@
-options(repos=c(CRAN="file:///opt/cran"))
+if (dir.exists("/opt/cran")) {
+  options(repos=c(CRAN="file:///opt/cran"))
+} else {
+  options(repos=c(CRAN="https://cran.rstudio.com"))
+}
 if (requireNamespace("ulimit", quietly = TRUE)) invisible(ulimit::memory_limit(6000))
 if (interactive()) {
   cat("Working directory:", getwd(), "\n")
