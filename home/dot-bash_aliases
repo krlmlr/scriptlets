@@ -1,5 +1,5 @@
 alias gf="git flow"
 alias g="git"
 
-export MAKEFLAGS="-j $(nproc)"
+export MAKEFLAGS="-j $(nproc) -O"
 export PATH=/usr/lib/ccache:${PATH}
