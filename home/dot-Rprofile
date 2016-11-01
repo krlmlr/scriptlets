@@ -3,19 +3,32 @@ if (dir.exists("/opt/cran")) {
 } else {
   options(repos=c(CRAN="https://cran.rstudio.com"))
 }
+
 if (requireNamespace("ulimit", quietly = TRUE)) invisible(ulimit::memory_limit(6000))
+
 if (interactive()) {
   cat("Working directory:", getwd(), "\n")
   library(magrittr)
 
-#  assign("dt", getNamespace("devtools"), .Internal(getNamespaceRegistry()))
-  
+  invisible(
+    reg.finalizer(
+      .GlobalEnv,
+      eval(bquote(function(e) try(savehistory(file.path(.(getwd()), ".Rhistory"))))),
+      onexit = TRUE))
 }
+
 options(
   devtools.name = "Kirill Müller",
   devtools.desc.author = 'person("Kirill", "Müller", role = c("aut", "cre"), email = "krlmlr+r@mailbox.org")',
   devtools.desc.license = "GPL-3",
-  devtools.desc = list(Encoding = "UTF-8", Version = "0.0-0", Date = Sys.Date(), URLNote = "https://github.com/krlmlr/", BugReports = "https://github.com/krlmlr/", URL = "http://krlmlr.github.io/"),
+  devtools.desc = list(
+    Encoding = "UTF-8",
+    Version = "0.0-0",
+    Date = Sys.Date(),
+    BugReports = paste0("https://github.com/krlmlr/", dirname(getwd()), "/issues"),
+    URL = paste0("https://github.com/krlmlr/", dirname(getwd()), ", http://krlmlr.github.io/", dirname(getwd())),
+    Roxygen = "list(markdown = TRUE)"
+  ),
   devtools.install.args = "--install-tests",
   devtools.revdep.libpath = "~/R-revdep",
 
