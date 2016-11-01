@@ -55,3 +55,6 @@ if (file.exists(".Rprofile.local")) {
   source(".Rprofile.local", chdir = TRUE)
 }
 
+if (file.exists("~/.Rprofile.private")) {
+  source("~/.Rprofile.private", chdir = TRUE)
+}
