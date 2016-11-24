@@ -45,8 +45,6 @@ options(
 
   testthat.summary.omit_dots = TRUE
 )
-#Sys.setenv(MAKE="make -k -j 4")
-# shinyapps::setAccountInfo(name='krlmlr', token='6091E980A02C603B72A33AED65628373', secret='RYnsTizZFKM/MHKOlwSDYW8lVqwsTk12MX8s+xXj')
 
 options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
