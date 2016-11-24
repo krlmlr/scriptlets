@@ -25,8 +25,8 @@ options(
     Encoding = "UTF-8",
     Version = "0.0-0",
     Date = Sys.Date(),
-    BugReports = paste0("https://github.com/krlmlr/", dirname(getwd()), "/issues"),
-    URL = paste0("https://github.com/krlmlr/", dirname(getwd()), ", http://krlmlr.github.io/", dirname(getwd())),
+    BugReports = paste0("https://github.com/krlmlr/", basename(getwd()), "/issues"),
+    URL = paste0("https://github.com/krlmlr/", basename(getwd()), ", http://krlmlr.github.io/", basename(getwd())),
     Roxygen = "list(markdown = TRUE)"
   ),
   devtools.install.args = "--install-tests",
