@@ -3,7 +3,9 @@
 set -e
 
 ROOT=$(readlink -f "$1")
-MOUNT=$(readlink -f "$2")
+shift
+MOUNT=$(readlink -f "$1")
+shift
 
-encfs "${ROOT}" "${MOUNT}"
+encfs "${ROOT}" "${MOUNT}" "$@"
 
