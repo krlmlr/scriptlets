@@ -51,9 +51,33 @@ options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
 #options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
 
-if (file.exists(".Rprofile.local")) {
-  source(".Rprofile.local", chdir = TRUE)
+check_local_env <- function(path) {
+  found <- FALSE
+
+  lib_path <- file.path(path, ".lib")
+  if (dir.exists(lib_path)) {
+    .libPaths(c(normalizePath(lib_path), .libPaths()))
+    options(prompt = paste0(basename(getwd()), "> "))
+    message("Packages in local lib: ", paste(dir(lib_path), collapse = ", "))
+    found <- TRUE
+  }
+
+  makevars_path <- file.path(path, "Makevars")
+  if (file.exists(makevars_path)) {
+    Sys.setenv(R_MAKEVARS_USER = normalizePath(makevars_path))
+    message("Compiling with: \n", paste(readLines(makevars_path), collapse = "\n"))
+    found <- TRUE
+  }
+
+  if (file.exists(".Rprofile.local")) {
+    source(".Rprofile.local", chdir = TRUE)
+    found <- TRUE
+  }
+
+  invisible(found)
 }
+
+invisible(check_local_env(".") || check_local_env(".."))
 
 if (file.exists("~/.Rprofile.private")) {
   source("~/.Rprofile.private", chdir = TRUE)
