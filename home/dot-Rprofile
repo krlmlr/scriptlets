@@ -47,6 +47,8 @@ options(
 )
 
 options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
+#requireNamespace("tracer", quietly = TRUE)
+#options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
 
 if (file.exists(".Rprofile.local")) {
