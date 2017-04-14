@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -7,7 +7,14 @@ if [ "$#" = "0" ]; then
   exit $?
 fi
 
-while true; do
+"$@" || echo "$0: continuing after error in $COMMAND"
+
+IFS=$'\n'
+IFS=
+unbuffer inotifywait . --monitor --recursive --event CREATE,MODIFY,DELETE | unbuffer -p grep -v "^[.]/tmp" | while read line; do
+  echo $line
+  while read -t 0.2 line; do
+    echo $line
+  done
   "$@" || echo "$0: continuing after error in $COMMAND"
-  inotifywait . -r -e CREATE,MODIFY,DELETE
 done
