@@ -1,0 +1,4 @@
+#!/bin/sh
+
+disp
+gvfs-mount -l | grep -o "[-]>.*$" | cut -d " " -f 2 | xargs -n 1 gvfs-mount -u
