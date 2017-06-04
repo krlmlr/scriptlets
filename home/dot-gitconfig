@@ -3,11 +3,11 @@
 	ac = commit --all --verbose
 	acm = commit --all --message
 	ap = add --patch
-	b = branch
-	bm = branch --merged
-	bn = branch --no-merged
-	bv = branch -v
-	bvv = branch -vv
+	b = branch --sort=committerdate
+	bm = branch --sort=committerdate --merged
+	bn = branch --sort=committerdate --no-merged
+	bv = branch -v --sort=committerdate
+	bvv = branch -vv --sort=committerdate
 	ci = commit -v
 	cia = commit --amend -v
 	ciao = commit --amend --no-edit
