@@ -83,3 +83,15 @@
 	required = true
 	clean = git-lfs clean %f
 	smudge = git-lfs smudge %f
+[gitflow "branch"]
+        master = production
+        develop = master
+[gitflow "prefix"]
+        feature = f-
+        bugfix = b-
+        release = r-
+        hotfix = h-
+        support = s-
+        versiontag = v
+[gitflow "path"]
+        hooks = .git/hooks
