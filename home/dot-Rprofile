@@ -39,7 +39,7 @@ options(
   keep.source = TRUE,
   keep.source.pkgs = TRUE,
 
-  mc.cores = 4,
+  mc.cores = 8,
 
   tibble.max_extra_cols = 30L,
 
