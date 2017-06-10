@@ -41,9 +41,7 @@ options(
 
   mc.cores = 8,
 
-  tibble.max_extra_cols = 30L,
-
-  testthat.summary.omit_dots = TRUE
+  tibble.max_extra_cols = 30L
 )
 
 options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
