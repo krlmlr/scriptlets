@@ -8,7 +8,7 @@ if (requireNamespace("ulimit", quietly = TRUE)) invisible(ulimit::memory_limit(6
 
 if (interactive()) {
   cat("Working directory:", getwd(), "\n")
-  library(magrittr)
+  require(magrittr)
 
   invisible(
     reg.finalizer(
