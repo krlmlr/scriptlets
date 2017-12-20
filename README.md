@@ -11,40 +11,40 @@ To install all scripts to `~/bin` (by creating symbolic links), clone the projec
 curl -s https://raw.githubusercontent.com/krlmlr/scriptlets/master/bootstrap | sh
 ```
 
-##Notifications
+## Notifications
 
-###n
+### n
 
 Execute command in the foreground and show desktop notification after completion.
 
-###bkg
+### bkg
 
 Execute command in the background and show desktop notification *in case of error*.
 
-##Open my GUI here
+## Open my GUI here
 
-###rstudio-here
+### rstudio-here
 
 Start RStudio with an `.Rproj` project file found in the current directory.
 If no project file is found, it is created using `devtools::use_rstudio()`
 
-###texstudio-here
+### texstudio-here
 
 Start a new instance of texstudio with a `.txss` session file found in the current directory.
 
-##copy-real-path
+## copy-real-path
 
 Copies its argument to the clipboard.
 
-##encfs-local
+## encfs-local
 
 `encfs` command with support for relative paths.
 
-##extmon-start and extmon-stop
+## extmon-start and extmon-stop
 
 Start multi-monitor output [on an Optimus card, using bumblebee](http://askubuntu.com/a/303897/30266).  Needs tweaking to adapt to your screen setup.
 
-##ghpsd
+## ghpsd
 
 GitHub Pages in a separate directory. Allows efficiently maintaining and synchronizing the contents of the `gh-pages` branch in a [subdirectory of the main branch](http://rafeca.com/2012/01/17/automate-your-release-flow/).  Supports subcommands `init`, `repair` (in case you want to undo `init`, works only before pushing), `merge` and `checkout`.
 
@@ -54,68 +54,68 @@ It works by cloning a copy of the repo into a shadow subdirectory named `.gh-pag
 
 You can also add the call `ghpsd merge` to your commit hook.
 
-##gh-mirror
+## gh-mirror
 
 Mirrors GitHub issues in a subdirectory of `.git` for offline use. A low-tech wrapper for `wget`.
 
-##git-mmv
+## git-mmv
 
 Allows you to write `git mmv` to move several Git-controlled files at once, with the usual `mmv` syntax.
 
-##git-merge-into
+## git-merge-into
 
 Merges the current branch into another branch without altering the current working copy.
 
-##git-merge-update
+## git-merge-update
 
 Simplifies maintenance of "development" branches that contain several feature/bugfix branches.
 
-##git-rsync
+## git-rsync
 
 Allows repeated Git-less synchronization with remote locations via `rsync`.
 
-##i4 and i4c
+## i4 and i4c
 
 Indent current clipboard contents by four spaces and copy back to clipboard, the latter script places two hashes in front.
 
-##imgdiff and imgdiff-bg
+## imgdiff and imgdiff-bg
 
 Compare two images side by side and show differences in a middle pane. Requires ImageMagick. The `-bg` script exits immediately. Usage: `git difftool -x imgdiff-bg -y <image files>`. ([Source](http://www.akikoskinen.info/image-diffs-with-git))
 
-##machine-load
+## machine-load
 
 Connects to remote machines and shows the top 5 processes by CPU consumption.
 
-##mail-after
+## mail-after
 
 Executes a script and e-mails the status and output to the current user after completion.
 
-##pmake
+## pmake
 
 Parallel `make`, uses number of CPU cores as number of jobs.
 
-##retry
+## retry
 Execute command until success, with increasing time intervals between failures.
 
-##slecho
+## slecho
 
 Echoes each of its parameters on a single line.
 
-##soR
+## soR
 
 Executes an R script in a way that its contents and output are formatted as strict Markdown.
 
-##tbca
+## tbca
 
 Creates a new mail in Thunderbird with attachments (given as parameters).
 
-##xpra-attach-ssh
+## xpra-attach-ssh
 
 A simple wrapper around `xpra attach`, useful to [integrate xpra with GNU Screen](http://krlmlr.github.io/2013/08/07/integrating-xpra-with-screen/).
 
-##rpt
+## rpt
 
 Repeat a command (default: `make`) as soon as the contents of the current working directory change.
 
 
-Copyright 2015 Kirill Müller.
+Copyright 2015-2017 Kirill Müller.
