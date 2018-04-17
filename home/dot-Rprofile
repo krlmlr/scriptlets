@@ -1,4 +1,4 @@
-if (dir.exists("/opt/cran")) {
+if (file.exists("/opt/cran")) {
   options(repos=c(CRAN="file:///opt/cran"))
 } else {
   options(repos=c(CRAN="https://cran.rstudio.com"))
@@ -53,7 +53,7 @@ check_local_env <- function(path) {
   found <- FALSE
 
   lib_path <- file.path(path, ".lib")
-  if (dir.exists(lib_path)) {
+  if (file.exists(lib_path)) {
     .libPaths(c(normalizePath(lib_path), .libPaths()))
     options(prompt = paste0(basename(getwd()), "> "))
     message("Packages in local lib: ", paste(dir(lib_path), collapse = ", "))
