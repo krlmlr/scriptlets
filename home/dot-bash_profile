@@ -1,0 +1,8 @@
+. .profile
+
+keychain .ssh/id_rsa
+
+. .keychain/$HOSTNAME-sh
+
+. .autoscreen
+
