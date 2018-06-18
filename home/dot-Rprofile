@@ -19,7 +19,7 @@ if (interactive()) {
 
 options(
   devtools.name = "Kirill Müller",
-  devtools.desc.author = 'person("Kirill", "Müller", role = c("aut", "cre"), email = "krlmlr+r@mailbox.org")',
+  devtools.desc.author = 'person("Kirill", "M\u00fcller", role = c("aut", "cre"), email = "krlmlr+r@mailbox.org", comment = c(ORCID = "0000-0002-1416-3412"))',
   devtools.desc.license = "GPL-3",
   devtools.desc = list(
     Encoding = "UTF-8",
@@ -39,9 +39,11 @@ options(
   keep.source = TRUE,
   keep.source.pkgs = TRUE,
 
+  #tibble.max_extra_cols = 30L,
+
   mc.cores = 8,
 
-  tibble.max_extra_cols = 30L
+  pillar.bold = TRUE
 )
 
 options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
@@ -80,3 +82,5 @@ invisible(check_local_env(".") || check_local_env(".."))
 if (file.exists("~/.Rprofile.private")) {
   source("~/.Rprofile.private", chdir = TRUE)
 }
+
+options(buildtools.check = function(...) TRUE)
