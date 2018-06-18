@@ -51,6 +51,7 @@ options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
 #options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
 
+(function(){
 check_local_env <- function(path) {
   found <- FALSE
 
@@ -78,6 +79,7 @@ check_local_env <- function(path) {
 }
 
 invisible(check_local_env(".") || check_local_env(".."))
+})()
 
 if (file.exists("~/.Rprofile.private")) {
   source("~/.Rprofile.private", chdir = TRUE)
