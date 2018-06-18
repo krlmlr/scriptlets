@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 displays=($(xrandr | grep " connected" | cut -d " " -f 1))
 
@@ -16,22 +17,25 @@ case $1 in
     fi
   ;;
   2)
-    xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --scale 1x1 --panning 0x0 --pos 2560x0
+    xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 1x1 --panning 0x0 --pos 2560x0
   ;;
   2s)
-    xrandr --fb 6400x2160 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --scale 2x2 --panning 3840x2160+2560+0 --scale-from 3840x2160 --pos 2560x0
+    xrandr --fb 6400x2160 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --panning 3840x2160+2560+0 --scale-from 3840x2160 --pos 2560x0
   ;;
   2sf)
-    xrandr --fb 6400x2400 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --scale 2x2 --panning 3840x2400+2560+0 --scale-from 3840x2400 --pos 2560x0
+    xrandr --fb 6400x2400 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --panning 3840x2400+2560+0 --scale-from 3840x2400 --pos 2560x0
   ;;
   3r)
-    xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[2]} --scale 1x1 --panning 0x0 --pos 2560x0 --rotate left
+    xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[2]} --auto --scale 1x1 --panning 0x0 --pos 2560x0 --rotate left
   ;;
   2f3r)
-    xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --scale 1x1 --pos 2560x0 --output ${displays[2]} --pos 4480x0 --scale 1x1 --rotate left
+    xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 1x1 --pos 2560x0 --output ${displays[2]} --auto --pos 4480x0 --scale 1x1 --rotate left
   ;;
   2sf3r)
-    xrandr --fb 7600x2400 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --scale 2x2 --panning 3840x2400+2560+0 --scale-from 3840x2400 --pos 2560x0 --output ${displays[2]} --pos 6400x0 --scale 1x1 --rotate left --panning 1200x1920+6400+0
+    xrandr --fb 7600x2400 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --panning 3840x2400+2560+0 --scale-from 3840x2400 --pos 2560x0 --output ${displays[2]} --auto --pos 6400x0 --scale 1x1 --rotate left --panning 1200x1920+6400+0
+  ;;
+  2s3r)
+    xrandr --fb 7480x2160 --output ${displays[0]} --auto --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --panning 3840x2160+2560+0 --scale-from 3840x2160 --pos 2560x0 --output ${displays[2]} --auto --pos 6400x0 --scale 1x1 --rotate left --panning 1080x1920+6400+0
   ;;
   *)
     echo "$0: Invalid argument: $1" 1>&2
