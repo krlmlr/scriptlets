@@ -16,6 +16,7 @@
 	cir = !sh -c 'git commit --reuse-message=${1:-HEAD}' -
 	co = checkout
 	cob = checkout -b
+	conflicts = diff --name-only --diff-filter=U
 	cop = checkout --patch
 	d = diff
 	dw = diff --word-diff
@@ -55,6 +56,8 @@
 	rma = rebase master
 	rmi = rebase master --interactive --autosquash
 	s = status
+	sp = status --porcelain
+	sync = sync
 [color]
 	ui = auto
 	branch = auto
@@ -66,7 +69,7 @@
 [rerere]
 	enabled = true
 [push]
-	default = matching
+	default = upstream
 	followTags = true
 [pull]
 	ff = only
@@ -79,10 +82,6 @@
 	no-ff = true
 [gitflow "bugfix.finish"]
 	no-ff = true
-[filter "lfs"]
-	required = true
-	clean = git-lfs clean %f
-	smudge = git-lfs smudge %f
 [gitflow "branch"]
         master = production
         develop = master
@@ -95,3 +94,11 @@
         versiontag = v
 [gitflow "path"]
         hooks = .git/hooks
+[diff]
+	tool = imgdiff
+[difftool]
+	prompt = false
+[difftool "imgdiff"]
+	cmd = ~/bin/imgdiff-bg $LOCAL $REMOTE
+[core]
+	excludesfile = ~/.gitignore

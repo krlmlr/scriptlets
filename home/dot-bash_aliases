@@ -2,4 +2,24 @@ alias gf="git flow"
 alias g="git"
 
 export MAKEFLAGS="-j $(nproc) -O"
-export PATH=/usr/lib/ccache:${PATH}
+#export PATH=/usr/lib/ccache:${PATH}
+
+# Was necessary for RStudio < 1.2
+#export QT_DEVICE_PIXEL_RATIO=2
+
+# http://stackoverflow.com/a/1088763/946850
+_xdiscard() {
+    echo -n "${READLINE_LINE:0:$READLINE_POINT}" | xclip -se c
+    READLINE_LINE="${READLINE_LINE:$READLINE_POINT}"
+    READLINE_POINT=0
+}
+_xkill() {
+    echo -n "${READLINE_LINE:$READLINE_POINT}" | xclip -se c
+    READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}"
+}
+_xcopy() {
+    echo -n "${READLINE_LINE:$READLINE_POINT}" | xclip -se c
+}
+bind -m emacs -x '"\eu": _xdiscard'
+bind -m emacs -x '"\ek": _xkill'
+bind -m emacs -x '"\ec": _xcopy'
