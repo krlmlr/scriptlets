@@ -19,11 +19,11 @@ if (interactive()) {
 
 options(
   devtools.name = "Kirill Müller",
-  devtools.desc.author = 'person("Kirill", "M\u00fcller", role = c("aut", "cre"), email = "krlmlr+r@mailbox.org", comment = c(ORCID = "0000-0002-1416-3412"))',
+  devtools.desc.author = 'person("Kirill", "M\\u00fcller", role = c("aut", "cre"), email = "krlmlr+r@mailbox.org", comment = c(ORCID = "0000-0002-1416-3412"))',
   devtools.desc.license = "GPL-3",
   devtools.desc = list(
     Encoding = "UTF-8",
-    Version = "0.0-0",
+    Version = "0.0.0.9000",
     Date = Sys.Date(),
     BugReports = paste0("https://github.com/krlmlr/", basename(getwd()), "/issues"),
     URL = paste0("https://github.com/krlmlr/", basename(getwd()), ", http://krlmlr.github.io/", basename(getwd())),
