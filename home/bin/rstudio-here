@@ -2,6 +2,8 @@
 
 set -e
 
+export QT_DEVICE_PIXEL_RATIO=
+
 RPROJ_FILE="$(find -maxdepth 1 -name '*.Rproj' -print -quit)"
 if [ "$RPROJ_FILE" = "" ]; then
   Rscript -e "devtools::use_rstudio()" || true
