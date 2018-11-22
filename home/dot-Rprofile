@@ -43,6 +43,8 @@ options(
 
   mc.cores = 8,
 
+  reprex.style = TRUE,
+
   pillar.bold = TRUE
 )
 
@@ -70,15 +72,18 @@ check_local_env <- function(path) {
     found <- TRUE
   }
 
-  if (file.exists(".Rprofile.local")) {
-    source(".Rprofile.local", chdir = TRUE)
+  local_path <- file.path(path, ".Rprofile.local")
+  if (file.exists(local_path)) {
+    message("Sourcing ", local_path)
+    source(local_path, chdir = TRUE)
     found <- TRUE
   }
 
   invisible(found)
 }
 
-invisible(check_local_env(".") || check_local_env(".."))
+check_local_env("..")
+check_local_env(".")
 })()
 
 if (file.exists("~/.Rprofile.private")) {
