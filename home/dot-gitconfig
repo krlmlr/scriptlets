@@ -78,22 +78,6 @@
 	ff = false
 [credential]
 	helper = cache --timeout=86400
-[gitflow "feature.finish"]
-	no-ff = true
-[gitflow "bugfix.finish"]
-	no-ff = true
-[gitflow "branch"]
-        master = production
-        develop = master
-[gitflow "prefix"]
-        feature = f-
-        bugfix = b-
-        release = r-
-        hotfix = h-
-        support = s-
-        versiontag = v
-[gitflow "path"]
-        hooks = .git/hooks
 [diff]
 	tool = imgdiff
 [difftool]
