@@ -1,5 +1,5 @@
 [alias]
-  # === Basic commands
+	# === Basic commands
 	s = status
 	d = diff
 	# ---
