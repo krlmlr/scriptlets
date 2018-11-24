@@ -21,6 +21,8 @@
 	lp = log --patch --graph --decorate
 	# ---
 	# blame
+	# ---
+	qhp = reset HEAD^
 	# === Interactive commands
 	ci = commit -v
 	cia = commit --amend -v
@@ -32,7 +34,7 @@
 	# ---
 	cob = checkout -b
 	# ---
-	# reset --hard
+	# q --hard
 	# ---
 	la = log --all --numstat --graph --decorate
 	# ---
@@ -79,7 +81,6 @@
 	pl = pull
 	plr = pull --rebase
 	qh = reset HEAD
-	qhp = reset HEAD^
 	rma = rebase master
 	rmi = rebase master --interactive --autosquash
 	sp = status --porcelain
