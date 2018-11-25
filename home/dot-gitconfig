@@ -49,11 +49,6 @@
 	# === Conflict resolution
 	ma = merge --abort
 	# ---
-	do = diff --ours
-	dt = diff --theirs
-	# ---
-	coo = checkout --ours
-	cot = checkout --theirs
 	conflicts = diff --name-only --diff-filter=U
 	cio = commit --no-edit
 	# === Rebasing
