@@ -80,6 +80,7 @@
 	rmi = rebase master --interactive --autosquash
 	sp = status --porcelain
 	sync = sync
+	sh = !'/home/kirill/git/shgit/shgit.sh'
 [rerere]
 	enabled = true
 [merge]
@@ -108,3 +109,6 @@
 	cmd = ~/bin/imgdiff-bg $LOCAL $REMOTE
 [core]
 	excludesfile = ~/.gitignore
+[shgit]
+	quiet-init = true
+	prompt-command-mode = stealthy
