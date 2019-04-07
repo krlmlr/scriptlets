@@ -113,3 +113,9 @@
 [shgit]
 	quiet-init = true
 	prompt-command-mode = stealthy
+	verbose-exec = true
+	location = /home/kirill/git/shgit
+[user]
+        email = kirill@cynkra.com
+[includeIf "gitdir:git/**"]
+	path = git/.gitconfig
