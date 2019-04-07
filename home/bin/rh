@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -6,15 +6,17 @@ export QT_DEVICE_PIXEL_RATIO=
 
 RPROJ_FILE="$(find -maxdepth 1 -name '*.Rproj' -print -quit)"
 if [ "$RPROJ_FILE" = "" ]; then
-  Rscript -e "devtools::use_rstudio()" || true
+  Rscript -e "usethis::use_rstudio()" || true
   echo "Version: 1.0
 AutoAppendNewline: Yes
 StripTrailingWhitespace: Yes
-" > $(basename $PWD).Rproj
+" >> $(basename $PWD).Rproj
 fi
 
 if ! [ -d .Rproj.user/.git ]; then
    git init .Rproj.user; ( cd .Rproj.user; git config user.name user; git config user.email user@email.com; git commit -m "initial" --allow-empty; echo "*" > .git/info/exclude )
 fi
 
-rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" 2> /dev/null 1> /dev/null &
+win_id=$(wmctrl -l | grep 'RStudio$' | grep "${PWD/#$HOME/'~'} - " | tee /dev/stderr | cut -d " " -f 1)
+
+if [ -n "$win_id" ]; then wmctrl -i -R ${win_id}; else false; fi || rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" 2> /dev/null 1> /dev/null &
