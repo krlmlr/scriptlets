@@ -18,19 +18,19 @@ if (interactive()) {
 }
 
 options(
-  devtools.name = "Kirill Müller",
-  devtools.desc.author = 'person("Kirill", "M\\u00fcller", role = c("aut", "cre"), email = "krlmlr+r@mailbox.org", comment = c(ORCID = "0000-0002-1416-3412"))',
-  devtools.desc.license = "GPL-3",
-  devtools.desc = list(
+  usethis.name = "Kirill Müller",
+  usethis.description = list(
+    "Authors@R" = 'person("Kirill", "M\\u00fcller", role = c("aut", "cre"), email = "krlmlr+r@mailbox.org", comment = c(ORCID = "0000-0002-1416-3412"))',
     Encoding = "UTF-8",
     Version = "0.0.0.9000",
     Date = Sys.Date(),
     BugReports = paste0("https://github.com/krlmlr/", basename(getwd()), "/issues"),
     URL = paste0("https://github.com/krlmlr/", basename(getwd()), ", http://krlmlr.github.io/", basename(getwd())),
+    License = "GPL-3",
     Roxygen = "list(markdown = TRUE)"
   ),
-  devtools.install.args = "--install-tests",
-  devtools.revdep.libpath = "~/R-revdep",
+  usethis.install.args = "--install-tests",
+  usethis.revdep.libpath = "~/R-revdep",
 
   warnPartialMatchAttr = TRUE,
   warnPartialMatchDollar = TRUE,
@@ -48,7 +48,11 @@ options(
   pillar.bold = TRUE
 )
 
-options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
+#options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
+options(
+  error = quote(rlang::entrace()),
+  rlang_backtrace_on_error = "collapse"
+)
 #requireNamespace("tracer", quietly = TRUE)
 #options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
