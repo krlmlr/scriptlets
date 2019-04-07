@@ -1,0 +1,7 @@
+#!/bin/bash
+
+! nmcli -f NAME connection show --active |
+  tail -n +2 |
+  sed 's/ *$//' |
+  xargs -n 1 -d $'\n' nmcli -f connection.metered connection show |
+  grep -q yes
