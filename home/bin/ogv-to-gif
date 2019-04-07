@@ -3,6 +3,9 @@
 # Requirements:
 #   apt-get install imagemagick mplayer gtk-recordmydesktop
 
+# Alternative, untested:
+#   https://superuser.com/a/556031/99136
+
 # Export into images
 mplayer -ao null $1 -vo jpeg:outdir=/tmp/ogv_to_gif
 exit 1

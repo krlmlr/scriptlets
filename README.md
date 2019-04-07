@@ -23,10 +23,10 @@ Execute command in the background and show desktop notification *in case of erro
 
 ## Open my GUI here
 
-### rstudio-here
+### rh
 
 Start RStudio with an `.Rproj` project file found in the current directory.
-If no project file is found, it is created using `devtools::use_rstudio()`
+If no project file is found, it is created using `usethis::use_rstudio()`.
 
 ### texstudio-here
 
@@ -35,14 +35,6 @@ Start a new instance of texstudio with a `.txss` session file found in the curre
 ## copy-real-path
 
 Copies its argument to the clipboard.
-
-## encfs-local
-
-`encfs` command with support for relative paths.
-
-## extmon-start and extmon-stop
-
-Start multi-monitor output [on an Optimus card, using bumblebee](http://askubuntu.com/a/303897/30266).  Needs tweaking to adapt to your screen setup.
 
 ## ghpsd
 
@@ -74,13 +66,13 @@ Simplifies maintenance of "development" branches that contain several feature/bu
 
 Allows repeated Git-less synchronization with remote locations via `rsync`.
 
-## i4 and i4c
-
-Indent current clipboard contents by four spaces and copy back to clipboard, the latter script places two hashes in front.
-
 ## imgdiff and imgdiff-bg
 
 Compare two images side by side and show differences in a middle pane. Requires ImageMagick. The `-bg` script exits immediately. Usage: `git difftool -x imgdiff-bg -y <image files>`. ([Source](http://www.akikoskinen.info/image-diffs-with-git))
+
+## is-unmetered
+
+Exits with 0 if and only if the connection is configured as an unmetered connection.
 
 ## machine-load
 
@@ -89,6 +81,10 @@ Connects to remote machines and shows the top 5 processes by CPU consumption.
 ## mail-after
 
 Executes a script and e-mails the status and output to the current user after completion.
+
+## ogv-to-gif
+
+Convert a video to an animated GIF.
 
 ## pmake
 
@@ -100,10 +96,6 @@ Execute command until success, with increasing time intervals between failures.
 ## slecho
 
 Echoes each of its parameters on a single line.
-
-## soR
-
-Executes an R script in a way that its contents and output are formatted as strict Markdown.
 
 ## tbca
 
@@ -117,5 +109,24 @@ A simple wrapper around `xpra attach`, useful to [integrate xpra with GNU Screen
 
 Repeat a command (default: `make`) as soon as the contents of the current working directory change.
 
+# Obsolete
 
-Copyright 2015-2017 Kirill Müller.
+## encfs-local
+
+`encfs` command with support for relative paths.
+
+## i4 and i4c
+
+Indent current clipboard contents by four spaces and copy back to clipboard, the latter script places two hashes in front.
+
+## soR
+
+Executes an R script in a way that its contents and output are formatted as strict Markdown.
+
+## extmon-start and extmon-stop
+
+Start multi-monitor output [on an Optimus card, using bumblebee](http://askubuntu.com/a/303897/30266).  Needs tweaking to adapt to your screen setup.
+
+
+
+Copyright 2015-2019 Kirill Müller.
