@@ -19,6 +19,9 @@ case $1 in
   2)
     xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 1x1 --pos 2560x0
   ;;
+  2f)
+    xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 1x1 --pos 2560x0 --output ${displays[2]} --off
+  ;;
   2s)
     xrandr --fb 6400x2160 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2160 --pos 2560x0
   ;;
@@ -27,6 +30,9 @@ case $1 in
   ;;
   2sf)
     xrandr --fb 6400x2400 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2400 --pos 2560x0
+  ;;
+  2sfl)
+    xrandr --fb 6400x2400 --output ${displays[0]} --pos 3840x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2400 --pos 0x0
   ;;
   3r)
     xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[2]} --auto --scale 1x1 --pos 2560x0 --rotate left
@@ -37,8 +43,19 @@ case $1 in
   2sf3r)
     xrandr --fb 7600x2400 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2400 --pos 2560x0 --output ${displays[2]} --auto --pos 6400x0 --scale 1x1 --rotate left
   ;;
+  2sf3rr)
+    xrandr --fb 7600x2400 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2400 --pos 2560x0 --output ${displays[2]} --auto --pos 6400x0 --scale 1x1 --rotate right
+  ;;
   2s3r)
     xrandr --fb 7480x2160 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2160 --pos 2560x0 --output ${displays[2]} --auto --pos 6400x0 --scale 1x1 --rotate left
+  ;;
+  mf)
+    secondary=$(xrandr | grep " connected" | grep -v primary | head -n 1 | cut -d " " -f 1)
+    xrandr --output $secondary --mode 1920x1080 --scale-from 2560x1440 --output eDP-1 --same-as $secondary
+  ;;
+  mh)
+    secondary=$(xrandr | grep " connected" | grep -v primary | head -n 1 | cut -d " " -f 1)
+    xrandr --output $secondary --mode 1280x720 --scale-from 2560x1440 --output eDP-1 --same-as $secondary
   ;;
   *)
     echo "$0: Invalid argument: $1" 1>&2
