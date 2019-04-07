@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Requirements:
+#   apt-get install imagemagick mplayer gtk-recordmydesktop
+
+# Export into images
+mplayer -ao null $1 -vo jpeg:outdir=/tmp/ogv_to_gif
+exit 1
+
+# Convert images to animated gif
+echo "Converting images folder to gif..."
+convert -loop 1 /tmp/ogv_to_gif/* /tmp/ogv_to_gif.gif
+
+# Final filename
+original_filename=$1
+echo $original_filename
+filename=${original_filename//ogv/gif}
+
+# Optimize gif
+echo "Optimizing generated gif..."
+convert /tmp/ogv_to_gif.gif -fuzz 10% -layers Optimize "$filename"
+
+# Cleans up tmp folders
+rm -rf /tmp/ogv_to_gif.gif /tmp/ogv_to_gif
+
+echo "Done! $filename"
