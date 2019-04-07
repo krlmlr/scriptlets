@@ -74,6 +74,7 @@
 	phf = push --force
 	phu = push --set-upstream
 	pl = pull
+	plf = pull --ff-only
 	plr = pull --rebase
 	qh = reset HEAD
 	rma = rebase master
