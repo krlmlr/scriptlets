@@ -46,6 +46,8 @@
 	bn = branch --sort=committerdate --no-merged
 	# b -d
 	# b -D
+	# ---
+	fft = !sh -c 'git branch --format \"%(if)%(upstream:short)%(then)git push . %(upstream:short):%(refname:short)%(end)\" | sh' -
 	# === Conflict resolution
 	ma = merge --abort
 	# ---
@@ -80,7 +82,6 @@
 	rma = rebase master
 	rmi = rebase master --interactive --autosquash
 	sp = status --porcelain
-	sync = sync
 	sh = !'/home/kirill/git/shgit/shgit.sh'
 [rerere]
 	enabled = true
