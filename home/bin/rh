@@ -4,19 +4,26 @@ set -e
 
 export QT_DEVICE_PIXEL_RATIO=
 
-RPROJ_FILE="$(find -maxdepth 1 -name '*.Rproj' -print -quit)"
-if [ "$RPROJ_FILE" = "" ]; then
-  Rscript -e "usethis::use_rstudio()" || true
-  echo "Version: 1.0
-AutoAppendNewline: Yes
-StripTrailingWhitespace: Yes
-" >> $(basename $PWD).Rproj
-fi
+RPROJ_FILE=$(R --slave -e '
+  library(usethis);
+  options(usethis.quiet = TRUE);
+  proj <- tryCatch(proj_get(), error = function(e) { create_project("."); use_rstudio(); proj_get() });
+  cat(dir(proj, pattern = "[.]Rproj$", full.names = TRUE)[[1]])
+')
+if [ $? -ne 0 ]; then echo "Failed to find/init project." > /dev/null 2>&1; exit; fi
+echo "Project file: ${RPROJ_FILE}"
+
+RPROJ_PATH=$(dirname ${RPROJ_FILE})
+echo "Project path: ${RPROJ_PATH}"
 
 if ! [ -d .Rproj.user/.git ]; then
-   git init .Rproj.user; ( cd .Rproj.user; git config user.name user; git config user.email user@email.com; git commit -m "initial" --allow-empty; echo "*" > .git/info/exclude )
+   git init .Rproj.user; ( cd .Rproj.user; git config user.name user; git config user.email user@email.com; git commit -m "Initial" --allow-empty; echo "*" > .git/info/exclude )
 fi
 
-win_id=$(wmctrl -l | grep 'RStudio$' | grep "${PWD/#$HOME/'~'} - " | tee /dev/stderr | cut -d " " -f 1)
+win_id=$(wmctrl -l | grep 'RStudio$' | grep "${RPROJ_PATH/#$HOME/'~'} - " | tee /dev/stderr | cut -d " " -f 1)
 
-if [ -n "$win_id" ]; then wmctrl -i -R ${win_id}; else false; fi || rstudio "$(find -maxdepth 1 -name '*.Rproj' -print -quit)" 2> /dev/null 1> /dev/null &
+# https://github.com/rstudio/rstudio/issues/4100#issuecomment-466223847
+R_LIBS=$(R --slave -e 'cat(paste0(setdiff(.libPaths(), c(.Library, .Library.site)), collapse = ":"))')
+export R_LIBS
+
+if [ -n "$win_id" ]; then wmctrl -i -R ${win_id}; else false; fi || rstudio "${RPROJ_FILE}" 2> /dev/null 1> /dev/null &
