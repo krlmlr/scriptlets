@@ -48,6 +48,9 @@ options(
   pillar.bold = TRUE
 )
 
+# https://github.com/rstudio/rstudio/issues/4723#issuecomment-487759342
+options(rstudio.errors.suppressed = FALSE)
+
 #options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
 options(
   error = quote(rlang::entrace()),
