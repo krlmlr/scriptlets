@@ -22,8 +22,14 @@ fi
 
 win_id=$(wmctrl -l | grep 'RStudio$' | grep "${RPROJ_PATH/#$HOME/'~'} - " | tee /dev/stderr | cut -d " " -f 1)
 
-# https://github.com/rstudio/rstudio/issues/4100#issuecomment-466223847
-R_LIBS=$(R --slave -e 'cat(paste0(setdiff(.libPaths(), c(.Library, .Library.site)), collapse = ":"))')
-export R_LIBS
+if [ -n "$win_id" ]; then
+  wmctrl -i -R ${win_id}
+else
+  false
+fi || {
+  # https://github.com/rstudio/rstudio/issues/4100#issuecomment-466223847
+  R_LIBS=$(R --slave -e 'cat(paste0(setdiff(.libPaths(), c(.Library, .Library.site)), collapse = ":"))')
+  export R_LIBS
 
-if [ -n "$win_id" ]; then wmctrl -i -R ${win_id}; else false; fi || rstudio "${RPROJ_FILE}" 2> /dev/null 1> /dev/null &
+  rstudio "${RPROJ_FILE}" 2> /dev/null 1> /dev/null &
+}
