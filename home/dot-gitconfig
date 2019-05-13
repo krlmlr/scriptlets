@@ -82,7 +82,7 @@
 	rma = rebase master
 	rmi = rebase master --interactive --autosquash
 	sp = status --porcelain
-	sh = !'/home/kirill/git/shgit/shgit.sh'
+	sh = !sh -c '~/git/shgit/shgit.sh'
 [rerere]
 	enabled = true
 [merge]
