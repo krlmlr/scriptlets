@@ -2,6 +2,8 @@ alias gf="git flow"
 alias g="git"
 
 export MAKEFLAGS="-j $(nproc) -O"
+alias sake="make -j1 -Onone"
+
 #export PATH=/usr/lib/ccache:${PATH}
 
 # Was necessary for RStudio < 1.2
