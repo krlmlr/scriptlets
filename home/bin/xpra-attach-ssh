@@ -1,7 +1,9 @@
 #!/bin/sh
 
-ATTACH_TO=ssh:$1
+if [ -n '$(which xpra)' ]; then
+    ATTACH_TO=ssh:$1
 
-echo -n "\033]0;xpra $1\007"
-echo "Attaching to $ATTACH_TO..." >> /dev/stderr
-xpra attach $ATTACH_TO
+    echo -n "\033]0;xpra $1\007"
+    echo "Attaching to $ATTACH_TO..." >> /dev/stderr
+    xpra attach $ATTACH_TO
+fi
