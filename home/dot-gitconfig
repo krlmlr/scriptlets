@@ -119,7 +119,7 @@
 	verbose-exec = true
 	location = ~/git/shgit
 [user]
-        email = kirill@cynkra.com
+	email = kirill@cynkra.com
 [includeIf "gitdir:git/**"]
 	path = git/.gitconfig
 [rebase]
