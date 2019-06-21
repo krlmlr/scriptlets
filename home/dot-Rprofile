@@ -51,15 +51,6 @@ options(
 # https://github.com/rstudio/rstudio/issues/4723#issuecomment-487759342
 options(rstudio.errors.suppressed = FALSE)
 
-#options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
-options(
-  error = quote(rlang::entrace()),
-  rlang_backtrace_on_error = "collapse"
-)
-#requireNamespace("tracer", quietly = TRUE)
-#options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
-options(deparse.max.lines = 2)
-
 (function(){
 check_local_env <- function(path) {
   found <- FALSE
@@ -98,3 +89,15 @@ if (file.exists("~/.Rprofile.private")) {
 }
 
 options(buildtools.check = function(...) TRUE)
+
+#options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
+if (interactive()) {
+  options(
+    error = rlang::entrace,
+    rlang_backtrace_on_error = "collapse"
+  )
+}
+
+#requireNamespace("tracer", quietly = TRUE)
+#options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
+options(deparse.max.lines = 2)
