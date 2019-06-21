@@ -119,3 +119,5 @@
         email = kirill@cynkra.com
 [includeIf "gitdir:git/**"]
 	path = git/.gitconfig
+[rebase]
+	abbreviateCommands = true
