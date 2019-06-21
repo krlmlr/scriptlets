@@ -117,6 +117,7 @@
 	quiet-init = true
 	prompt-command-mode = stealthy
 	verbose-exec = true
+	location = ~/git/shgit
 [user]
         email = kirill@cynkra.com
 [includeIf "gitdir:git/**"]
