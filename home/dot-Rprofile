@@ -101,3 +101,6 @@ if (interactive()) {
 #requireNamespace("tracer", quietly = TRUE)
 #options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
+
+# Set to true to make these checks an error
+Sys.setenv("_R_CHECK_LENGTH_1_LOGIC2_" = "warn")
