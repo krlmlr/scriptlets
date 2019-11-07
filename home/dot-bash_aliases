@@ -3,6 +3,7 @@ alias g="git"
 
 export MAKEFLAGS="-j $(nproc) -O"
 alias sake="make -j1 -Onone"
+alias pxc="pwd | xclip -se c"
 
 #export PATH=/usr/lib/ccache:${PATH}
 
