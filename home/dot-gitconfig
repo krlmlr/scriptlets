@@ -110,9 +110,15 @@
 [difftool]
 	prompt = false
 [difftool "imgdiff"]
-	cmd = ~/bin/imgdiff-bg $LOCAL $REMOTE
+	cmd = ~/bin/imgdiff-bg \"$LOCAL\" \"$REMOTE\"
+[diff "pdf"]
+	textconv = pdfcat
+	binary = true
+[difftool "diffpdf"]
+	cmd = diffpdf \"$LOCAL\" \"$REMOTE\"
 [core]
 	excludesfile = ~/.gitignore
+	attributesfile = /home/kirill/.gitattributes
 [shgit]
 	quiet-init = true
 	prompt-command-mode = stealthy
@@ -125,3 +131,23 @@
 [rebase]
 	abbreviateCommands = true
 	autoStash = true
+[diff "daff-diff"]
+	command = daff diff --git
+[merge "daff-diff"]
+	name = daff tabular diff merge
+	driver = daff merge --output %A %O %A %B
+[diff "daff---cached"]
+	command = daff diff --git
+[merge "daff---cached"]
+	name = daff tabular --cached merge
+	driver = daff merge --output %A %O %A %B
+[diff "daff-csv"]
+	command = daff diff --git
+[merge "daff-csv"]
+	name = daff tabular csv merge
+	driver = daff merge --output %A %O %A %B
+[diff "daff-.csv"]
+	command = daff diff --git
+[merge "daff-.csv"]
+	name = daff tabular .csv merge
+	driver = daff merge --output %A %O %A %B
