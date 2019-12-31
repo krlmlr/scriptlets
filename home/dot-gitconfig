@@ -125,21 +125,6 @@
 [rebase]
 	abbreviateCommands = true
 	autoStash = true
-[diff "daff-diff"]
-	command = daff diff --git
-[merge "daff-diff"]
-	name = daff tabular diff merge
-	driver = daff merge --output %A %O %A %B
-[diff "daff---cached"]
-	command = daff diff --git
-[merge "daff---cached"]
-	name = daff tabular --cached merge
-	driver = daff merge --output %A %O %A %B
-[diff "daff-csv"]
-	command = daff diff --git
-[merge "daff-csv"]
-	name = daff tabular csv merge
-	driver = daff merge --output %A %O %A %B
 [diff "daff-.csv"]
 	command = daff diff --git
 [merge "daff-.csv"]
