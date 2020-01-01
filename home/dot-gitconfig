@@ -82,7 +82,6 @@
 	rma = rebase master
 	rmi = rebase master --interactive --autosquash
 	sp = status --porcelain
-	sh = !sh -c '~/git/shgit/shgit.sh'
 	# https://stackoverflow.com/a/5201642/946850
 	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m"$(git log --format=%B --reverse HEAD..HEAD@{1})"'
 [rerere]
@@ -119,13 +118,10 @@
 [core]
 	excludesfile = ~/.gitignore
 	attributesfile = /home/kirill/.gitattributes
-[shgit]
-	quiet-init = true
-	prompt-command-mode = stealthy
-	verbose-exec = true
-	location = ~/git/shgit
 [user]
 	email = kirill@cynkra.com
+[include]
+	path = .gitconfig.shgit
 [includeIf "gitdir:git/**"]
 	path = git/.gitconfig
 [rebase]
