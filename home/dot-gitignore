@@ -1,2 +1,5 @@
 /.Rhistory
 .Rproj.user
+.Rhistory
+.Rdata
+.DS_Store
