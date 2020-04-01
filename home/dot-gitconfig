@@ -75,6 +75,8 @@
 	ph = push
 	phf = push --force
 	phu = push --set-upstream
+	phuk = push --set-upstream krlmlr
+	phuo = push --set-upstream origin
 	pl = pull
 	plf = pull --ff-only
 	plr = pull --rebase
@@ -84,6 +86,8 @@
 	sp = status --porcelain
 	# https://stackoverflow.com/a/5201642/946850
 	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m"$(git log --format=%B --reverse HEAD..HEAD@{1})"'
+	# hub
+	pr = !sh -c 'hub pull-request'
 [rerere]
 	enabled = true
 [merge]
@@ -100,7 +104,7 @@
 [merge "ours"]
 	driver = /bin/true
 [push]
-	default = upstream
+	default = current
 	followTags = true
 [credential]
 	helper = cache --timeout=86400
