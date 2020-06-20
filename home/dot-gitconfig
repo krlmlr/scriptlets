@@ -70,6 +70,7 @@
 	dm = !sh -c 'diffuse -m "$@" &' -
 	f = fetch --prune
 	fa = fetch --all --prune
+	lsf = !sh -c 'git ls-files "$@" -z | xargs -0 -n1 -I"{}" -- git log -1 --format=%ai\\ {} "{}"'
 	mf = merge --ff
 	mu = merge-update
 	ph = push
@@ -87,7 +88,7 @@
 	# https://stackoverflow.com/a/5201642/946850
 	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m"$(git log --format=%B --reverse HEAD..HEAD@{1})"'
 	# hub
-	pr = !sh -c 'hub pull-request'
+	pr = !sh -c 'hub pull-request "$@"'
 [rerere]
 	enabled = true
 [merge]
