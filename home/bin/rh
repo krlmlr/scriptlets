@@ -6,6 +6,7 @@ set -x
 export QT_DEVICE_PIXEL_RATIO=
 
 RPROJ_FILE=$(R --slave -e '
+ if (requireNamespace("usethis", quietly = TRUE)) {
   library(usethis);
   options(usethis.quiet = TRUE, error = NULL);
   proj <- tryCatch(proj_get(), error = function(e) { create_project("../'$(basename $PWD)'", rstudio = TRUE); proj_get() });
@@ -16,6 +17,9 @@ RPROJ_FILE=$(R --slave -e '
     file <- dir(proj, pattern = "[.]Rproj$", full.names = TRUE)[[1]];
   }
   cat(file);
+ } else {
+  cat(dir(getwd(), pattern = "[.]Rproj$", full.names = TRUE)[[1]])
+ }
 ')
 echo "Project file: ${RPROJ_FILE}"
 
