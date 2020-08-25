@@ -1,10 +1,13 @@
 if (file.exists("/opt/cran")) {
   options(repos=c(CRAN="file:///opt/cran"))
 } else if (!("renv" %in% loadedNamespaces())) {
-  options(
-    repos=c(CRAN = "https://packagemanager.rstudio.com/all/__linux__/bionic/latest"),
-    HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
-  )
+  release <- system2("lsb_release", "-sc", stdout = TRUE)
+  if (release != "") {
+    options(
+      repos=c(CRAN = paste0("https://packagemanager.rstudio.com/all/__linux__/", release, "/latest")),
+      HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
+    )
+  }
 }
 
 if (requireNamespace("ulimit", quietly = TRUE)) invisible(ulimit::memory_limit(6000))
