@@ -17,9 +17,9 @@ for f in ${INSTALL_FILES}; do
 	source_file=${PWD}/${SOURCE_DIR}/$f
 	
 	if [ ! -h ${target_file} -o "$(readlink -- ${target_file})" != ${source_file} ]; then
-		mkdir --verbose -p $(dirname ${target_file})
+		mkdir -v -p $(dirname ${target_file})
 		if [[ ! "${target_file}" == */.dummy ]]; then
-			ln ${LN_ARGS} --verbose --symbolic ${source_file} ${target_file} || diff --report-identical-files ${source_file} ${target_file} || true
+			ln ${LN_ARGS} -v -s ${source_file} ${target_file} || diff --report-identical-files ${source_file} ${target_file} || true
 		fi
 	fi
 done
