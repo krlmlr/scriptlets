@@ -111,4 +111,5 @@ if (interactive()) {
 options(deparse.max.lines = 2)
 
 # Set to true to make these checks an error
+Sys.setenv("_R_CHECK_LENGTH_1_CONDITION_" = "warn")
 Sys.setenv("_R_CHECK_LENGTH_1_LOGIC2_" = "warn")
