@@ -1,19 +1,15 @@
 #!/bin/sh
 
-DoRun() {
-  if $SCRIPT; then
-    notify-send -i emblem-default "$0: $SCRIPT"
-  else
-    exitcode=$?
-    notify-send -u critical "$0: $SCRIPT"
-    return $exitcode
-  fi
-}
-
-SCRIPT="$@"
-if [ "$SCRIPT" = "" ]; then
+if [ "$1" = "" ]; then
   echo "Usage: $0 <command> <parameters...>" >> /dev/stderr
   exit 1
 fi
 
-DoRun
+SCRIPT="$@"
+if "$@"; then
+  notify-send -i emblem-default "$0: $SCRIPT"
+else
+  exitcode=$?
+  notify-send -u critical "$0: $SCRIPT"
+  exit $exitcode
+fi
