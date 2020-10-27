@@ -113,3 +113,7 @@ options(deparse.max.lines = 2)
 # Set to true to make these checks an error
 Sys.setenv("_R_CHECK_LENGTH_1_CONDITION_" = "warn")
 Sys.setenv("_R_CHECK_LENGTH_1_LOGIC2_" = "warn")
+
+if (Sys.getenv("RSTUDIO") == "" && file.exists("/usr/lib/rstudio/bin/pandoc")) {
+  Sys.setenv(RSTUDIO_PANDOC = "/usr/lib/rstudio/bin/pandoc")
+}
