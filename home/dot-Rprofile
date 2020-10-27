@@ -33,7 +33,7 @@ options(
     Version = "0.0.0.9000",
     Date = Sys.Date(),
     BugReports = paste0("https://github.com/krlmlr/", basename(getwd()), "/issues"),
-    URL = paste0("https://github.com/krlmlr/", basename(getwd()), ", http://krlmlr.github.io/", basename(getwd())),
+    URL = paste0("https://github.com/krlmlr/", basename(getwd()), ", https://krlmlr.github.io/", basename(getwd())),
     License = "GPL-3",
     Roxygen = "list(markdown = TRUE)"
   ),
