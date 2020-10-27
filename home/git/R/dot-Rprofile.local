@@ -1,5 +1,7 @@
-path <- path.expand("~/R-dev")
-message("Dev mode: ON")
-options(dev_path = path)
-options(prompt = paste("d> "))
-.libPaths(c(path, .libPaths()))
+local({
+  path <- path.expand("~/R-dev")
+  message("Dev mode: ON")
+  options(dev_path = path)
+  options(prompt = paste("d> "))
+  .libPaths(c(path, .libPaths()))
+})
