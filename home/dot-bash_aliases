@@ -6,6 +6,8 @@ alias sake="make -j1 -Onone"
 alias pxc='echo -n $(pwd) | xclip -se c'
 alias csv='soffice --calc --infilter="Text - txt - csv (StarCalc)":44,34,76,1,,,,'
 alias tsv='soffice --calc --infilter="Text - txt - csv (StarCalc)":9,34,76,1,,,,'
+alias xo='xdg-open'
+alias fclean="fsed -i 's/ +$//' && fsed -e :a -e '/^\n*$/{$d;N;};/\n$/ba'"
 
 #export PATH=/usr/lib/ccache:${PATH}
 
