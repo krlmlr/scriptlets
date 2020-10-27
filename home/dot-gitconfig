@@ -138,3 +138,5 @@
 [merge "daff-csv"]
 	name = daff tabular csv merge
 	driver = daff merge --output %A %O %A %B
+[init]
+	defaultBranch = main
