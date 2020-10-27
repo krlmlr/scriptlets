@@ -40,9 +40,6 @@ options(
   usethis.install.args = "--install-tests",
   usethis.revdep.libpath = "~/R-revdep",
 
-  # Fixme: Use custom reporter
-  testthat.default_reporter = c("summary", "progress"),
-
   warnPartialMatchAttr = TRUE,
   warnPartialMatchDollar = TRUE,
   #warnPartialMatchArgs = TRUE,
