@@ -47,7 +47,7 @@
 	# b -d
 	# b -D
 	# ---
-	fft = !sh -c 'git branch --format \"%(if)%(upstream:short)%(then)git push . %(upstream:short):%(refname:short)%(end)\" | sh' -
+	fft = !sh -c 'git bvv | sed -r -n \"/^ +([^ ]+) +[^ ]+ [[]([^:]+): behind.*$/ {s//git push . \\2:\\1/ p}\" | sh -x' -
 	# === Conflict resolution
 	ma = merge --abort
 	# ---
