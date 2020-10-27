@@ -117,3 +117,7 @@ Sys.setenv("_R_CHECK_LENGTH_1_LOGIC2_" = "warn")
 if (Sys.getenv("RSTUDIO") == "" && file.exists("/usr/lib/rstudio/bin/pandoc")) {
   Sys.setenv(RSTUDIO_PANDOC = "/usr/lib/rstudio/bin/pandoc")
 }
+
+if (requireNamespace("unix", quietly = TRUE)) {
+  try(invisible(unix::rlimit_as(12e9, 12e9)))
+}
