@@ -114,6 +114,10 @@ fi
 # added by travis gem
 [ -f /home/kirill/.travis/travis.sh ] && source /home/kirill/.travis/travis.sh
 
+if [ -f ~/.env ]; then
+    . ~/.env
+fi
+
 
 # https://stackoverflow.com/a/19533853/946850
 
