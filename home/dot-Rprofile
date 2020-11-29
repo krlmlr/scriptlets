@@ -53,6 +53,8 @@ options(
 
   reprex.style = TRUE,
 
+  testthat.progress.verbose_skips = FALSE,
+
   pillar.bold = TRUE
 )
 
