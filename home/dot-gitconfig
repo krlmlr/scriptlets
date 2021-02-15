@@ -141,3 +141,5 @@
 	driver = daff merge --output %A %O %A %B
 [init]
 	defaultBranch = main
+[checkout]
+	defaultRemote = origin
