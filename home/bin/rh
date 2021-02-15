@@ -5,7 +5,7 @@ set -x
 
 export QT_DEVICE_PIXEL_RATIO=
 
-RPROJ_FILE=$(R --slave -e '
+RPROJ_FILE=$(R --vanilla --slave -e '
  if (requireNamespace("usethis", quietly = TRUE)) {
   library(usethis);
   options(usethis.quiet = TRUE, error = NULL);
@@ -39,7 +39,7 @@ else
   false
 fi || {
   # https://github.com/rstudio/rstudio/issues/4100#issuecomment-466223847
-  R_LIBS=$(R --slave -e 'cat(paste0(setdiff(.libPaths(), c(.Library, .Library.site)), collapse = ":"))')
+  R_LIBS=$(R --vanilla --slave -e 'cat(paste0(setdiff(.libPaths(), c(.Library, .Library.site)), collapse = ":"))')
   export R_LIBS
 
   rstudio "${RPROJ_FILE}" 2> /dev/null 1> /dev/null &
