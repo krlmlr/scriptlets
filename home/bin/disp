@@ -8,12 +8,12 @@ displays=($(xrandr | grep " connected" | cut -d " " -f 1))
 case $1 in
   "")
     if [ "${displays[2]}" != "" ]; then
-      xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --off --output ${displays[2]} --off 
+      xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --mode 2560x1440 --output ${displays[1]} --off --output ${displays[2]} --off 
     elif [ "${displays[1]}" != "" ]; then
-      xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --off
+      xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --mode 2560x1440 --output ${displays[1]} --off
     else
+      xrandr --output ${displays[0]} --pos 0x0 --scale 1x1 --mode 2560x1440
       echo "No external monitor found" 1>&2
-      exit 1
     fi
   ;;
   2)
@@ -24,6 +24,9 @@ case $1 in
   ;;
   2s)
     xrandr --fb 6400x2160 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2160 --pos 2560x0
+  ;;
+  2sw)
+    xrandr --fb 4720x1440 --output ${displays[0]} --pos 0x0 --mode 1280x720 --scale 1x1 --output ${displays[1]} --mode 3440x1440 --pos 1280x0
   ;;
   2s3o)
     xrandr --fb 6400x2160 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2160 --pos 2560x0 --output ${displays[2]} --off
@@ -49,6 +52,13 @@ case $1 in
   2s3r)
     xrandr --fb 6400x2160 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2160 --pos 2560x0
     xrandr --fb 7480x2160 --output ${displays[0]} --pos 0x0 --scale 1x1 --output ${displays[1]} --auto --scale 2x2 --scale-from 3840x2160 --pos 2560x0 --output ${displays[2]} --auto --pos 6400x0 --scale 1x1 --rotate left
+  ;;
+  2sh)
+    xrandr --fb 4280x1920 --output ${displays[0]} --pos 0x0 --mode 1280x720 --scale 1x1 --output ${displays[1]} --auto --pos 1280x0 --scale 1x1
+  ;;
+  2sh3r)
+    xrandr --fb 4280x1920 --output ${displays[0]} --pos 0x0 --mode 1280x720 --scale 1x1 --output ${displays[1]} --auto --pos 1280x0 --scale 1x1
+    xrandr --fb 4280x1920 --output ${displays[0]} --pos 0x0 --mode 1280x720 --scale 1x1 --output ${displays[1]} --auto --pos 1280x0 --scale 1x1 --output ${displays[2]} --auto --pos 3200x0 --scale 1x1 --rotate left
   ;;
   mf)
     secondary=$(xrandr | grep " connected" | grep -v primary | head -n 1 | cut -d " " -f 1)
