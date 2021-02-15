@@ -68,6 +68,7 @@
 	dw = diff --word-diff
 	dcw = diff --cached --word-diff
 	dm = !sh -c 'diffuse -m "$@" &' -
+	dmh = !sh -c 'diffuse -c HEAD &' -
 	f = fetch --prune
 	fa = fetch --all --prune
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
