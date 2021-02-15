@@ -1,7 +1,8 @@
-source("~/renv/activate.R")
-
-if (FALSE) local({
-  if (file.exists("/opt/cran")) {
+local({
+  if (file.exists("renv/activate.R")) {
+    setwd("~")
+    source("renv/activate.R")
+  } else if (file.exists("/opt/cran")) {
     options(repos=c(CRAN="file:///opt/cran"))
   } else if (!("renv" %in% loadedNamespaces()) && Sys.which("lsb_release") != "") {
     release <- system2("lsb_release", "-sc", stdout = TRUE)
