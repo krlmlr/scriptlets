@@ -45,7 +45,7 @@ options(
 
   warnPartialMatchAttr = TRUE,
   warnPartialMatchDollar = TRUE,
-  #warnPartialMatchArgs = TRUE,
+  warnPartialMatchArgs = TRUE,
   max.print = 100L,
   keep.source = TRUE,
   keep.source.pkgs = TRUE,
