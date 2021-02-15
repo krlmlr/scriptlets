@@ -1,4 +1,6 @@
-local({
+source("renv/activate.R")
+
+if (FALSE) local({
   if (file.exists("/opt/cran")) {
     options(repos=c(CRAN="file:///opt/cran"))
   } else if (!("renv" %in% loadedNamespaces()) && Sys.which("lsb_release") != "") {
