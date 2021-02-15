@@ -18,11 +18,14 @@ if (interactive()) {
   cat("Working directory:", getwd(), "\n")
   require(magrittr)
 
-  invisible(
-    reg.finalizer(
-      .GlobalEnv,
-      eval(bquote(function(e) try(savehistory(file.path(.(getwd()), ".Rhistory"))))),
-      onexit = TRUE))
+  if (Sys.getenv("RADIAN_VERSION") == "") {
+    invisible(
+      reg.finalizer(
+        .GlobalEnv,
+        eval(bquote(function(e) try(savehistory(file.path(.(getwd()), ".Rhistory"))))),
+        onexit = TRUE)
+    )
+  }
 }
 
 options(
@@ -104,7 +107,7 @@ options(buildtools.check = function(...) TRUE)
 if (interactive()) {
   options(
     error = rlang::entrace,
-    rlang_backtrace_on_error = "collapse"
+    rlang_backtrace_on_error = "branch"
   )
 }
 
