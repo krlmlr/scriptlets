@@ -5,4 +5,4 @@ gio mount -l | grep -o "[-]>.*$" | cut -d " " -f 2 | xargs -n 1 gio mount -u
 
 # https://askubuntu.com/a/961163/30266
 # FIXME: Find which disks to turn off
-echo /dev/sd{b,c} | xargs -n 1 udisksctl power-off -b
+echo /dev/sd{a,b,c} | xargs -n 1 udisksctl power-off -b
