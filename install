@@ -23,3 +23,5 @@ for f in ${INSTALL_FILES}; do
 		fi
 	fi
 done
+
+if [ -d private ]; then private/install; fi
