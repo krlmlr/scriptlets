@@ -15,11 +15,14 @@ LN_ARGS="$@"
 for f in ${INSTALL_FILES}; do
 	target_file=$(echo ${INSTALL_DIR}/$f | sed 's#dot-#.#g')
 	source_file=${PWD}/${SOURCE_DIR}/$f
-	
+
 	if [ ! -h ${target_file} -o "$(readlink -- ${target_file})" != ${source_file} ]; then
-		mkdir -v -p $(dirname ${target_file})
-		if [[ ! "${target_file}" == */.dummy ]]; then
-			ln ${LN_ARGS} -v -s ${source_file} ${target_file} || diff --report-identical-files ${source_file} ${target_file} || true
+		if mkdir -v -p $(dirname ${target_file}); then
+			if [[ ! "${target_file}" == */.dummy ]]; then
+				ln ${LN_ARGS} -v -s ${source_file} ${target_file} || diff --report-identical-files ${source_file} ${target_file} || true
+			fi
+		else
+			echo "Error: can't create $(dirname ${target_file})"
 		fi
 	fi
 done
