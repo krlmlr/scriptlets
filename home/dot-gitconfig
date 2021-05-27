@@ -82,6 +82,8 @@
 	pl = pull
 	plf = pull --ff-only
 	plr = pull --rebase
+	pr = !sh -c 'hub pull-request "$@"'
+	prm = !sh -c 'hub pull-request -b main "$@"'
 	qh = reset HEAD
 	rma = rebase master
 	rmi = rebase master --interactive --autosquash
@@ -89,7 +91,6 @@
 	# https://stackoverflow.com/a/5201642/946850
 	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m"$(git log --format=%B --reverse HEAD..HEAD@{1})"'
 	# hub
-	pr = !sh -c 'hub pull-request "$@"'
 [rerere]
 	enabled = true
 [merge]
