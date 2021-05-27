@@ -8,3 +8,12 @@ root = true
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
+
+# DESCRIPTION is special, don't remove trailing spaces after :
+[DESCRIPTION]
+trim_trailing_whitespace = false
+
+# Tab indentation (no size specified)
+[Makefile]
+indent_style = tab
+
