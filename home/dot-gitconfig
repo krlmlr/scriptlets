@@ -91,6 +91,10 @@
 	# https://stackoverflow.com/a/5201642/946850
 	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m"$(git log --format=%B --reverse HEAD..HEAD@{1})"'
 	# hub
+	sts = stash save
+	stp = stash pop
+	std = stash drop
+	stl = stash list
 [rerere]
 	enabled = true
 [merge]
