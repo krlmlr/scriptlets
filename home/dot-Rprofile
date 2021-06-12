@@ -39,8 +39,9 @@ if (interactive()) {
     invisible(
       reg.finalizer(
         .GlobalEnv,
-        eval(bquote(function(e) try(savehistory(file.path(.(getwd()), ".Rhistory"))))),
-        onexit = TRUE)
+        eval(bquote(function(e) try(utils::savehistory(file.path(.(getwd()), ".Rhistory"))))),
+        onexit = TRUE
+      )
     )
   }
 }
