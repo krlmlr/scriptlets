@@ -130,6 +130,9 @@ if (interactive()) {
   )
 }
 
+options(testthat.default_reporter = structure(list(new = function(...) testthat::MultiReporter$new(list(testthat::ProgressReporter$new(), happy::PurgeReporter$new()))), class = "R6ClassGenerator"))
+options(testthat.default_parallel_reporter = structure(list(new = function(...) testthat::MultiReporter$new(list(testthat::ProgressReporter$new(), happy::PurgeReporter$new()))), class = "R6ClassGenerator"))
+
 # requireNamespace("tracer", quietly = TRUE)
 # options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
