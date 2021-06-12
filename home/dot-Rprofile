@@ -76,6 +76,7 @@ options(
 
   testthat.progress.verbose_skips = FALSE,
 
+  vsc.rstudioapi = TRUE,
   pillar.bold = TRUE
 )
 
