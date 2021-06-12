@@ -1,7 +1,21 @@
 local({
-  if (file.exists("renv/activate.R")) {
-    setwd("~")
+  if (file.exists("~/renv/activate.R")) {
+    oldwd <- setwd("~")
+    on.exit(setwd(oldwd))
+    options(renv.config.synchronized.check = FALSE)
     source("renv/activate.R")
+    if (grepl("unstable", R.version.string)) {
+      if (getRversion() > "4.1.99") {
+        warning("Fix HTTPUserAgent in .Rprofile", call. = FALSE)
+      }
+      options(
+        HTTPUserAgent = "R/4.0.0 (ubuntu-20.04) R (4.0.0 x86_64-pc-linux-gnu x86_64 linux-gnu) on GitHub Actions"
+      )
+    }
+    #  options(
+    #    repos=c(CRAN = paste0("https://packagemanager.rstudio.com/all/__linux__/focal/1390593")),
+    #    HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
+    #  )
   } else if (file.exists("/opt/cran")) {
     options(repos=c(CRAN="file:///opt/cran"))
   } else if (!("renv" %in% loadedNamespaces()) && Sys.which("lsb_release") != "") {
