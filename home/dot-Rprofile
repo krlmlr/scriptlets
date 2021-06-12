@@ -126,7 +126,7 @@ options(buildtools.check = function(...) TRUE)
 if (interactive()) {
   options(
     error = rlang::entrace,
-    rlang_backtrace_on_error = "branch"
+    rlang_backtrace_on_error = "collapse"
   )
 }
 
