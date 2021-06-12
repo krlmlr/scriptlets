@@ -17,12 +17,12 @@ local({
     #    HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
     #  )
   } else if (file.exists("/opt/cran")) {
-    options(repos=c(CRAN="file:///opt/cran"))
+    options(repos = c(CRAN = "file:///opt/cran"))
   } else if (!("renv" %in% loadedNamespaces()) && Sys.which("lsb_release") != "") {
     release <- system2("lsb_release", "-sc", stdout = TRUE)
     if (release != "") {
       options(
-        repos=c(CRAN = paste0("https://packagemanager.rstudio.com/all/__linux__/", release, "/latest")),
+        repos = c(CRAN = paste0("https://packagemanager.rstudio.com/all/__linux__/", release, "/latest")),
         HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(), paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
       )
     }
@@ -67,7 +67,7 @@ options(
   keep.source = TRUE,
   keep.source.pkgs = TRUE,
 
-  #tibble.max_extra_cols = 30L,
+  # tibble.max_extra_cols = 30L,
 
   mc.cores = 8,
 
@@ -81,37 +81,37 @@ options(
 # https://github.com/rstudio/rstudio/issues/4723#issuecomment-487759342
 options(rstudio.errors.suppressed = FALSE)
 
-(function(){
-check_local_env <- function(path) {
-  found <- FALSE
+(function() {
+  check_local_env <- function(path) {
+    found <- FALSE
 
-  lib_path <- file.path(path, ".lib")
-  if (file.exists(lib_path)) {
-    .libPaths(c(normalizePath(lib_path), .libPaths()))
-    options(prompt = paste0(basename(getwd()), "> "))
-    message("Packages in local lib: ", paste(dir(lib_path), collapse = ", "))
-    found <- TRUE
+    lib_path <- file.path(path, ".lib")
+    if (file.exists(lib_path)) {
+      .libPaths(c(normalizePath(lib_path), .libPaths()))
+      options(prompt = paste0(basename(getwd()), "> "))
+      message("Packages in local lib: ", paste(dir(lib_path), collapse = ", "))
+      found <- TRUE
+    }
+
+    makevars_path <- file.path(path, "Makevars")
+    if (file.exists(makevars_path)) {
+      Sys.setenv(R_MAKEVARS_USER = normalizePath(makevars_path))
+      message("Compiling with: \n", paste(readLines(makevars_path), collapse = "\n"))
+      found <- TRUE
+    }
+
+    local_path <- file.path(path, ".Rprofile.local")
+    if (file.exists(local_path)) {
+      message("Sourcing ", local_path)
+      source(local_path, chdir = TRUE, local = TRUE)
+      found <- TRUE
+    }
+
+    invisible(found)
   }
 
-  makevars_path <- file.path(path, "Makevars")
-  if (file.exists(makevars_path)) {
-    Sys.setenv(R_MAKEVARS_USER = normalizePath(makevars_path))
-    message("Compiling with: \n", paste(readLines(makevars_path), collapse = "\n"))
-    found <- TRUE
-  }
-
-  local_path <- file.path(path, ".Rprofile.local")
-  if (file.exists(local_path)) {
-    message("Sourcing ", local_path)
-    source(local_path, chdir = TRUE, local = TRUE)
-    found <- TRUE
-  }
-
-  invisible(found)
-}
-
-check_local_env("..")
-check_local_env(".")
+  check_local_env("..")
+  check_local_env(".")
 })()
 
 if (file.exists("~/.Rprofile.private")) {
@@ -120,7 +120,7 @@ if (file.exists("~/.Rprofile.private")) {
 
 options(buildtools.check = function(...) TRUE)
 
-#options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
+# options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
 if (interactive()) {
   options(
     error = rlang::entrace,
@@ -128,8 +128,8 @@ if (interactive()) {
   )
 }
 
-#requireNamespace("tracer", quietly = TRUE)
-#options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
+# requireNamespace("tracer", quietly = TRUE)
+# options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
 
 # Set to true to make these checks an error
