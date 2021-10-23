@@ -109,6 +109,7 @@ if ! shopt -oq posix; then
   fi
 
   source <(kubectl completion bash)
+  complete -F __start_kubectl k
 fi
 
 # added by travis gem
@@ -168,3 +169,11 @@ GIT_PROMPT_SHOW_CHANGED_FILES_COUNT=0 # uncomment to avoid printing the number o
 GIT_PROMPT_THEME=Solarized_Ubuntu # use theme optimized for solarized color scheme
 source ~/git/bash-git-prompt/gitprompt.sh
 
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+alias gco="git co"
+
+. ~/git/complete-alias/complete_alias
