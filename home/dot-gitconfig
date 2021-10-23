@@ -77,8 +77,8 @@
 	ph = push
 	phf = push --force
 	phu = push --set-upstream
-	phuk = push --set-upstream krlmlr
-	phuo = push --set-upstream origin
+	phuk = push --set-upstream krlmlr HEAD
+	phuo = push --set-upstream origin HEAD
 	pl = pull
 	plf = pull --ff-only
 	plr = pull --rebase
@@ -111,7 +111,7 @@
 [merge "ours"]
 	driver = /bin/true
 [push]
-	default = current
+	default = upstream
 	followTags = true
 [credential]
 	helper = cache --timeout=86400
