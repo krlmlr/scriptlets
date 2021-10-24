@@ -47,7 +47,7 @@
 	# b -d
 	# b -D
 	# ---
-	fft = !sh -c 'git bvv | sed -r -n \"/^ +([^ ]+) +[^ ]+ [[]([^:]+): behind.*$/ {s//git push . \\2:\\1/ p}\" | sh -x' -
+	fft = !sh -c 'git bvv | $(which gsed || which sed)  -r -n \"/^ +([^ ]+) +[^ ]+ [[]([^:]+): behind.*$/ {s//git push . \\2:\\1/ p}\" | sh -x' -
 	# === Conflict resolution
 	ma = merge --abort
 	# ---
@@ -129,6 +129,7 @@
 [core]
 	excludesfile = ~/.gitignore
 	attributesfile = /home/kirill/.gitattributes
+	pager = less -FRX
 [user]
 	email = kirill@cynkra.com
 [include]
