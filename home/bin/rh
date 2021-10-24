@@ -42,5 +42,5 @@ fi || {
   R_LIBS=$(R --vanilla --slave -e 'cat(paste0(setdiff(.libPaths(), c(.Library, .Library.site)), collapse = ":"))')
   export R_LIBS
 
-  rstudio "${RPROJ_FILE}" 2> /dev/null 1> /dev/null &
+  $(which /Applications/RStudio.app/Contents/MacOS/RStudio || which rstudio) "${RPROJ_FILE}" 2> /dev/null 1> /dev/null & disown
 }

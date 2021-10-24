@@ -1,4 +1,4 @@
 #!/bin/sh
 
 # --parallel to disable internal search_stream flag in ag, https://github.com/ggreer/the_silver_searcher/issues/173#issuecomment-14680588
-\ag --parallel --hidden -g . | \egrep -v "(^|/)[.]git/" | \xargs -d "\n" sed -r -i "$@"
+\ag --parallel --hidden -g . | \egrep -v "(^|/)[.]git/" | \xargs -d "\n" $(which gsed || which sed) -r -i "$@"
