@@ -38,5 +38,5 @@ fi
 # Commit
 if [ -n "$(git -C ${target_dir} status --porcelain)" ]; then
   echo "> ${source_dir}"
-  \git -C ${target_dir} commit -m "git backup"
+  \git -C ${target_dir} commit -m "git backup" --status
 fi
