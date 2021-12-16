@@ -50,6 +50,14 @@ You can also add the call `ghpsd merge` to your commit hook.
 
 Mirrors GitHub issues in a subdirectory of `.git` for offline use. A low-tech wrapper for `wget`.
 
+## git-backup
+
+Tracks the files that Git does *not* track in a shadow Git repository.
+
+## git-backup-all
+
+Treat a whole tree of Git repositories with `git-backup`.
+
 ## git-mmv
 
 Allows you to write `git mmv` to move several Git-controlled files at once, with the usual `mmv` syntax.

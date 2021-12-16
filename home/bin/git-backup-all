@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+if [ -z "$1" -o -z "$2" -o -n "$3" ]; then
+  echo "Usage: $0 <source-root> <target-root>"
+  exit 1
+fi
+
+target_root=$(\grealpath -m "$2")
+source_root=$(\grealpath -m "$1")
+cd "$1"
+
+\find . -type d -name .git |
+  \gsed -r "s|^[.]/(.*)/[.]git$|git backup \1 '${target_root}/\1/git-backup'|" |
+  \nice \parallel

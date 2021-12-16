@@ -1,0 +1,42 @@
+#!/bin/sh
+
+set -e
+
+if [ -z "$1" -o -z "$2" -o -n "$3" ]; then
+  echo "Usage: $0 <source-dir> <target-dir>"
+  exit 1
+fi
+
+target_dir=$(\grealpath -m "$2")
+source_dir=$(\grealpath -m "$1")
+cd "$1"
+
+# echo "> ${PWD}"
+
+# Init if missing
+if ! [ -d ${target_dir} ]; then
+  \mkdir -p ${target_dir}
+  \git init ${target_dir}
+  \git -C ${target_dir} commit -m "Initial" --allow-empty
+fi
+
+# Prune target
+\find ${target_dir}/ -mindepth 1 -maxdepth 1 -depth -name .git -prune -o -print0 |
+  \xargs -r -0 \rm -r
+
+# Copy files to target
+\git --no-optional-locks status --porcelain --untracked-files=all --ignored=traditional --no-renames -z |
+  \tr '\0' '\n' |
+  \egrep -v '^.D ' |
+  \gsed -r 's/^.. //' |
+  \tr '\n' '\0' |
+  \xargs -r -0 \gcp --parents -rlP -t ${target_dir}/
+
+# Add all files in target
+\git -C ${target_dir} add -A
+
+# Commit
+if [ -n "$(git -C ${target_dir} status --porcelain)" ]; then
+  echo "> ${source_dir}"
+  \git -C ${target_dir} commit -m "git backup"
+fi
