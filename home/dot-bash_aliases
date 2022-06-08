@@ -30,6 +30,11 @@ _xkill() {
 _xcopy() {
     echo -n "${READLINE_LINE:$READLINE_POINT}" | xclip -se c
 }
-bind -m emacs -x '"\eu": _xdiscard'
-bind -m emacs -x '"\ek": _xkill'
-bind -m emacs -x '"\ec": _xcopy'
+
+if [ -n "$BASH_VERSION" ]
+then
+  bind -m emacs -x '"\eu": _xdiscard'
+  bind -m emacs -x '"\ek": _xkill'
+  bind -m emacs -x '"\ec": _xcopy'
+fi
+
