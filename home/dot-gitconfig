@@ -70,13 +70,14 @@
 	dm = !sh -c 'diffuse -m "$@" &' -
 	dmh = !sh -c 'diffuse -c HEAD &' -
 	f = fetch --prune
-	fa = fetch --all --prune
+	fa = fetch --all --prune -j 32
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
 	mf = merge --ff
 	mu = merge-update
 	ph = push
 	phf = push --force
 	phu = push --set-upstream
+	phuc = push --set-upstream cynkra HEAD
 	phuk = push --set-upstream krlmlr HEAD
 	phuo = push --set-upstream origin HEAD
 	pl = pull
@@ -132,6 +133,7 @@
 	pager = less -FRX
 [user]
 	email = kirill@cynkra.com
+	name = Kirill Müller
 [include]
 	path = .gitconfig.shgit
 [includeIf "gitdir:git/**"]
