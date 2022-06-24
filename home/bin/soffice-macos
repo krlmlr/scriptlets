@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -euxo pipefail
+
+if [ -z "$(ps -ef | grep "/Applications/LibreOffice.app/Contents/MacOS/soffice" | grep -v grep)" ]; then
+  soffice --calc & disown
+  sleep 1
+fi
+
+soffice "$@"
+open -a LibreOffice
