@@ -12,7 +12,8 @@ alias xo='xdg-open'
 alias fsed='\ag --hidden -g . | \egrep -v "(^|/)[.]git/" | \xargs -d "\n" sed -r -i'
 alias fclean="fsed -i 's/ +$//' && fsed -e :a -e '/^\n*$/{$d;N;};/\n$/ba'"
 
-#export PATH=/usr/lib/ccache:${PATH}
+# Useful for gitpod
+export PATH=/usr/lib/ccache:${PATH}
 
 # Was necessary for RStudio < 1.2
 #export QT_DEVICE_PIXEL_RATIO=2
