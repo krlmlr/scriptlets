@@ -43,4 +43,5 @@ fi || {
   export R_LIBS
 
   $(which /Applications/RStudio.app/Contents/MacOS/RStudio || which rstudio) "${RPROJ_FILE}" 2> /dev/null 1> /dev/null & disown
+  echo ok
 }
