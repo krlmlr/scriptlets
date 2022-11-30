@@ -77,6 +77,9 @@ options(
   testthat.progress.verbose_skips = FALSE,
 
   vsc.rstudioapi = TRUE,
+  pillar.min_title_chars = 5,
+  pillar.max_title_chars = 5,
+  pillar.max_footer_lines = 12,
   pillar.bold = TRUE
 )
 
@@ -126,7 +129,7 @@ options(buildtools.check = function(...) TRUE)
 if (interactive()) {
   options(
     error = rlang::entrace,
-    rlang_backtrace_on_error = "collapse"
+    rlang_backtrace_on_error = "branch"
   )
 }
 
@@ -138,6 +141,8 @@ if (dir.exists(file.path(.libPaths()[[1]], "happy"))) {
 # requireNamespace("tracer", quietly = TRUE)
 # options(error = expression({tracer::tb(); if (!interactive()) q(status = 1)}))
 options(deparse.max.lines = 2)
+
+options(boomer.ignore = c("~", "{", "("))
 
 # Set to true to make these checks an error
 Sys.setenv("_R_CHECK_LENGTH_1_CONDITION_" = "warn")
