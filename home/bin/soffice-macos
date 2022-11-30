@@ -2,9 +2,18 @@
 
 set -euxo pipefail
 
+# Assume last argument is file name
+# https://stackoverflow.com/a/1853993/946850
+for last; do true; done
+
+if ! [ -f "$last" ]; then
+  echo "File not found: $last" > /dev/stderr
+  exit 1
+fi
+
 if [ -z "$(ps -ef | grep "/Applications/LibreOffice.app/Contents/MacOS/soffice" | grep -v grep)" ]; then
   soffice --calc & disown
-  sleep 1
+  sleep 2
 fi
 
 soffice "$@"
