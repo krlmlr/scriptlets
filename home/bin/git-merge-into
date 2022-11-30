@@ -18,7 +18,7 @@ function cleanup {
 trap cleanup EXIT
 
 
-SOURCE_BRANCH="$(git branch | sed -n -r '/^\* (.*)$/ {s//\1/;p}')"
+SOURCE_BRANCH="$(git branch | gsed -n -r '/^\* (.*)$/ {s//\1/;p}')"
 [ -n "${SOURCE_BRANCH}" ]
 
 TARGET_BRANCH="$1"
