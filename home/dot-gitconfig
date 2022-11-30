@@ -3,6 +3,7 @@
 	# === Basic commands
 	s = status
 	d = diff
+	dd = !sh -c 'git diff | delta --max-line-length 2048 --navigate'
 	# ---
 	a = add
 	aa = add .
