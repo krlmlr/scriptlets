@@ -6,8 +6,8 @@ export HUB_PROTOCOL=ssh
 export MAKEFLAGS="-j $(nproc 2> /dev/null || sysctl -n hw.logicalcpu) -O"
 alias sake="make -j1 -Onone"
 alias pxc='echo -n $(pwd) | xclip -se c'
-alias csv='soffice --calc --infilter="Text - txt - csv (StarCalc)":44,34,76,1,,,,'
-alias tsv='soffice --calc --infilter="Text - txt - csv (StarCalc)":9,34,76,1,,,,'
+alias csv='soffice-macos --calc --infilter="Text - txt - csv (StarCalc)":44,34,76,1,,,,'
+alias tsv='soffice-macos --calc --infilter="Text - txt - csv (StarCalc)":9,34,76,1,,,,'
 alias xo='xdg-open'
 alias fclean="fsed -i 's/ +$//' && fsed -e :a -e '/^\n*$/{$d;N;};/\n$/ba'"
 
