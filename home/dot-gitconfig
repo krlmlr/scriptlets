@@ -154,11 +154,6 @@
 	defaultBranch = main
 [checkout]
 	defaultRemote = origin
-[diff "daff-init"]
-	command = daff diff --git
-[merge "daff-init"]
-	name = daff tabular init merge
-	driver = daff merge --output %A %O %A %B
 [diff "daff-.csv"]
 	command = daff diff --git
 [merge "daff-.csv"]
