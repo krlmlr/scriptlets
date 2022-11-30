@@ -38,3 +38,4 @@ then
   bind -m emacs -x '"\ec": _xcopy'
 fi
 
+. ~/.bash_secrets
