@@ -9,7 +9,6 @@ alias pxc='echo -n $(pwd) | xclip -se c'
 alias csv='soffice --calc --infilter="Text - txt - csv (StarCalc)":44,34,76,1,,,,'
 alias tsv='soffice --calc --infilter="Text - txt - csv (StarCalc)":9,34,76,1,,,,'
 alias xo='xdg-open'
-alias fsed='\ag --hidden -g . | \egrep -v "(^|/)[.]git/" | \xargs -d "\n" sed -r -i'
 alias fclean="fsed -i 's/ +$//' && fsed -e :a -e '/^\n*$/{$d;N;};/\n$/ba'"
 
 # Useful for gitpod
