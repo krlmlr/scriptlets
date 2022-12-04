@@ -85,6 +85,7 @@ set diff-view	= line-number:no,interval=5 text:yes,commit-title-overflow=no
 
 # UI display settings
 set show-changes		= yes		# Show changes commits in the main view?
+set main-view-date-local = true
 set show-untracked		= yes		# Show also untracked changes?
 set wrap-lines			= no		# Wrap long lines in pager views?
 set tab-size			= 8		# Number of spaces to use when expanding tabs
