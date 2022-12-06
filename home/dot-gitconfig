@@ -140,6 +140,7 @@
 	path = .gitconfig.gitpod
 [include]
 	path = .gitconfig.shgit
+	path = .gitconfig.gitpod
 [includeIf "gitdir:git/**"]
 	path = git/.gitconfig
 [rebase]
