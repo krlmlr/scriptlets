@@ -1,5 +1,6 @@
 alias gf="git flow"
 alias g="git"
+__git_complete g __git_main
 
 export HUB_PROTOCOL=ssh
 
