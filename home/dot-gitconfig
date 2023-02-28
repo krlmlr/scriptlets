@@ -137,6 +137,8 @@
 [include]
 	path = .gitconfig.user
 [include]
+	path = .gitconfig.gitpod
+[include]
 	path = .gitconfig.shgit
 [includeIf "gitdir:git/**"]
 	path = git/.gitconfig
