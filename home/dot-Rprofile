@@ -155,3 +155,7 @@ if (Sys.getenv("RSTUDIO") == "" && file.exists("/usr/lib/rstudio/bin/pandoc")) {
 if (requireNamespace("unix", quietly = TRUE)) {
   try(invisible(unix::rlimit_as(12e9, 12e9)))
 }
+
+if (Sys.getenv("USER") == "gitpod") {
+  source(".Rprofile.gitpod")
+}
