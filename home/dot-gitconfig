@@ -134,9 +134,8 @@
 	excludesfile = ~/.gitignore
 	attributesfile = /home/kirill/.gitattributes
 	pager = less -FRX
-[user]
-	email = kirill@cynkra.com
-	name = Kirill Müller
+[include]
+	path = .gitconfig.user
 [include]
 	path = .gitconfig.shgit
 [includeIf "gitdir:git/**"]
