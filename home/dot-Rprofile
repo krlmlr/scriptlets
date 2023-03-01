@@ -157,5 +157,5 @@ if (requireNamespace("unix", quietly = TRUE)) {
 }
 
 if (Sys.getenv("USER") == "gitpod") {
-  source(".Rprofile.gitpod")
+  source("~/.Rprofile.gitpod")
 }
