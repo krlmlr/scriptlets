@@ -1,6 +1,17 @@
 alias gf="git flow"
 alias g="git"
-__git_complete g __git_main
+
+# https://askubuntu.com/a/642778
+# https://github.com/jonas/tig/pull/1055/files
+# Make sure __git_complete is defined
+if ! declare -f __git_complete &>/dev/null; then
+  if [ -d source /usr/share/bash-completion/completions]; then
+    source /usr/share/bash-completion/completions/git
+  fi
+fi
+if declare -f __git_complete &>/dev/null; then
+  __git_complete g __git_main
+fi
 
 export HUB_PROTOCOL=ssh
 
