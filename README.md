@@ -11,6 +11,29 @@ To install all scripts to `~/bin` (by creating symbolic links), clone the projec
 curl -s https://raw.githubusercontent.com/krlmlr/scriptlets/master/bootstrap | sh
 ```
 
+## Run commands in subdirectories
+
+### inside
+
+Execute command inside a subdirectory, given as first argument.
+
+### every
+
+Treat each line of the standard input as subdirectory to execute command in (via `inside`).
+
+### each
+
+Like `every`, but in parallel.
+
+### everyfile
+
+Execute command in each subdirectory (via `inside`).
+FIXME: Currently assumes that the current directory only has subdirectories, not files.
+
+### eachfile
+
+Like `everyfile`, but in parallel.
+
 ## Notifications
 
 ### n

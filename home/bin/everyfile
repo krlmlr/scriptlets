@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -euxo pipefail
+
+ls | every "$@"

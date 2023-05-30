@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -euxo pipefail
+
+cd $1
+shift
+"$@"
