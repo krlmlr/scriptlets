@@ -1,0 +1,13 @@
+#! /bin/sh
+
+pipe=/tmp/testpipe
+
+trap "rm -f $pipe" EXIT
+
+if [[ ! -p $pipe ]]; then
+    mkfifo $pipe
+fi
+
+sh < $pipe 2>&1 | gsed -r 's/^/# /' &
+
+tee -a $pipe

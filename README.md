@@ -11,6 +11,44 @@ To install all scripts to `~/bin` (by creating symbolic links), clone the projec
 curl -s https://raw.githubusercontent.com/krlmlr/scriptlets/master/bootstrap | sh
 ```
 
+## reprex
+
+Reproducible shell examples.
+
+```sh
+~ ( echo "echo a"; echo "echo b" ) | reprex
+echo a
+echo b
+# a
+# b
+```
+
+Step by step:
+
+1. Type `reprex` on the shell.
+
+2. Type `echo a` <enter> on the shell.
+
+3. Output:
+
+    ```
+    echo a
+    # a
+    ```
+
+4. Type `echo b` <enter> on the shell.
+
+5. Output:
+
+    ```
+    echo b
+    # b
+    ```
+
+6. Type <Ctrl + D> on the shell.
+
+Not perfect, but a start.
+
 ## Run commands in subdirectories
 
 ### inside
