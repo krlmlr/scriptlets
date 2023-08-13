@@ -154,3 +154,41 @@ if (requireNamespace("unix", quietly = TRUE)) {
 if (Sys.getenv("USER") == "gitpod") {
   source("~/.Rprofile.gitpod")
 }
+
+options(
+  covr.flags = c(
+    CFLAGS = "-O0 --coverage",
+    CXXFLAGS = "-O0 --coverage",
+    CXX1XFLAGS = "-O0 --coverage",
+    CXX11FLAGS = "-O0 --coverage",
+    CXX14FLAGS = "-O0 --coverage",
+    CXX17FLAGS = "-O0 --coverage",
+    CXX20FLAGS = "-O0 --coverage",
+
+    # LDFLAGS is ignored on windows and visa versa
+    LDFLAGS = "--coverage"
+  )
+)
+
+options(testthat.progress.max_fails = Inf)
+
+if (interactive()) local({
+  dark <- suppressWarnings(system("defaults read -g AppleInterfaceStyle", ignore.stderr = TRUE, intern = TRUE))
+  if (identical(dark, "Dark")) {
+    unlink("~/.gitconfig.delta")
+    file.symlink("~/.gitconfig.delta.dark", "~/.gitconfig.delta")
+    if (Sys.getenv("RSTUDIO") != "") {
+      later::later(function() {
+        rstudioapi::applyTheme("Tomorrow Night")
+      })
+    }
+  } else {
+    unlink("~/.gitconfig.delta")
+    file.symlink("~/.gitconfig.delta.light", "~/.gitconfig.delta")
+    if (Sys.getenv("RSTUDIO") != "") {
+      later::later(function() {
+        rstudioapi::applyTheme("Tomorrow")
+      })
+    }
+  }
+})
