@@ -1,0 +1,38 @@
+#!/bin/sh
+
+set -ex
+
+top_level=$(git rev-parse --show-toplevel)
+# TODO: Does this always exist?
+git_dir=${top_level}/.git
+tmpdir="${git_dir}/bubble-work"
+/bin/rm -rf "$tmpdir"
+git clone "$top_level" "$tmpdir"
+
+start_commit=$(git rev-parse HEAD)
+
+if [ -n "$1" ]; then
+  my_commit=$1
+else
+  my_commit=$start_commit
+fi
+
+git -C $tmpdir reset --hard ${my_commit}^
+
+# https://stackoverflow.com/a/62397081/946850
+# FIXME: Better way to find branch point?
+for current_commit in $(git log --format="%H" origin/HEAD..${my_commit}^); do
+  git -C $tmpdir revert --no-edit $current_commit
+  if ! git -C $tmpdir cherry-pick --no-commit $my_commit; then
+    # Show info that helps decide if this is really the right place
+    # to move that commit to, and to navigate in the subsequent `git rebase -i`
+    git --no-pager show $current_commit
+    git --no-pager show $my_commit
+    git log --oneline -n 1 $current_commit
+    git log --oneline -n 1 $my_commit
+    exit 1
+  fi
+  git -C $tmpdir reset --hard HEAD
+done
+
+echo "End reached, can be applied onto the main branch"
