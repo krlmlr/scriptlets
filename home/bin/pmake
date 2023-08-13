@@ -1,6 +1,6 @@
 #!/bin/sh
 
-make -j $(nproc) -O "$@"
+gmake -j $(nproc) -O "$@"
 ERRORS=$?
 if [ "$ERRORS" -gt 0 ]; then
   echo "Errors occurred: $ERRORS" >> /dev/stderr
