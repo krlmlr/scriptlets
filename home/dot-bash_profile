@@ -6,3 +6,4 @@ keychain ~/.ssh/id_rsa
 
 . ~/.autoscreen
 
+complete -C /opt/homebrew/bin/bit bit
