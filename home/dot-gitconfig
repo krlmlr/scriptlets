@@ -141,6 +141,7 @@
 [include]
 	path = .gitconfig.shgit
 	path = .gitconfig.gitpod
+	path = .gitconfig.delta
 [includeIf "gitdir:git/**"]
 	path = git/.gitconfig
 [rebase]
@@ -163,8 +164,5 @@
 	driver = daff merge --output %A %O %A %B
 [interactive]
 	diffFilter = delta --color-only --max-line-length 2048
-[delta]
-	navigate = true    # use n and N to move between diff sections
-	light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
 [diff]
 	colorMoved = default
