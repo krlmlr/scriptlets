@@ -177,3 +177,7 @@ export NVM_DIR="$HOME/.nvm"
 alias gco="git co"
 
 . ~/git/complete-alias/complete_alias
+
+if [ -d /opt/homebrew ]; then
+  export PATH=/opt/homebrew/bin:$PATH
+fi
