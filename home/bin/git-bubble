@@ -32,7 +32,20 @@ for current_commit in $(git log --format="%H" origin/HEAD..${my_commit}^); do
     git log --oneline -n 1 $my_commit
     exit 1
   fi
+
+  if  [ -z "$(git -C $tmpdir status --porcelain)" ]; then
+    # Show info that helps decide if this is really the right place
+    # to move that commit to, and to navigate in the subsequent `git rebase -i`
+    git --no-pager show $prev_commit
+    git --no-pager show $my_commit
+    git log --oneline -n 1 $prev_commit
+    git log --oneline -n 1 $my_commit
+    echo "Commit has no effect here!"
+    exit 1
+  fi
+
   git -C $tmpdir reset --hard HEAD
+  prev_commit=$current_commit
 done
 
 echo "End reached, can be applied onto the main branch"
