@@ -12,7 +12,7 @@ git clone "$top_level" "$tmpdir"
 start_commit=$(git rev-parse HEAD)
 
 if [ -n "$1" ]; then
-  my_commit=$1
+  my_commit=$(git rev-parse $1)
 else
   my_commit=$start_commit
 fi
