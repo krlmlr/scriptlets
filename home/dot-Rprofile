@@ -173,9 +173,7 @@ options(
   )
 )
 
-options(testthat.progress.max_fails = Inf)
-
-if (interactive()) local({
+setHook("rstudio.sessionInit", action = "append", function(newSession) {
   dark <- suppressWarnings(system("defaults read -g AppleInterfaceStyle", ignore.stderr = TRUE, intern = TRUE))
   if (identical(dark, "Dark")) {
     unlink("~/.gitconfig.delta")
