@@ -5,6 +5,10 @@ set -x
 
 export QT_DEVICE_PIXEL_RATIO=
 
+if [ -n "$1" ]; then
+  cd $1
+fi
+
 RPROJ_FILE=$(R --vanilla --slave -e '
  if (requireNamespace("usethis", quietly = TRUE)) {
   library(usethis);
