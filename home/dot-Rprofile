@@ -75,6 +75,9 @@ options(
   reprex.style = TRUE,
 
   testthat.progress.verbose_skips = FALSE,
+  # testthat.progress.max_fails = Inf,
+
+  gargle_oauth_email = "kirill@cynkra.com",
 
   vsc.rstudioapi = TRUE,
   pillar.min_title_chars = 5,
