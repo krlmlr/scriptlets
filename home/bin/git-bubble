@@ -3,13 +3,12 @@
 set -ex
 
 top_level=$(git rev-parse --show-toplevel)
-# TODO: Does this always exist?
-git_dir=${top_level}/.git
-tmpdir="${git_dir}/bubble-work"
+tmpdir=$(mktemp)
 /bin/rm -rf "$tmpdir"
-git clone "$top_level" "$tmpdir"
 
 start_commit=$(git rev-parse HEAD)
+git clone "$top_level" "$tmpdir"
+git -C "$tmpdir" checkout $start_commit
 
 if [ -n "$1" ]; then
   my_commit=$(git rev-parse $1)
