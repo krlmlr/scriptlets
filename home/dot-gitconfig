@@ -80,7 +80,7 @@
 	mf = merge --ff
 	mu = merge-update
 	ph = push
-	phf = push --force
+	phf = push --force-with-lease
 	phu = push --set-upstream
 	phuc = push --set-upstream cynkra HEAD
 	phuk = push --set-upstream krlmlr HEAD
