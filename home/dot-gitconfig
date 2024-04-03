@@ -21,6 +21,7 @@
 	# clean
 	# ---
 	l = log --numstat --graph --decorate
+	ll = log --oneline --graph --decorate
 	lp = log --patch --graph --decorate
 	# ---
 	# blame
