@@ -73,7 +73,7 @@
 	dcw = diff --cached --word-diff
 	dm = !sh -c 'diffuse -m "$@" &' -
 	dmh = !sh -c 'diffuse -c HEAD &' -
-	du = !sh -c 'git diff $(git rev-parse --abbrev-ref --symbolic-full-name @{u})i "$@"'
+	du = !sh -c 'git diff $(git rev-parse --abbrev-ref --symbolic-full-name @{u}) "$@"'
 	f = fetch --prune
 	fa = fetch --all --prune -j 32
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
