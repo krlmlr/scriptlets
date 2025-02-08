@@ -1,0 +1,107 @@
+[alias]
+	echo = "!bash -c 'echo \"${@: 0}\"'"
+	# === Basic commands
+	s = status
+	d = diff
+	dd = !sh -c 'git diff | delta --max-line-length 2048 --navigate'
+	# ---
+	a = add
+	aa = add .
+	# rm = rm
+	q = reset
+	dc = diff --cached
+	# ---
+	cim = commit --message
+	cims = "!sh -c 'git commit --message \"$0 [ci skip]\" \"$@\"'"
+	ciao = commit --amend --no-edit
+	# ---
+	co = checkout
+	coa = checkout .
+	cop = checkout --patch
+	# clean
+	# ---
+	l = log --numstat --graph --decorate
+	ll = log --oneline --graph --decorate
+	lp = log --patch --graph --decorate
+	# ---
+	# blame
+	# ---
+	qhp = reset HEAD^
+	# === Interactive commands
+	ci = commit -v
+	cia = commit --amend -v
+	ap = add --patch
+	# === Branching and merging
+	b = branch --sort=committerdate
+	bv = branch -v --sort=committerdate
+	bvv = branch -vv --sort=committerdate
+	# ---
+	cob = checkout -b
+	# ---
+	# q --hard
+	# ---
+	la = log --all --numstat --graph --decorate
+	# ---
+	m = merge
+	mo = merge --no-edit
+	ms = merge --squash --ff
+	mso = "!sh -c 'git merge --squash --ff \"$0\" \"$@\" && git commit --no-edit'"
+	lf = log --numstat --first-parent --graph --decorate
+	lfp = log --patch -m --first-parent --graph --decorate
+	bm = branch --sort=committerdate --merged
+	bn = branch --sort=committerdate --no-merged
+	# b -d
+	# b -D
+	# ---
+	fft = "!sh -c 'git bvv | $(which gsed || which sed)  -r -n \"/^ +([^ ]+) +[^ ]+ [[]([^:]+): behind.*$/ {s//git push . \\2:\\1/ p}\" | sh -x' -"
+	# === Conflict resolution
+	ma = merge --abort
+	# ---
+	conflicts = diff --name-only --diff-filter=U
+	cio = commit --no-edit
+	# === Rebasing
+	r = rebase
+	ri = rebase --interactive --autosquash
+	ra = rebase --abort
+	rc = rebase --continue
+	rs = rebase --skip
+	rp = rebase --preserve-merges
+	cif = !sh -c 'git commit --fixup=$1' -
+	# ===
+	ac = commit --all --verbose
+	acm = commit --all --message
+	cir = !sh -c 'git commit --reuse-message=${1:-HEAD}' -
+	dw = diff --word-diff
+	dcw = diff --cached --word-diff
+	dm = !sh -c 'diffuse -m "$@" &' -
+	dmh = !sh -c 'diffuse -c HEAD &' -
+	du = !git diff $(git rev-parse --abbrev-ref --symbolic-full-name @{u}) "$@"
+	f = fetch --prune
+	fa = fetch --all --prune -j 32
+	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
+	mf = merge --ff
+	mu = merge-update
+	ph = push
+	phf = push --force-with-lease
+	phu = push --set-upstream
+	phuc = push --set-upstream cynkra HEAD
+	phuk = push --set-upstream krlmlr HEAD
+	phuo = push --set-upstream origin HEAD
+	pl = pull
+	plf = pull --ff-only
+	plr = pull --rebase
+	pr = !sh -c 'hub pull-request "$@"'
+	prm = !sh -c 'hub pull-request -b main "$@"'
+	qh = reset HEAD
+	rma = rebase master
+	rmi = rebase master --interactive --autosquash
+	sp = status --porcelain
+	# https://stackoverflow.com/a/5201642/946850
+	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
+	# hub
+	# ---
+	# stash
+	sts = stash save
+	stp = stash pop
+	std = stash drop
+	stl = stash list
