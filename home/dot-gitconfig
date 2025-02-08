@@ -135,7 +135,7 @@
 	textconv = pdfcat
 	binary = true
 [difftool "diffpdf"]
-	cmd = diffpdf \"$LOCAL\" \"$REMOTE\"
+	cmd = "diffpdf \"$LOCAL\" \"$REMOTE\""
 [core]
 	excludesfile = ~/.gitignore
 	attributesfile = /home/kirill/.gitattributes
