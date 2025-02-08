@@ -142,9 +142,7 @@
 	pager = less -FRX
 [include]
 	path = .gitconfig.user
-[include]
 	path = .gitconfig.gitpod
-[include]
 	path = .gitconfig.shgit
 	path = .gitconfig.gitpod
 	path = .gitconfig.delta
