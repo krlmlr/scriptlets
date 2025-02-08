@@ -3,6 +3,9 @@
 set -e
 set -x
 
+# positron .
+# exit 0
+
 export QT_DEVICE_PIXEL_RATIO=
 
 if [ -n "$1" ]; then
