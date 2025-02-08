@@ -66,6 +66,8 @@
 	rc = rebase --continue
 	rs = rebase --skip
 	rp = rebase --preserve-merges
+	rma = rebase main
+	rmi = rebase main --interactive --autosquash
 	cif = !sh -c 'git commit --fixup=$1' -
 	# ===
 	ac = commit --all --verbose
@@ -75,7 +77,6 @@
 	dcw = diff --cached --word-diff
 	dm = !sh -c 'diffuse -m "$@" &' -
 	dmh = !sh -c 'diffuse -c HEAD &' -
-	du = !git diff $(git rev-parse --abbrev-ref --symbolic-full-name @{u}) "$@"
 	f = fetch --prune
 	fa = fetch --all --prune -j 32
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
@@ -90,15 +91,14 @@
 	pl = pull
 	plf = pull --ff-only
 	plr = pull --rebase
-	pr = !sh -c 'hub pull-request "$@"'
-	prm = !sh -c 'hub pull-request -b main "$@"'
+	du = !git diff $(git rev-parse --abbrev-ref --symbolic-full-name @{u}) "$@"
 	qh = reset HEAD
-	rma = rebase master
-	rmi = rebase master --interactive --autosquash
 	sp = status --porcelain
 	# https://stackoverflow.com/a/5201642/946850
-	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
+	sq = !sh -c 'git reset --soft ${1:-main} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
 	# hub
+	pr = !sh -c 'hub pull-request "$@"'
+	prm = !sh -c 'hub pull-request -b main "$@"'
 	# ---
 	# stash
 	sts = stash save
