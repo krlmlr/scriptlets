@@ -126,6 +126,14 @@
 	cmd = "~/bin/imgdiff-bg \"$LOCAL\" \"$REMOTE\""
 [difftool "diffpdf"]
 	cmd = "diffpdf \"$LOCAL\" \"$REMOTE\""
+[merge "daff-csv"]
+	name = daff tabular csv merge
+	driver = daff merge --output %A %O %A %B
+[merge "daff-.csv"]
+	name = daff tabular .csv merge
+	driver = daff merge --output %A %O %A %B
+[merge "ours"]
+	driver = /bin/true
 [pull]
 	ff = only
 [color]
@@ -134,8 +142,6 @@
 	diff = auto
 	interactive = auto
 	status = auto
-[merge "ours"]
-	driver = /bin/true
 [push]
 	default = upstream
 	followTags = true
@@ -158,15 +164,9 @@
 	abbreviateCommands = true
 	autoStash = true
 	backend = apply
-[merge "daff-csv"]
-	name = daff tabular csv merge
-	driver = daff merge --output %A %O %A %B
 [init]
 	defaultBranch = main
 [checkout]
 	defaultRemote = origin
-[merge "daff-.csv"]
-	name = daff tabular .csv merge
-	driver = daff merge --output %A %O %A %B
 [interactive]
 	diffFilter = delta --color-only --max-line-length 2048
