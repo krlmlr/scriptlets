@@ -1,5 +1,5 @@
 [alias]
-	echo = !bash -c 'echo \"${@: 0}\"'
+	echo = "!bash -c 'echo \"${@: 0}\"'"
 	# === Basic commands
 	s = status
 	d = diff
@@ -12,7 +12,7 @@
 	dc = diff --cached
 	# ---
 	cim = commit --message
-	cims = !sh -c 'git commit --message \"$0 [ci skip]\" \"$@\"'
+	cims = "!sh -c 'git commit --message \"$0 [ci skip]\" \"$@\"'"
 	ciao = commit --amend --no-edit
 	# ---
 	co = checkout
@@ -51,7 +51,7 @@
 	# b -d
 	# b -D
 	# ---
-	fft = !sh -c 'git bvv | $(which gsed || which sed)  -r -n \"/^ +([^ ]+) +[^ ]+ [[]([^:]+): behind.*$/ {s//git push . \\2:\\1/ p}\" | sh -x' -
+	fft = "!sh -c 'git bvv | $(which gsed || which sed)  -r -n \"/^ +([^ ]+) +[^ ]+ [[]([^:]+): behind.*$/ {s//git push . \\2:\\1/ p}\" | sh -x' -"
 	# === Conflict resolution
 	ma = merge --abort
 	# ---
@@ -73,7 +73,7 @@
 	dcw = diff --cached --word-diff
 	dm = !sh -c 'diffuse -m "$@" &' -
 	dmh = !sh -c 'diffuse -c HEAD &' -
-	du = !sh -c 'git diff $(git rev-parse --abbrev-ref --symbolic-full-name @{u}) "$@"'
+	du = !git diff $(git rev-parse --abbrev-ref --symbolic-full-name @{u}) "$@"
 	f = fetch --prune
 	fa = fetch --all --prune -j 32
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
@@ -95,7 +95,7 @@
 	rmi = rebase master --interactive --autosquash
 	sp = status --porcelain
 	# https://stackoverflow.com/a/5201642/946850
-	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m"$(git log --format=%B --reverse HEAD..HEAD@{1})"'
+	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
 	# hub
 	sts = stash save
 	stp = stash pop
