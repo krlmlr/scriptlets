@@ -44,6 +44,8 @@
 	# ---
 	m = merge
 	mo = merge --no-edit
+	ms = merge --squash --ff
+	mso = "!sh -c 'git merge --squash --ff \"$0\" \"$@\" && git commit --no-edit'"
 	lf = log --numstat --first-parent --graph --decorate
 	lfp = log --patch -m --first-parent --graph --decorate
 	bm = branch --sort=committerdate --merged
@@ -97,6 +99,8 @@
 	# https://stackoverflow.com/a/5201642/946850
 	sq = !sh -c 'git reset --soft ${1:-master} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
 	# hub
+	# ---
+	# stash
 	sts = stash save
 	stp = stash pop
 	std = stash drop
