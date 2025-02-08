@@ -140,6 +140,7 @@
 	excludesfile = ~/.gitignore
 	attributesfile = /home/kirill/.gitattributes
 	pager = less -FRX
+	bare = false
 [include]
 	path = .gitconfig.user
 	path = .gitconfig.gitpod
