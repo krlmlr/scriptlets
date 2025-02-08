@@ -113,6 +113,19 @@
 [diff]
 	tool = imgdiff
 	colorMoved = default
+[diff "pdf"]
+	textconv = pdfcat
+	binary = true
+[diff "daff-csv"]
+	command = daff diff --git
+[diff "daff-.csv"]
+	command = daff diff --git
+[difftool]
+	prompt = false
+[difftool "imgdiff"]
+	cmd = "~/bin/imgdiff-bg \"$LOCAL\" \"$REMOTE\""
+[difftool "diffpdf"]
+	cmd = "diffpdf \"$LOCAL\" \"$REMOTE\""
 [pull]
 	ff = only
 [color]
@@ -128,15 +141,6 @@
 	followTags = true
 [credential]
 	helper = cache --timeout=86400
-[difftool]
-	prompt = false
-[difftool "imgdiff"]
-	cmd = ~/bin/imgdiff-bg \"$LOCAL\" \"$REMOTE\"
-[diff "pdf"]
-	textconv = pdfcat
-	binary = true
-[difftool "diffpdf"]
-	cmd = "diffpdf \"$LOCAL\" \"$REMOTE\""
 [core]
 	excludesfile = ~/.gitignore
 	attributesfile = /home/kirill/.gitattributes
@@ -154,8 +158,6 @@
 	abbreviateCommands = true
 	autoStash = true
 	backend = apply
-[diff "daff-csv"]
-	command = daff diff --git
 [merge "daff-csv"]
 	name = daff tabular csv merge
 	driver = daff merge --output %A %O %A %B
@@ -163,8 +165,6 @@
 	defaultBranch = main
 [checkout]
 	defaultRemote = origin
-[diff "daff-.csv"]
-	command = daff diff --git
 [merge "daff-.csv"]
 	name = daff tabular .csv merge
 	driver = daff merge --output %A %O %A %B
