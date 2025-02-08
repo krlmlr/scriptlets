@@ -110,6 +110,9 @@
 [merge]
 	conflictstyle = diff3
 	ff = false
+[diff]
+	tool = imgdiff
+	colorMoved = default
 [pull]
 	ff = only
 [color]
@@ -125,8 +128,6 @@
 	followTags = true
 [credential]
 	helper = cache --timeout=86400
-[diff]
-	tool = imgdiff
 [difftool]
 	prompt = false
 [difftool "imgdiff"]
@@ -169,5 +170,3 @@
 	driver = daff merge --output %A %O %A %B
 [interactive]
 	diffFilter = delta --color-only --max-line-length 2048
-[diff]
-	colorMoved = default
