@@ -135,9 +135,9 @@ options(buildtools.check = function(...) TRUE)
 # options(error = expression({traceback(1); if (!interactive()) q(status = 1)}))
 if (interactive()) {
   options(
-    error = rlang::entrace,
     rlang_backtrace_on_error = "branch"
   )
+  rlang::global_entrace()
 }
 
 # requireNamespace("tracer", quietly = TRUE)
