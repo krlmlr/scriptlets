@@ -7,9 +7,9 @@ fi
 
 SCRIPT="$@"
 if "$@"; then
-  notify-send -i emblem-default "$0: $SCRIPT"
+  terminal-notifier -title "✅" -message "$SCRIPT"
 else
   exitcode=$?
-  notify-send -u critical "$0: $SCRIPT"
+  terminal-notifier -title "🛑" -message "$SCRIPT"
   exit $exitcode
 fi
