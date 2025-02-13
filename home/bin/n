@@ -7,9 +7,9 @@ fi
 
 SCRIPT="$@"
 if "$@"; then
-  terminal-notifier -title "✅" -message "$SCRIPT"
+  terminal-notifier -title "✅ ${PWD}" -message "$SCRIPT"
 else
   exitcode=$?
-  terminal-notifier -title "🛑" -message "$SCRIPT"
+  terminal-notifier -title "🛑 ${PWD}" -message "$SCRIPT"
   exit $exitcode
 fi
