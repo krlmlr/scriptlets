@@ -23,7 +23,7 @@ InitCheckoutDir() {
   git add .gitignore
   git commit -m "ignore .gh-pages"
 
-  git clone --local . .gh-pages
+  git clone --local --no-hardlinks . .gh-pages
   cd .gh-pages
   git checkout gh-pages --
 }
