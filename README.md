@@ -135,6 +135,18 @@ Simplifies maintenance of "development" branches that contain several feature/bu
 
 Allows repeated Git-less synchronization with remote locations via `rsync`.
 
+## h and s
+
+Iterate over all worktrees under the current Git repository and execute a command in each of them.
+With `h`, the command is executed directly.
+The `s` command prepends `git`, it is a wrapper around `h git` .
+Supported switches:
+
+- `-i` or `--interactive`: run the command in interactive mode, turn off parallel propcessing
+- `-p`: Print the paths of all worktrees
+
+`gita` both does too much and not enough, let's see how far I can get with home-grown scripts.
+
 ## imgdiff and imgdiff-bg
 
 Compare two images side by side and show differences in a middle pane. Requires ImageMagick. The `-bg` script exits immediately. Usage: `git difftool -x imgdiff-bg -y <image files>`. ([Source](http://www.akikoskinen.info/image-diffs-with-git))

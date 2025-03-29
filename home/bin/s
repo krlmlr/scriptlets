@@ -1,0 +1,37 @@
+#!/bin/bash
+
+forward_flags=()
+
+while [[ $# -gt 0 ]]; do
+  arg="$1"
+  case "$arg" in
+    --?*)
+      forward_flags+=("$arg")
+      shift
+      ;;
+    -[!-]*)
+      # Handle combined short flags like -ni or -in
+      combined="${arg:1}"
+      for (( i=0; i<${#combined}; i++ )); do
+        flag="${combined:$i:1}"
+        forward_flags+=("-$flag")
+      done
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      echo "$0: Unknown option: $1"
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+# Forward just the interactive/dry-run flags
+h "${forward_flags[@]}" -- \
+  git -c color.ui=always -c color.diff=always -c color.show-branch=always "$@"
