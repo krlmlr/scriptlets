@@ -5,14 +5,14 @@ set -euo pipefail
 # Default values
 source_dir="home"
 install_dir="$HOME"
-ln_args=()
 quiet=false
+force=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --force)
-            ln_args+=("--force")
+            force=true
             ;;
         --quiet)
             quiet=true
@@ -50,6 +50,7 @@ fi
 install_files=$(cd "${source_dir}" && find ./* -type f | sed -r 's#^[.]/##')
 
 mkdir_args=()
+
 ln_args_local=("${ln_args[@]}" -s)
 diff_args=()
 
@@ -57,6 +58,10 @@ if [ "$quiet" = false ]; then
   mkdir_args+=(-v)
   ln_args_local+=(-v)
   diff_args+=(--report-identical-files)
+fi
+
+if [ "$force" = true ]; then
+    ln_args+=("--force")
 fi
 
 echo "${install_files}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${install_dir}"'/#' | xargs mkdir "${mkdir_args[@]}" -p
