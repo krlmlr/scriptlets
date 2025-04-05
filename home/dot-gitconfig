@@ -42,7 +42,6 @@
 	helper = cache --timeout=86400
 [core]
 	excludesfile = ~/.gitignore
-	attributesfile = /home/kirill/.gitattributes
 	pager = less -FRX
 	bare = false
 [include]
