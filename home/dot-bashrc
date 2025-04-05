@@ -113,8 +113,6 @@ if ! shopt -oq posix; then
 fi
 
 # added by travis gem
-[ -f /home/kirill/.travis/travis.sh ] && source /home/kirill/.travis/travis.sh
-
 if [ -f ~/.env ]; then
     . ~/.env
 fi

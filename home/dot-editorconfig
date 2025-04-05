@@ -10,6 +10,9 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 tab_width = 2
 
+[*.py]
+tab_width = 4
+
 # DESCRIPTION is special, don't remove trailing spaces after :
 [DESCRIPTION]
 trim_trailing_whitespace = false
