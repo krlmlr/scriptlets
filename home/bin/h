@@ -120,7 +120,11 @@ process_git_dirs() {
 # or run in parallel.
 process_cmd() {
   if $dry_run; then
-    cat | less -FRX
+    if $paged; then
+      less -FRX
+    else
+      cat
+    fi
   elif $interactive; then
     local cmds
     cmds=$(mktemp -u "${TMPDIR:-/tmp}/h-cmds-XXXXXX")
