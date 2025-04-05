@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# A wrapper script is better than an alias
+# because it allows use in scripts and other programs.
+kubectl "$@"
