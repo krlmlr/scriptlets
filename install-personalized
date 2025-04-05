@@ -1,0 +1,69 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Default values
+quiet=false
+force=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --force|-f)
+            force=true
+            ;;
+        --quiet|-q)
+            quiet=true
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# Source for copying
+source_dir="${PWD}"
+
+# From now on, all paths are relative to the installation directory
+mkdir -p "${HOME}/scriptlets"
+cd "${HOME}/scriptlets"
+
+# Setup command arguments based on options
+mkdir_args=(-p)
+ln_args=(-s)
+
+if [ "$force" = true ]; then
+    ln_force=true
+else
+    ln_force=false
+fi
+
+if [ "$quiet" = false ]; then
+    mkdir_args+=(-v)
+    ln_args+=(-v)
+fi
+
+# Create required directories
+
+# Create directories
+mkdir "${mkdir_args[@]}" \
+  "." \
+  #
+
+
+# Remove existing files if force option is enabled
+if [ "$ln_force" = true ]; then
+  rm -f \
+    "Rprofile" \
+    "gitconfig" \
+    "ssh-config" \
+  #
+fi
+
+# Create symlinks for all files, accept errors from here onwards
+set +e
+ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/Rprofile" "Rprofile"
+ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/gitconfig" "gitconfig"
+ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/ssh-config" "ssh-config"

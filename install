@@ -3,8 +3,6 @@
 set -euo pipefail
 
 # Default values
-source_dir="home"
-install_dir="$HOME"
 quiet=false
 force=false
 
@@ -17,62 +15,213 @@ while [[ $# -gt 0 ]]; do
         --quiet|-q)
             quiet=true
             ;;
-        -*)
+        *)
             echo "Unknown option: $1" >&2
             exit 1
-            ;;
-        *)
-            # Break out of the loop when we hit positional args
-            break
             ;;
     esac
     shift
 done
 
-# Handle positional arguments
-if [[ $# -gt 0 ]]; then
-    source_dir="$1"
-    shift
-    if [[ $# -gt 0 ]]; then
-        install_dir="$1"
-        shift
-        # Check if there are more arguments (which would be too many)
-        if [[ $# -gt 0 ]]; then
-            echo "Error: Too many positional arguments. Expected at most 2: source_dir and install_dir." >&2
-            exit 1
-        fi
-    else
-        echo "Error: If source_dir is provided, install_dir must also be provided." >&2
-        exit 1
-    fi
+# Source for copying
+source_dir="${PWD}"
+
+# From now on, all paths are relative to the installation directory
+cd "${HOME}"
+
+# Setup command arguments based on options
+mkdir_args=(-p)
+ln_args=(-s)
+
+if [ "$force" = true ]; then
+    ln_force=true
+else
+    ln_force=false
 fi
-
-install_files=$(cd "${source_dir}" && find ./* -type f | sed -r 's#^[.]/##')
-
-mkdir_args=""
-
-ln_args_local=(-s)
 
 if [ "$quiet" = false ]; then
-  mkdir_args="-v"
-  ln_args_local+=(-v)
+    mkdir_args+=(-v)
+    ln_args+=(-v)
 fi
 
-echo "${install_files}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${install_dir}"'/#' | xargs mkdir "${mkdir_args}" -p
+# Create required directories
 
-for f in ${install_files}; do
-  target_file=$(echo "${install_dir}/$f" | sed 's#dot-#.#g')
+# Create directories
+mkdir "${mkdir_args[@]}" \
+  "." \
+  "bin" \
+  ".config/diffuse" \
+  ".ssh" \
+  "git/R" \
+  "log" \
+  #
 
-  if ! [[ "${target_file}" =~ [.]dummy$ ]]; then
-    source_file="${PWD}/${source_dir}/$f"
 
-    if [ "$force" = true ]; then
-      # Always remove the target and recreate symlink if force is enabled
-      rm -f "${target_file}"
-      ln "${ln_args_local[@]}" "${source_file}" "${target_file}"
-    elif ! [ -h "${target_file}" ] || [ "$(realpath "${target_file}")" != "${source_file}" ]; then
-      # Create symlink, show error if this fails
-      ln "${ln_args_local[@]}" "${source_file}" "${target_file}" || true
-    fi
-  fi
-done
+# Remove existing files if force option is enabled
+if [ "$ln_force" = true ]; then
+  rm -f \
+    "bin/azure-resource-group-get-default" \
+    "bin/azure-vm-deallocate" \
+    "bin/azure-vm-set-size" \
+    "bin/azure-vm-start" \
+    "bin/bash-template" \
+    "bin/bkg" \
+    "bin/cgrep" \
+    "bin/copy-real-path" \
+    "bin/disp" \
+    "bin/each" \
+    "bin/eachfile" \
+    "bin/encfs-local" \
+    "bin/every" \
+    "bin/everyfile" \
+    "bin/extmon-start" \
+    "bin/extmon-stop" \
+    "bin/fsed" \
+    "bin/g" \
+    "bin/gh-mirror" \
+    "bin/ghpsd" \
+    "bin/git-backup" \
+    "bin/git-backup-all" \
+    "bin/git-bubble" \
+    "bin/git-config-parent" \
+    "bin/git-join-repos" \
+    "bin/git-merge-into" \
+    "bin/git-merge-update" \
+    "bin/git-mmv" \
+    "bin/git-rsync" \
+    "bin/h" \
+    "bin/hi" \
+    "bin/hp" \
+    "bin/i4" \
+    "bin/i4c" \
+    "bin/imgdiff" \
+    "bin/imgdiff-bg" \
+    "bin/inside" \
+    "bin/is-unmetered" \
+    "bin/k" \
+    "bin/machine-load" \
+    "bin/mail-after" \
+    "bin/n" \
+    "bin/ogv-to-gif" \
+    "bin/pdfcat" \
+    "bin/pmake" \
+    "bin/reprex" \
+    "bin/retry" \
+    "bin/rh" \
+    "bin/rpt" \
+    "bin/s" \
+    "bin/sh-template" \
+    "bin/si" \
+    "bin/slecho" \
+    "bin/soR" \
+    "bin/soffice-macos" \
+    "bin/sp" \
+    "bin/tbca" \
+    "bin/texstudio-here" \
+    "bin/undock" \
+    "bin/update-scriptlets" \
+    "bin/xpra-attach-ssh" \
+    ".Rprofile" \
+    ".autoscreen" \
+    ".bash_aliases" \
+    ".bash_profile" \
+    ".bashrc" \
+    ".config/diffuse/diffuserc" \
+    ".editorconfig" \
+    ".finicky.js" \
+    ".gitaliases" \
+    ".gitconfig" \
+    ".gitignore" \
+    ".screenrc" \
+    ".screenrc-xpra" \
+    ".ssh/config" \
+    ".tigrc" \
+    ".toprc" \
+    ".vimrc" \
+    "git/R/CMakeLists.txt" \
+    "git/R/clion-build.sh" \
+  #
+fi
+
+# Create symlinks for all files, accept errors from here onwards
+set +e
+ln "${ln_args[@]}" "${source_dir}/home/bin/azure-resource-group-get-default" "bin/azure-resource-group-get-default"
+ln "${ln_args[@]}" "${source_dir}/home/bin/azure-vm-deallocate" "bin/azure-vm-deallocate"
+ln "${ln_args[@]}" "${source_dir}/home/bin/azure-vm-set-size" "bin/azure-vm-set-size"
+ln "${ln_args[@]}" "${source_dir}/home/bin/azure-vm-start" "bin/azure-vm-start"
+ln "${ln_args[@]}" "${source_dir}/home/bin/bash-template" "bin/bash-template"
+ln "${ln_args[@]}" "${source_dir}/home/bin/bkg" "bin/bkg"
+ln "${ln_args[@]}" "${source_dir}/home/bin/cgrep" "bin/cgrep"
+ln "${ln_args[@]}" "${source_dir}/home/bin/copy-real-path" "bin/copy-real-path"
+ln "${ln_args[@]}" "${source_dir}/home/bin/disp" "bin/disp"
+ln "${ln_args[@]}" "${source_dir}/home/bin/each" "bin/each"
+ln "${ln_args[@]}" "${source_dir}/home/bin/eachfile" "bin/eachfile"
+ln "${ln_args[@]}" "${source_dir}/home/bin/encfs-local" "bin/encfs-local"
+ln "${ln_args[@]}" "${source_dir}/home/bin/every" "bin/every"
+ln "${ln_args[@]}" "${source_dir}/home/bin/everyfile" "bin/everyfile"
+ln "${ln_args[@]}" "${source_dir}/home/bin/extmon-start" "bin/extmon-start"
+ln "${ln_args[@]}" "${source_dir}/home/bin/extmon-stop" "bin/extmon-stop"
+ln "${ln_args[@]}" "${source_dir}/home/bin/fsed" "bin/fsed"
+ln "${ln_args[@]}" "${source_dir}/home/bin/g" "bin/g"
+ln "${ln_args[@]}" "${source_dir}/home/bin/gh-mirror" "bin/gh-mirror"
+ln "${ln_args[@]}" "${source_dir}/home/bin/ghpsd" "bin/ghpsd"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-backup" "bin/git-backup"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-backup-all" "bin/git-backup-all"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-bubble" "bin/git-bubble"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-config-parent" "bin/git-config-parent"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-join-repos" "bin/git-join-repos"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-merge-into" "bin/git-merge-into"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-merge-update" "bin/git-merge-update"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-mmv" "bin/git-mmv"
+ln "${ln_args[@]}" "${source_dir}/home/bin/git-rsync" "bin/git-rsync"
+ln "${ln_args[@]}" "${source_dir}/home/bin/h" "bin/h"
+ln "${ln_args[@]}" "${source_dir}/home/bin/hi" "bin/hi"
+ln "${ln_args[@]}" "${source_dir}/home/bin/hp" "bin/hp"
+ln "${ln_args[@]}" "${source_dir}/home/bin/i4" "bin/i4"
+ln "${ln_args[@]}" "${source_dir}/home/bin/i4c" "bin/i4c"
+ln "${ln_args[@]}" "${source_dir}/home/bin/imgdiff" "bin/imgdiff"
+ln "${ln_args[@]}" "${source_dir}/home/bin/imgdiff-bg" "bin/imgdiff-bg"
+ln "${ln_args[@]}" "${source_dir}/home/bin/inside" "bin/inside"
+ln "${ln_args[@]}" "${source_dir}/home/bin/is-unmetered" "bin/is-unmetered"
+ln "${ln_args[@]}" "${source_dir}/home/bin/k" "bin/k"
+ln "${ln_args[@]}" "${source_dir}/home/bin/machine-load" "bin/machine-load"
+ln "${ln_args[@]}" "${source_dir}/home/bin/mail-after" "bin/mail-after"
+ln "${ln_args[@]}" "${source_dir}/home/bin/n" "bin/n"
+ln "${ln_args[@]}" "${source_dir}/home/bin/ogv-to-gif" "bin/ogv-to-gif"
+ln "${ln_args[@]}" "${source_dir}/home/bin/pdfcat" "bin/pdfcat"
+ln "${ln_args[@]}" "${source_dir}/home/bin/pmake" "bin/pmake"
+ln "${ln_args[@]}" "${source_dir}/home/bin/reprex" "bin/reprex"
+ln "${ln_args[@]}" "${source_dir}/home/bin/retry" "bin/retry"
+ln "${ln_args[@]}" "${source_dir}/home/bin/rh" "bin/rh"
+ln "${ln_args[@]}" "${source_dir}/home/bin/rpt" "bin/rpt"
+ln "${ln_args[@]}" "${source_dir}/home/bin/s" "bin/s"
+ln "${ln_args[@]}" "${source_dir}/home/bin/sh-template" "bin/sh-template"
+ln "${ln_args[@]}" "${source_dir}/home/bin/si" "bin/si"
+ln "${ln_args[@]}" "${source_dir}/home/bin/slecho" "bin/slecho"
+ln "${ln_args[@]}" "${source_dir}/home/bin/soR" "bin/soR"
+ln "${ln_args[@]}" "${source_dir}/home/bin/soffice-macos" "bin/soffice-macos"
+ln "${ln_args[@]}" "${source_dir}/home/bin/sp" "bin/sp"
+ln "${ln_args[@]}" "${source_dir}/home/bin/tbca" "bin/tbca"
+ln "${ln_args[@]}" "${source_dir}/home/bin/texstudio-here" "bin/texstudio-here"
+ln "${ln_args[@]}" "${source_dir}/home/bin/undock" "bin/undock"
+ln "${ln_args[@]}" "${source_dir}/home/bin/update-scriptlets" "bin/update-scriptlets"
+ln "${ln_args[@]}" "${source_dir}/home/bin/xpra-attach-ssh" "bin/xpra-attach-ssh"
+ln "${ln_args[@]}" "${source_dir}/home/dot-Rprofile" ".Rprofile"
+ln "${ln_args[@]}" "${source_dir}/home/dot-autoscreen" ".autoscreen"
+ln "${ln_args[@]}" "${source_dir}/home/dot-bash_aliases" ".bash_aliases"
+ln "${ln_args[@]}" "${source_dir}/home/dot-bash_profile" ".bash_profile"
+ln "${ln_args[@]}" "${source_dir}/home/dot-bashrc" ".bashrc"
+ln "${ln_args[@]}" "${source_dir}/home/dot-config/diffuse/diffuserc" ".config/diffuse/diffuserc"
+ln "${ln_args[@]}" "${source_dir}/home/dot-editorconfig" ".editorconfig"
+ln "${ln_args[@]}" "${source_dir}/home/dot-finicky.js" ".finicky.js"
+ln "${ln_args[@]}" "${source_dir}/home/dot-gitaliases" ".gitaliases"
+ln "${ln_args[@]}" "${source_dir}/home/dot-gitconfig" ".gitconfig"
+ln "${ln_args[@]}" "${source_dir}/home/dot-gitignore" ".gitignore"
+ln "${ln_args[@]}" "${source_dir}/home/dot-screenrc" ".screenrc"
+ln "${ln_args[@]}" "${source_dir}/home/dot-screenrc-xpra" ".screenrc-xpra"
+ln "${ln_args[@]}" "${source_dir}/home/dot-ssh/config" ".ssh/config"
+ln "${ln_args[@]}" "${source_dir}/home/dot-tigrc" ".tigrc"
+ln "${ln_args[@]}" "${source_dir}/home/dot-toprc" ".toprc"
+ln "${ln_args[@]}" "${source_dir}/home/dot-vimrc" ".vimrc"
+ln "${ln_args[@]}" "${source_dir}/home/git/R/CMakeLists.txt" "git/R/CMakeLists.txt"
+ln "${ln_args[@]}" "${source_dir}/home/git/R/clion-build.sh" "git/R/clion-build.sh"

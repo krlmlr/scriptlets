@@ -1,18 +1,32 @@
-all: install
+all: run-install
 
-.PHONY: install quiet-install force-install
+# Directories exist: personalized/kirill, personalized/cynkra
+# all_personalized should then be install-kirill install-cynkra
+all_personalized=$(shell ls personalized | tr '\n' ' ')
 
-install:
+build: install install-personalized
+
+.PHONY: run-install run-quiet-install run-force-install
+
+install: make-install Makefile
+	./make-install home '$${HOME}' > $@
+	chmod +x $@
+
+install-personalized: make-install Makefile
+	./make-install personalized/kirill '$${HOME}/scriptlets' | sed 's#kirill#$${USER}#g' > $@
+	chmod +x $@
+
+run-install:
 	./install
 	./diff
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install personalized/$${USER} $${HOME}/scriptlets && ./diff personalized/$${USER} $${HOME}/scriptlets; fi
+	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized personalized/$${USER} $${HOME}/scriptlets && ./diff personalized/$${USER} $${HOME}/scriptlets; fi
 
-quiet-install:
+run-quiet-install:
 	./install --quiet
 	./diff --quiet
 	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install --quiet personalized/$${USER} $${HOME}/scriptlets; ./diff --quiet personalized/$${USER} $${HOME}/scriptlets; fi
 
-force-install:
+run-force-install:
 	./install --force
 	./diff
 	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install --force personalized/$${USER} $${HOME}/scriptlets; ./diff personalized/$${USER} $${HOME}/scriptlets; fi
@@ -23,5 +37,5 @@ test:
 test-local:
 	make
 	ls -lRa $${HOME}
-	make force-install
+	make run-force-install
 	ls -lRa $${HOME}

@@ -1,0 +1,134 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -*)
+            echo "Unknown option: $1" >&2
+            exit 1
+            ;;
+        *)
+            # Break out of the loop when we hit positional args
+            break
+            ;;
+    esac
+    shift
+done
+
+# Check if there are more arguments (which would be too many)
+if [[ $# -ne 2 ]]; then
+  echo "Error: expected exactly 2 arguments, source_dir and install_dir" >&2
+  exit 1
+fi
+
+# Handle positional arguments - only accept install_dir now
+source_dir="$1"
+shift
+install_dir="$1"
+shift
+
+# Find all files to install
+install_files=$(cd "${source_dir}" && find ./* -type f | sed -r 's#^[.]/##' | LC_ALL=C sort)
+
+# Print the generated script
+cat << 'SCRIPT_HEADER'
+#!/bin/bash
+
+set -euo pipefail
+
+# Default values
+quiet=false
+force=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --force|-f)
+            force=true
+            ;;
+        --quiet|-q)
+            quiet=true
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# Source for copying
+source_dir="${PWD}"
+
+# From now on, all paths are relative to the installation directory
+SCRIPT_HEADER
+
+if [[ "${install_dir}" != "\${HOME}" ]]; then
+    echo "mkdir -p \"${install_dir}\""
+fi
+
+echo "cd \"${install_dir}\""
+
+cat << 'HEADER'
+
+# Setup command arguments based on options
+mkdir_args=(-p)
+ln_args=(-s)
+
+if [ "$force" = true ]; then
+    ln_force=true
+else
+    ln_force=false
+fi
+
+if [ "$quiet" = false ]; then
+    mkdir_args+=(-v)
+    ln_args+=(-v)
+fi
+
+# Create required directories
+HEADER
+
+echo ""
+echo "# Create directories"
+echo "mkdir \"\${mkdir_args[@]}\" \\"
+
+# Generate mkdir commands for all needed directories
+for dir in $(echo "${install_files}" | xargs dirname | sort | uniq); do
+    echo "  \"${dir//dot-/.}\" \\"
+done
+echo "  #"
+echo
+
+echo ""
+echo "# Remove existing files if force option is enabled"
+echo "if [ \"\$ln_force\" = true ]; then"
+echo "  rm -f \\"
+
+# Generate remove commands for all files when --force is used
+for f in ${install_files}; do
+    target_file="${f}"
+    target_file=${target_file//dot-/\.}
+
+    if ! [[ "${target_file}" =~ [.]dummy$ ]]; then
+        echo "    \"${target_file}\" \\"
+    fi
+done
+echo "  #"
+echo "fi"
+
+echo ""
+echo "# Create symlinks for all files, accept errors from here onwards"
+echo "set +e"
+
+# Generate ln commands for all files
+for f in ${install_files}; do
+    target_file=${f//dot-/\.}
+    source_file="${source_dir}/${f}"
+
+    if ! [[ "${target_file}" =~ [.]dummy$ ]]; then
+        echo "ln \"\${ln_args[@]}\" \"\${source_dir}/${source_file}\" \"${target_file}\""
+    fi
+done
