@@ -1,12 +1,6 @@
 # From cynkra's Gitea
 Include ~/git/cynkra/gitea/ansible/ansible/ssh.cfg
 
-# Created by a local tool
-Include ssz.cfg
-
-# Created by a local tool
-Include efv.cfg
-
 # macOS only
 Host *
   UseKeychain yes

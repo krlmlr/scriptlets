@@ -12,6 +12,9 @@ Include ~/.orbstack/ssh/config
 # Created by scriptlets
 Include ~/scriptlets/ssh-config
 
+# Private config
+Include config-private
+
 # Settings good for all hosts
 Host *
   AddKeysToAgent yes
