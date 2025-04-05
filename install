@@ -47,7 +47,7 @@ if [[ $# -gt 0 ]]; then
     fi
 fi
 
-INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f)
+INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f | sed 's#^\./##')
 
 mkdir_args=()
 ln_args_local=("${LN_ARGS[@]}" -s)
