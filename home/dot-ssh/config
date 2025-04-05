@@ -1,3 +1,19 @@
-Host *
-    UseKeychain yes
+## START GITPOD INTEGRATION
+## This section is managed by Gitpod. Any manual changes will be lost.
+Include "code_gitpod.d/config"
+## END GITPOD INTEGRATION
 
+# Colima standard location
+Include ~/.colima/ssh_config
+
+# OrbStack standard location
+Include ~/.orbstack/ssh/config
+
+# Created by scriptlets
+Include ~/scriptlets/ssh-config
+
+# Settings good for all hosts
+Host *
+  AddKeysToAgent yes
+  ServerAliveInterval 3
+  ServerAliveCountMax 5

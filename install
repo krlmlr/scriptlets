@@ -4,6 +4,7 @@ set -e
 
 # Default values
 SOURCE_DIR="home"
+INSTALL_DIR="$HOME"
 LN_ARGS=()
 QUIET=false
 
@@ -21,15 +22,32 @@ while [[ $# -gt 0 ]]; do
             exit 1
             ;;
         *)
-            SOURCE_DIR="$1"
+            # Break out of the loop when we hit positional args
+            break
             ;;
     esac
     shift
 done
 
-INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f)
+# Handle positional arguments
+if [[ $# -gt 0 ]]; then
+    SOURCE_DIR="$1"
+    shift
+    if [[ $# -gt 0 ]]; then
+        INSTALL_DIR="$1"
+        shift
+        # Check if there are more arguments (which would be too many)
+        if [[ $# -gt 0 ]]; then
+            echo "Error: Too many positional arguments. Expected at most 2: SOURCE_DIR and INSTALL_DIR." >&2
+            exit 1
+        fi
+    else
+        echo "Error: If SOURCE_DIR is provided, INSTALL_DIR must also be provided." >&2
+        exit 1
+    fi
+fi
 
-INSTALL_DIR=~
+INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f)
 
 mkdir_args=()
 ln_args_local=("${LN_ARGS[@]}" -s)
