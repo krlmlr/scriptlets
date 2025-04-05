@@ -20,3 +20,5 @@ test:
 test-local:
 	make
 	ls -lRa $${HOME}
+	make force-install
+	ls -lRa $${HOME}

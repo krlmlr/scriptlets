@@ -60,10 +60,6 @@ if [ "$quiet" = false ]; then
   diff_args+=(--report-identical-files)
 fi
 
-if [ "$force" = true ]; then
-    ln_args+=("--force")
-fi
-
 echo "${install_files}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${install_dir}"'/#' | xargs mkdir "${mkdir_args[@]}" -p
 
 for f in ${install_files}; do
@@ -72,6 +68,9 @@ for f in ${install_files}; do
 
 	if ! [ -h "${target_file}" ] || [ "$(realpath "${target_file}")" != "${source_file}" ]; then
     if [[ ! "${target_file}" == "*/.dummy" ]]; then
+      if [ "$force" = true ]; then
+        rm -f "${target_file}"
+      fi
       if [ "$quiet" = true ]; then
         ln "${ln_args_local[@]}" "${source_file}" "${target_file}" 2>/dev/null || diff "${diff_args[@]}" -U 3 "${source_file}" "${target_file}" || true
       else
