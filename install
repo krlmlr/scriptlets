@@ -5,12 +5,16 @@ set -e
 # Default values
 SOURCE_DIR="home"
 LN_ARGS=()
+QUIET=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --force)
             LN_ARGS+=("--force")
+            ;;
+        --quiet)
+            QUIET=true
             ;;
         -*)
             echo "Unknown option: $1" >&2
@@ -27,14 +31,28 @@ INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f)
 
 INSTALL_DIR=~
 
+mkdir_args=()
+ln_args_local=("${LN_ARGS[@]}" -s)
+diff_args=()
+
+if [ "$QUIET" = false ]; then
+  mkdir_args+=(-v)
+  ln_args_local+=(-v)
+  diff_args+=(--report-identical-files)
+fi
+
 for f in ${INSTALL_FILES}; do
 	target_file=$(echo "${INSTALL_DIR}/$f" | sed 's#dot-#.#g')
 	source_file="${PWD}/${SOURCE_DIR}/$f"
 
 	if ! [ -h "${target_file}" ] || [ "$(readlink -- "${target_file}")" != "${source_file}" ]; then
-		if mkdir -v -p "$(dirname "${target_file}")"; then
+		if mkdir "${mkdir_args[@]}" -p "$(dirname "${target_file}")"; then
 			if [[ ! "${target_file}" == */.dummy ]]; then
-				ln "${LN_ARGS[@]}" -v -s "${source_file}" "${target_file}" || diff --report-identical-files "${source_file}" "${target_file}" || true
+				if [ "$QUIET" = true ]; then
+					ln "${ln_args_local[@]}" "${source_file}" "${target_file}" 2>/dev/null || diff "${diff_args[@]}" -U 3 "${source_file}" "${target_file}" || true
+				else
+					ln "${ln_args_local[@]}" "${source_file}" "${target_file}" || diff --report-identical-files "${source_file}" "${target_file}" || true
+				fi
 			fi
 		else
 			echo "Error: can't create $(dirname "${target_file}")"
