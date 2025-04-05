@@ -68,15 +68,18 @@ for f in ${install_files}; do
   if [[ ! "${target_file}" == "*/.dummy" ]]; then
     source_file="${PWD}/${source_dir}/$f"
 
-    if ! [ -h "${target_file}" ] || [ "$(realpath "${target_file}")" != "${source_file}" ]; then
-      if [ "$force" = true ]; then
-        rm -f "${target_file}"
+    if [ "$force" = true ]; then
+      # Always remove the target and recreate symlink if force is enabled
+      rm -f "${target_file}"
+      ln "${ln_args_local[@]}" "${source_file}" "${target_file}"
+    elif [ -h "${target_file}" ]; then
+      # If it's a symlink but points somewhere else, show the diff
+      if [ "$(realpath "${target_file}")" != "${source_file}" ]; then
+        diff "${diff_args[@]}" -U 3 "${source_file}" "${target_file}" || true
       fi
-      if [ "$quiet" = true ]; then
-        ln "${ln_args_local[@]}" "${source_file}" "${target_file}" 2>/dev/null || diff "${diff_args[@]}" -U 3 "${source_file}" "${target_file}" || true
-      else
-        ln "${ln_args_local[@]}" "${source_file}" "${target_file}" || diff --report-identical-files "${source_file}" "${target_file}" || true
-      fi
+    elif ! ln "${ln_args_local[@]}" "${source_file}" "${target_file}"; then
+      # If the link creation fails, also show the diff
+      diff "${diff_args[@]}" -U 3 "${source_file}" "${target_file}" || true
     fi
-	fi
+  fi
 done
