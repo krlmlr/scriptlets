@@ -1,5 +1,5 @@
+#! /bin/bash
 alias gf="git flow"
-alias g="git"
 
 # https://askubuntu.com/a/642778
 # https://github.com/jonas/tig/pull/1055/files
