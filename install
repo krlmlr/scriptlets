@@ -23,13 +23,13 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-INSTALL_FILES=$(cd ${SOURCE_DIR} && find ./* -type f)
+INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f)
 
 INSTALL_DIR=~
 
 for f in ${INSTALL_FILES}; do
 	target_file=$(echo "${INSTALL_DIR}/$f" | sed 's#dot-#.#g')
-	source_file=${PWD}/${SOURCE_DIR}/$f
+	source_file="${PWD}/${SOURCE_DIR}/$f"
 
 	if ! [ -h "${target_file}" ] || [ "$(readlink -- "${target_file}")" != "${source_file}" ]; then
 		if mkdir -v -p "$(dirname "${target_file}")"; then
