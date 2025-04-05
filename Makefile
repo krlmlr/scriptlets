@@ -13,3 +13,10 @@ quiet-install:
 force-install:
 	./install --force
 	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install --force personalized/$${USER} $${HOME}/scriptlets; fi
+
+test:
+	docker run --rm -v $(shell pwd):/scriptlets -w /scriptlets buildpack-deps:latest make test-local
+
+test-local:
+	make
+	ls -lRa $${HOME}
