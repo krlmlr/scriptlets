@@ -2,13 +2,30 @@
 
 set -e
 
-SOURCE_DIR=home
+# Default values
+SOURCE_DIR="home"
+LN_ARGS=()
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --force)
+            LN_ARGS+=("--force")
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            exit 1
+            ;;
+        *)
+            SOURCE_DIR="$1"
+            ;;
+    esac
+    shift
+done
 
 INSTALL_FILES=$(cd ${SOURCE_DIR} && find ./* -type f)
 
 INSTALL_DIR=~
-
-LN_ARGS=("$@")
 
 for f in ${INSTALL_FILES}; do
 	target_file=$(echo "${INSTALL_DIR}/$f" | sed 's#dot-#.#g')
