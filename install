@@ -3,19 +3,19 @@
 set -euo pipefail
 
 # Default values
-SOURCE_DIR="home"
-INSTALL_DIR="$HOME"
-LN_ARGS=()
-QUIET=false
+source_dir="home"
+install_dir="$HOME"
+ln_args=()
+quiet=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --force)
-            LN_ARGS+=("--force")
+            ln_args+=("--force")
             ;;
         --quiet)
-            QUIET=true
+            quiet=true
             ;;
         -*)
             echo "Unknown option: $1" >&2
@@ -31,43 +31,43 @@ done
 
 # Handle positional arguments
 if [[ $# -gt 0 ]]; then
-    SOURCE_DIR="$1"
+    source_dir="$1"
     shift
     if [[ $# -gt 0 ]]; then
-        INSTALL_DIR="$1"
+        install_dir="$1"
         shift
         # Check if there are more arguments (which would be too many)
         if [[ $# -gt 0 ]]; then
-            echo "Error: Too many positional arguments. Expected at most 2: SOURCE_DIR and INSTALL_DIR." >&2
+            echo "Error: Too many positional arguments. Expected at most 2: source_dir and install_dir." >&2
             exit 1
         fi
     else
-        echo "Error: If SOURCE_DIR is provided, INSTALL_DIR must also be provided." >&2
+        echo "Error: If source_dir is provided, install_dir must also be provided." >&2
         exit 1
     fi
 fi
 
-INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f | sed -r 's#^[.]/##')
+install_files=$(cd "${source_dir}" && find ./* -type f | sed -r 's#^[.]/##')
 
 mkdir_args=()
-ln_args_local=("${LN_ARGS[@]}" -s)
+ln_args_local=("${ln_args[@]}" -s)
 diff_args=()
 
-if [ "$QUIET" = false ]; then
+if [ "$quiet" = false ]; then
   mkdir_args+=(-v)
   ln_args_local+=(-v)
   diff_args+=(--report-identical-files)
 fi
 
-echo "${INSTALL_FILES}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${INSTALL_DIR}"'/#' | xargs mkdir "${mkdir_args[@]}" -p
+echo "${install_files}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${install_dir}"'/#' | xargs mkdir "${mkdir_args[@]}" -p
 
-for f in ${INSTALL_FILES}; do
-	target_file=$(echo "${INSTALL_DIR}/$f" | sed 's#dot-#.#g')
-	source_file="${PWD}/${SOURCE_DIR}/$f"
+for f in ${install_files}; do
+	target_file=$(echo "${install_dir}/$f" | sed 's#dot-#.#g')
+	source_file="${PWD}/${source_dir}/$f"
 
 	if ! [ -h "${target_file}" ] || [ "$(realpath "${target_file}")" != "${source_file}" ]; then
     if [[ ! "${target_file}" == "*/.dummy" ]]; then
-      if [ "$QUIET" = true ]; then
+      if [ "$quiet" = true ]; then
         ln "${ln_args_local[@]}" "${source_file}" "${target_file}" 2>/dev/null || diff "${diff_args[@]}" -U 3 "${source_file}" "${target_file}" || true
       else
         ln "${ln_args_local[@]}" "${source_file}" "${target_file}" || diff --report-identical-files "${source_file}" "${target_file}" || true
