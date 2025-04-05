@@ -65,9 +65,9 @@ options(
   usethis.install.args = "--install-tests",
   usethis.revdep.libpath = "~/R-revdep",
 
-  warnPartialMatchAttr = TRUE,
-  warnPartialMatchDollar = TRUE,
-  warnPartialMatchArgs = TRUE,
+  #warnPartialMatchAttr = TRUE,
+  #warnPartialMatchDollar = TRUE,
+  #warnPartialMatchArgs = TRUE,
   max.print = 100L,
   keep.source = TRUE,
   keep.source.pkgs = TRUE,
