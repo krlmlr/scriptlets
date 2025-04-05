@@ -30,6 +30,7 @@ while [[ $# -gt 0 ]]; do
       log_commands=true
       shift
       ;;
+    # Performance: https://github.com/sharkdp/fd/issues/1706
     --unsorted)
       unsorted=true
       shift
