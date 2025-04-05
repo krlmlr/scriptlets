@@ -63,11 +63,12 @@ fi
 echo "${install_files}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${install_dir}"'/#' | xargs mkdir "${mkdir_args[@]}" -p
 
 for f in ${install_files}; do
-	target_file=$(echo "${install_dir}/$f" | sed 's#dot-#.#g')
-	source_file="${PWD}/${source_dir}/$f"
+  target_file=$(echo "${install_dir}/$f" | sed 's#dot-#.#g')
 
-	if ! [ -h "${target_file}" ] || [ "$(realpath "${target_file}")" != "${source_file}" ]; then
-    if [[ ! "${target_file}" == "*/.dummy" ]]; then
+  if [[ ! "${target_file}" == "*/.dummy" ]]; then
+    source_file="${PWD}/${source_dir}/$f"
+
+    if ! [ -h "${target_file}" ] || [ "$(realpath "${target_file}")" != "${source_file}" ]; then
       if [ "$force" = true ]; then
         rm -f "${target_file}"
       fi
