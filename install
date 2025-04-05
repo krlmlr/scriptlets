@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
 # Default values
 SOURCE_DIR="home"
@@ -47,7 +47,7 @@ if [[ $# -gt 0 ]]; then
     fi
 fi
 
-INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f | sed 's#^\./##')
+INSTALL_FILES=$(cd "${SOURCE_DIR}" && find ./* -type f | sed -r 's#^[.]/##')
 
 mkdir_args=()
 ln_args_local=("${LN_ARGS[@]}" -s)
@@ -59,21 +59,19 @@ if [ "$QUIET" = false ]; then
   diff_args+=(--report-identical-files)
 fi
 
+echo "${INSTALL_FILES}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${INSTALL_DIR}"'/#' | xargs mkdir "${mkdir_args[@]}" -p
+
 for f in ${INSTALL_FILES}; do
 	target_file=$(echo "${INSTALL_DIR}/$f" | sed 's#dot-#.#g')
 	source_file="${PWD}/${SOURCE_DIR}/$f"
 
-	if ! [ -h "${target_file}" ] || [ "$(readlink -- "${target_file}")" != "${source_file}" ]; then
-		if mkdir "${mkdir_args[@]}" -p "$(dirname "${target_file}")"; then
-			if [[ ! "${target_file}" == */.dummy ]]; then
-				if [ "$QUIET" = true ]; then
-					ln "${ln_args_local[@]}" "${source_file}" "${target_file}" 2>/dev/null || diff "${diff_args[@]}" -U 3 "${source_file}" "${target_file}" || true
-				else
-					ln "${ln_args_local[@]}" "${source_file}" "${target_file}" || diff --report-identical-files "${source_file}" "${target_file}" || true
-				fi
-			fi
-		else
-			echo "Error: can't create $(dirname "${target_file}")"
-		fi
+	if ! [ -h "${target_file}" ] || [ "$(realpath "${target_file}")" != "${source_file}" ]; then
+    if [[ ! "${target_file}" == "*/.dummy" ]]; then
+      if [ "$QUIET" = true ]; then
+        ln "${ln_args_local[@]}" "${source_file}" "${target_file}" 2>/dev/null || diff "${diff_args[@]}" -U 3 "${source_file}" "${target_file}" || true
+      else
+        ln "${ln_args_local[@]}" "${source_file}" "${target_file}" || diff --report-identical-files "${source_file}" "${target_file}" || true
+      fi
+    fi
 	fi
 done
