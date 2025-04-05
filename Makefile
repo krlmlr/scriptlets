@@ -22,12 +22,10 @@ run-install:
 
 run-quiet-install:
 	./install --quiet
-	./diff --quiet
 	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized --quiet; fi
 
 run-force-install:
 	./install --force
-	./diff
 	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized --force; fi
 
 test:

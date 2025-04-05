@@ -66,22 +66,15 @@ if [ "$ln_force" = true ]; then
     "bin/azure-vm-deallocate" \
     "bin/azure-vm-set-size" \
     "bin/azure-vm-start" \
-    "bin/bash-template" \
     "bin/bkg" \
     "bin/cgrep" \
-    "bin/copy-real-path" \
-    "bin/disp" \
     "bin/each" \
     "bin/eachfile" \
-    "bin/encfs-local" \
     "bin/every" \
     "bin/everyfile" \
-    "bin/extmon-start" \
-    "bin/extmon-stop" \
     "bin/fsed" \
     "bin/g" \
     "bin/gh-mirror" \
-    "bin/ghpsd" \
     "bin/git-backup" \
     "bin/git-backup-all" \
     "bin/git-bubble" \
@@ -94,15 +87,11 @@ if [ "$ln_force" = true ]; then
     "bin/h" \
     "bin/hi" \
     "bin/hp" \
-    "bin/i4" \
-    "bin/i4c" \
     "bin/imgdiff" \
     "bin/imgdiff-bg" \
     "bin/inside" \
-    "bin/is-unmetered" \
     "bin/k" \
     "bin/machine-load" \
-    "bin/mail-after" \
     "bin/n" \
     "bin/ogv-to-gif" \
     "bin/pdfcat" \
@@ -112,17 +101,10 @@ if [ "$ln_force" = true ]; then
     "bin/rh" \
     "bin/rpt" \
     "bin/s" \
-    "bin/sh-template" \
     "bin/si" \
     "bin/slecho" \
-    "bin/soR" \
     "bin/soffice-macos" \
     "bin/sp" \
-    "bin/tbca" \
-    "bin/texstudio-here" \
-    "bin/undock" \
-    "bin/update-scriptlets" \
-    "bin/xpra-attach-ssh" \
     ".Rprofile" \
     ".autoscreen" \
     ".bash_aliases" \
@@ -151,22 +133,15 @@ if ! [ -h "bin/azure-resource-group-get-default" ]; then ln "${ln_args[@]}" "${s
 if ! [ -h "bin/azure-vm-deallocate" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/azure-vm-deallocate" "bin/azure-vm-deallocate"; fi
 if ! [ -h "bin/azure-vm-set-size" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/azure-vm-set-size" "bin/azure-vm-set-size"; fi
 if ! [ -h "bin/azure-vm-start" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/azure-vm-start" "bin/azure-vm-start"; fi
-if ! [ -h "bin/bash-template" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/bash-template" "bin/bash-template"; fi
 if ! [ -h "bin/bkg" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/bkg" "bin/bkg"; fi
 if ! [ -h "bin/cgrep" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/cgrep" "bin/cgrep"; fi
-if ! [ -h "bin/copy-real-path" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/copy-real-path" "bin/copy-real-path"; fi
-if ! [ -h "bin/disp" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/disp" "bin/disp"; fi
 if ! [ -h "bin/each" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/each" "bin/each"; fi
 if ! [ -h "bin/eachfile" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/eachfile" "bin/eachfile"; fi
-if ! [ -h "bin/encfs-local" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/encfs-local" "bin/encfs-local"; fi
 if ! [ -h "bin/every" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/every" "bin/every"; fi
 if ! [ -h "bin/everyfile" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/everyfile" "bin/everyfile"; fi
-if ! [ -h "bin/extmon-start" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/extmon-start" "bin/extmon-start"; fi
-if ! [ -h "bin/extmon-stop" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/extmon-stop" "bin/extmon-stop"; fi
 if ! [ -h "bin/fsed" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/fsed" "bin/fsed"; fi
 if ! [ -h "bin/g" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/g" "bin/g"; fi
 if ! [ -h "bin/gh-mirror" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/gh-mirror" "bin/gh-mirror"; fi
-if ! [ -h "bin/ghpsd" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/ghpsd" "bin/ghpsd"; fi
 if ! [ -h "bin/git-backup" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/git-backup" "bin/git-backup"; fi
 if ! [ -h "bin/git-backup-all" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/git-backup-all" "bin/git-backup-all"; fi
 if ! [ -h "bin/git-bubble" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/git-bubble" "bin/git-bubble"; fi
@@ -179,15 +154,11 @@ if ! [ -h "bin/git-rsync" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/git
 if ! [ -h "bin/h" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/h" "bin/h"; fi
 if ! [ -h "bin/hi" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/hi" "bin/hi"; fi
 if ! [ -h "bin/hp" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/hp" "bin/hp"; fi
-if ! [ -h "bin/i4" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/i4" "bin/i4"; fi
-if ! [ -h "bin/i4c" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/i4c" "bin/i4c"; fi
 if ! [ -h "bin/imgdiff" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/imgdiff" "bin/imgdiff"; fi
 if ! [ -h "bin/imgdiff-bg" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/imgdiff-bg" "bin/imgdiff-bg"; fi
 if ! [ -h "bin/inside" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/inside" "bin/inside"; fi
-if ! [ -h "bin/is-unmetered" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/is-unmetered" "bin/is-unmetered"; fi
 if ! [ -h "bin/k" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/k" "bin/k"; fi
 if ! [ -h "bin/machine-load" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/machine-load" "bin/machine-load"; fi
-if ! [ -h "bin/mail-after" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/mail-after" "bin/mail-after"; fi
 if ! [ -h "bin/n" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/n" "bin/n"; fi
 if ! [ -h "bin/ogv-to-gif" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/ogv-to-gif" "bin/ogv-to-gif"; fi
 if ! [ -h "bin/pdfcat" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/pdfcat" "bin/pdfcat"; fi
@@ -197,17 +168,10 @@ if ! [ -h "bin/retry" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/retry" 
 if ! [ -h "bin/rh" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/rh" "bin/rh"; fi
 if ! [ -h "bin/rpt" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/rpt" "bin/rpt"; fi
 if ! [ -h "bin/s" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/s" "bin/s"; fi
-if ! [ -h "bin/sh-template" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/sh-template" "bin/sh-template"; fi
 if ! [ -h "bin/si" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/si" "bin/si"; fi
 if ! [ -h "bin/slecho" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/slecho" "bin/slecho"; fi
-if ! [ -h "bin/soR" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/soR" "bin/soR"; fi
 if ! [ -h "bin/soffice-macos" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/soffice-macos" "bin/soffice-macos"; fi
 if ! [ -h "bin/sp" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/sp" "bin/sp"; fi
-if ! [ -h "bin/tbca" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/tbca" "bin/tbca"; fi
-if ! [ -h "bin/texstudio-here" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/texstudio-here" "bin/texstudio-here"; fi
-if ! [ -h "bin/undock" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/undock" "bin/undock"; fi
-if ! [ -h "bin/update-scriptlets" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/update-scriptlets" "bin/update-scriptlets"; fi
-if ! [ -h "bin/xpra-attach-ssh" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/xpra-attach-ssh" "bin/xpra-attach-ssh"; fi
 if ! [ -h ".Rprofile" ]; then ln "${ln_args[@]}" "${source_dir}/home/dot-Rprofile" ".Rprofile"; fi
 if ! [ -h ".autoscreen" ]; then ln "${ln_args[@]}" "${source_dir}/home/dot-autoscreen" ".autoscreen"; fi
 if ! [ -h ".bash_aliases" ]; then ln "${ln_args[@]}" "${source_dir}/home/dot-bash_aliases" ".bash_aliases"; fi
@@ -232,22 +196,15 @@ diff "${diff_args[@]}" "${source_dir}/home/bin/azure-resource-group-get-default"
 diff "${diff_args[@]}" "${source_dir}/home/bin/azure-vm-deallocate" "bin/azure-vm-deallocate"
 diff "${diff_args[@]}" "${source_dir}/home/bin/azure-vm-set-size" "bin/azure-vm-set-size"
 diff "${diff_args[@]}" "${source_dir}/home/bin/azure-vm-start" "bin/azure-vm-start"
-diff "${diff_args[@]}" "${source_dir}/home/bin/bash-template" "bin/bash-template"
 diff "${diff_args[@]}" "${source_dir}/home/bin/bkg" "bin/bkg"
 diff "${diff_args[@]}" "${source_dir}/home/bin/cgrep" "bin/cgrep"
-diff "${diff_args[@]}" "${source_dir}/home/bin/copy-real-path" "bin/copy-real-path"
-diff "${diff_args[@]}" "${source_dir}/home/bin/disp" "bin/disp"
 diff "${diff_args[@]}" "${source_dir}/home/bin/each" "bin/each"
 diff "${diff_args[@]}" "${source_dir}/home/bin/eachfile" "bin/eachfile"
-diff "${diff_args[@]}" "${source_dir}/home/bin/encfs-local" "bin/encfs-local"
 diff "${diff_args[@]}" "${source_dir}/home/bin/every" "bin/every"
 diff "${diff_args[@]}" "${source_dir}/home/bin/everyfile" "bin/everyfile"
-diff "${diff_args[@]}" "${source_dir}/home/bin/extmon-start" "bin/extmon-start"
-diff "${diff_args[@]}" "${source_dir}/home/bin/extmon-stop" "bin/extmon-stop"
 diff "${diff_args[@]}" "${source_dir}/home/bin/fsed" "bin/fsed"
 diff "${diff_args[@]}" "${source_dir}/home/bin/g" "bin/g"
 diff "${diff_args[@]}" "${source_dir}/home/bin/gh-mirror" "bin/gh-mirror"
-diff "${diff_args[@]}" "${source_dir}/home/bin/ghpsd" "bin/ghpsd"
 diff "${diff_args[@]}" "${source_dir}/home/bin/git-backup" "bin/git-backup"
 diff "${diff_args[@]}" "${source_dir}/home/bin/git-backup-all" "bin/git-backup-all"
 diff "${diff_args[@]}" "${source_dir}/home/bin/git-bubble" "bin/git-bubble"
@@ -260,15 +217,11 @@ diff "${diff_args[@]}" "${source_dir}/home/bin/git-rsync" "bin/git-rsync"
 diff "${diff_args[@]}" "${source_dir}/home/bin/h" "bin/h"
 diff "${diff_args[@]}" "${source_dir}/home/bin/hi" "bin/hi"
 diff "${diff_args[@]}" "${source_dir}/home/bin/hp" "bin/hp"
-diff "${diff_args[@]}" "${source_dir}/home/bin/i4" "bin/i4"
-diff "${diff_args[@]}" "${source_dir}/home/bin/i4c" "bin/i4c"
 diff "${diff_args[@]}" "${source_dir}/home/bin/imgdiff" "bin/imgdiff"
 diff "${diff_args[@]}" "${source_dir}/home/bin/imgdiff-bg" "bin/imgdiff-bg"
 diff "${diff_args[@]}" "${source_dir}/home/bin/inside" "bin/inside"
-diff "${diff_args[@]}" "${source_dir}/home/bin/is-unmetered" "bin/is-unmetered"
 diff "${diff_args[@]}" "${source_dir}/home/bin/k" "bin/k"
 diff "${diff_args[@]}" "${source_dir}/home/bin/machine-load" "bin/machine-load"
-diff "${diff_args[@]}" "${source_dir}/home/bin/mail-after" "bin/mail-after"
 diff "${diff_args[@]}" "${source_dir}/home/bin/n" "bin/n"
 diff "${diff_args[@]}" "${source_dir}/home/bin/ogv-to-gif" "bin/ogv-to-gif"
 diff "${diff_args[@]}" "${source_dir}/home/bin/pdfcat" "bin/pdfcat"
@@ -278,17 +231,10 @@ diff "${diff_args[@]}" "${source_dir}/home/bin/retry" "bin/retry"
 diff "${diff_args[@]}" "${source_dir}/home/bin/rh" "bin/rh"
 diff "${diff_args[@]}" "${source_dir}/home/bin/rpt" "bin/rpt"
 diff "${diff_args[@]}" "${source_dir}/home/bin/s" "bin/s"
-diff "${diff_args[@]}" "${source_dir}/home/bin/sh-template" "bin/sh-template"
 diff "${diff_args[@]}" "${source_dir}/home/bin/si" "bin/si"
 diff "${diff_args[@]}" "${source_dir}/home/bin/slecho" "bin/slecho"
-diff "${diff_args[@]}" "${source_dir}/home/bin/soR" "bin/soR"
 diff "${diff_args[@]}" "${source_dir}/home/bin/soffice-macos" "bin/soffice-macos"
 diff "${diff_args[@]}" "${source_dir}/home/bin/sp" "bin/sp"
-diff "${diff_args[@]}" "${source_dir}/home/bin/tbca" "bin/tbca"
-diff "${diff_args[@]}" "${source_dir}/home/bin/texstudio-here" "bin/texstudio-here"
-diff "${diff_args[@]}" "${source_dir}/home/bin/undock" "bin/undock"
-diff "${diff_args[@]}" "${source_dir}/home/bin/update-scriptlets" "bin/update-scriptlets"
-diff "${diff_args[@]}" "${source_dir}/home/bin/xpra-attach-ssh" "bin/xpra-attach-ssh"
 diff "${diff_args[@]}" "${source_dir}/home/dot-Rprofile" ".Rprofile"
 diff "${diff_args[@]}" "${source_dir}/home/dot-autoscreen" ".autoscreen"
 diff "${diff_args[@]}" "${source_dir}/home/dot-bash_aliases" ".bash_aliases"
