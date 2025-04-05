@@ -141,9 +141,9 @@ process_cmd() {
 # 3. Sort the paths uniquely using `gsort`.
 # 4. Pass the sorted paths to `process_git_dirs` to generate commands.
 # 5. Pass the generated commands to `process_cmd` for execution or display.
-# fd -t d -HILg .git |
-gfind . -mindepth 2 -follow -type d -name .git -prune 2>/dev/null |
-  gsed -r 's#^[.]/##;s#/[.]git$##' |
+# gfind . -mindepth 2 -follow -type d -name .git -prune 2>/dev/null |
+fd -t d -HILg .git |
+  gsed --unbuffered -r 's#^[.]/##;s#/[.]git/?$##' |
   gsort -u |
   process_git_dirs "$@" |
   process_cmd
