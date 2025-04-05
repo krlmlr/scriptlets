@@ -1,18 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
 DoRun() {
   TEMPFILE=$(mktemp)
-  if ! $SCRIPT > $TEMPFILE 2>&1; then
-    notify-send -u critical "bkg: Error executing $SCRIPT" "$(echo; cat $TEMPFILE)"
+  if ! $SCRIPT > "$TEMPFILE" 2>&1; then
+    terminal-notifier -title "🛑 ${PWD}" -message "$SCRIPT"
   fi
-  rm $TEMPFILE
+  rm "$TEMPFILE"
 }
 
-SCRIPT="$@"
-if [ "$SCRIPT" = "" ]; then
+SCRIPT=("$@")
+if [ "${SCRIPT[0]}" = "" ]; then
   echo "Usage: $0 <command> <parameters...>" >> /dev/stderr
   exit 1
 fi
 
 DoRun &
-
