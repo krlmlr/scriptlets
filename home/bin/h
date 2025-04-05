@@ -6,9 +6,10 @@ interactive=false
 dry_run=false
 paged=false
 log_commands=false
+unsorted=false
 
 # Parse arguments
-# This block processes command-line arguments, supporting long options (--interactive, --dry-run, --log-commands),
+# This block processes command-line arguments, supporting long options (--interactive, --dry-run, --log-commands, --unsorted),
 # combined short flags (e.g., -ni), and error handling for unknown options.
 while [[ $# -gt 0 ]]; do
   arg="$1"
@@ -29,6 +30,10 @@ while [[ $# -gt 0 ]]; do
       log_commands=true
       shift
       ;;
+    --unsorted)
+      unsorted=true
+      shift
+      ;;
     -[!-]*)
       # Handle combined short flags like -ni or -in
       combined="${arg:1}"
@@ -46,6 +51,9 @@ while [[ $# -gt 0 ]]; do
             ;;
           x)
             log_commands=true
+            ;;
+          u)
+            unsorted=true
             ;;
           *)
             echo "$0: Unknown short option: -$flag"
@@ -142,12 +150,11 @@ process_cmd() {
 # Main pipeline:
 # 1. Find all Git repositories under the current directory using `gfind`.
 # 2. Format the paths by removing "./" and ".git" suffix using `gsed`.
-# 3. Sort the paths uniquely using `gsort`.
+# 3. Sort the paths uniquely using `gsort` unless `--unsorted` is active.
 # 4. Pass the sorted paths to `process_git_dirs` to generate commands.
 # 5. Pass the generated commands to `process_cmd` for execution or display.
 # gfind . -mindepth 2 -follow -type d -name .git -prune 2>/dev/null |
 fd -t d -HILg .git |
   gsed --unbuffered -r 's#^[.]/##;s#/[.]git/?$##' |
-  gsort -u |
-  process_git_dirs "$@" |
+  { if ! $unsorted; then gsort -u | process_git_dirs "$@"; else process_git_dirs "$@"; fi; } |
   process_cmd
