@@ -7,6 +7,10 @@ module.exports = {
   },
   handlers: [
     {
+      match: "http://*.orb.local*",
+      browser: "Safari"
+    },
+    {
       match: "http://support.posit.co/*",
       browser: "Safari"
     },
