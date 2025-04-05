@@ -1,7 +1,0 @@
-[user]
-        email = krlmlr@mailbox.org 
-        name = Kirill Müller
-[includeIf "gitdir:R/**"]
-	path = R/.gitconfig
-[includeIf "gitdir:cynkra/**"]
-	path = cynkra/.gitconfig

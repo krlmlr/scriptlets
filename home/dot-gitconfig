@@ -51,6 +51,7 @@
 	path = .gitconfig.shgit
 	path = .gitconfig.gitpod
 	path = .gitconfig.delta
+	path = scriptlets/gitconfig
 [includeIf "gitdir:git/**"]
 	path = git/.gitconfig
 [rebase]
