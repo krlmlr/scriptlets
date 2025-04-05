@@ -5,9 +5,10 @@ set -euo pipefail
 interactive=false
 dry_run=false
 paged=false
+log_commands=false
 
 # Parse arguments
-# This block processes command-line arguments, supporting long options (--interactive, --dry-run),
+# This block processes command-line arguments, supporting long options (--interactive, --dry-run, --log-commands),
 # combined short flags (e.g., -ni), and error handling for unknown options.
 while [[ $# -gt 0 ]]; do
   arg="$1"
@@ -24,6 +25,10 @@ while [[ $# -gt 0 ]]; do
       paged=true
       shift
       ;;
+    --log-commands)
+      log_commands=true
+      shift
+      ;;
     -[!-]*)
       # Handle combined short flags like -ni or -in
       combined="${arg:1}"
@@ -38,6 +43,9 @@ while [[ $# -gt 0 ]]; do
             ;;
           p)
             paged=true
+            ;;
+          x)
+            log_commands=true
             ;;
           *)
             echo "$0: Unknown short option: -$flag"
@@ -60,6 +68,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# Enable command logging if --log-commands or -x is active
+if $log_commands; then
+  set -x
+fi
 
 # Function: process_git_dirs
 # Reads a list of Git repository directories from stdin and generates shell commands
