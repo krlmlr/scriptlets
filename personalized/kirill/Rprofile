@@ -1,0 +1,15 @@
+options(
+  gargle_oauth_email = "kirill@cynkra.com",
+
+  usethis.name = "Kirill Müller",
+  usethis.description = list(
+    "Authors@R" = 'person("Kirill", "M\\u00fcller", role = c("aut", "cre"), email = "kirill@cynkra.com", comment = c(ORCID = "0000-0002-1416-3412"))',
+    Encoding = "UTF-8",
+    Version = "0.0.0.9000",
+    Date = Sys.Date(),
+    BugReports = paste0("https://github.com/krlmlr/", basename(getwd()), "/issues"),
+    URL = paste0("https://github.com/krlmlr/", basename(getwd()), ", https://krlmlr.github.io/", basename(getwd())),
+    License = "MIT",
+    Roxygen = "list(markdown = TRUE)"
+  )
+)

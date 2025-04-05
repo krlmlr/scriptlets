@@ -1,3 +1,5 @@
 [user]
 	email = kirill@cynkra.com
 	name = Kirill Müller
+[alias]
+	phuk = push --set-upstream krlmlr HEAD

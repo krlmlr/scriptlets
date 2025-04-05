@@ -86,7 +86,6 @@
 	phf = push --force-with-lease
 	phu = push --set-upstream
 	phuc = push --set-upstream cynkra HEAD
-	phuk = push --set-upstream krlmlr HEAD
 	phuo = push --set-upstream origin HEAD
 	pl = pull
 	plf = pull --ff-only
