@@ -51,3 +51,11 @@ Executes an R script in a way that its contents and output are formatted as stri
 ## extmon-start and extmon-stop
 
 Start multi-monitor output [on an Optimus card, using bumblebee](http://askubuntu.com/a/303897/30266).  Needs tweaking to adapt to your screen setup.
+
+### disp
+
+Display management utility.
+
+### undock
+
+Script to handle transitioning a laptop from a docked state to mobile use.

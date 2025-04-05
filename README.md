@@ -31,9 +31,9 @@ With `h`, the command is executed directly.
 The `s` command prepends `git`, it is a wrapper around `h git` .
 Supported switches:
 
-- `-i` or `--interactive`: run the command in interactive mode, turn off parallel propcessing
+- `-i` or `--interactive`: run the command in interactive mode, turn off parallel propcessing (with aliases `hi` and `si`)
+- `-p` or `--paged`: show the output of the command in a pager (with aliases `hp` and `sp`)
 - `-n` or `--dry-run`: show the command that would be executed, but do not execute it
-- `-p` or `--paged`: show the output of the command in a pager
 - `-x` or `--log-commands`: also log the commands that are executed
 
 `gita` both does too much and not enough, let's see how far I can get with home-grown scripts.
@@ -42,14 +42,14 @@ Supported switches:
 
 FIXME: Integrate with `inside` and `every`
 
-## k
-
-A simple forwarder to `kubectl`.
-
 ## rh
 
 Start RStudio with an `.Rproj` project file found in the current directory.
 If no project file is found, it is created using `usethis::use_rstudio()`.
+
+## fsed
+
+Run `gsed` on files in subdirectories.
 
 ## git-mmv
 
@@ -66,6 +66,28 @@ Parallel `make`, uses number of CPU cores as number of jobs.
 ## retry
 
 Execute command until success, with increasing time intervals between failures.
+
+## cgrep
+
+Colorful `egrep` .
+
+## pdfcat
+
+Concatenate multiple PDF files into a single document.
+
+## git-bubble
+
+How far can the most recent commit be pushed back up in the history without introducing merge conflicts?
+
+FIXME: Add option to run code (check for semantic conflicts).
+
+## soffice-macos
+
+Launch LibreOffice/OpenOffice on macOS with proper environment setup.
+
+## k
+
+A simple forwarder to `kubectl`.
 
 # To be reviewed
 
@@ -171,6 +193,32 @@ Step by step:
 6. Type <Ctrl + D> on the shell.
 
 Not perfect, but a start.
+
+## Azure utilities
+
+### azure-resource-group-get-default
+
+Get the default Azure resource group.
+
+### azure-vm-deallocate
+
+Deallocate an Azure VM, freeing up compute resources.
+
+### azure-vm-set-size
+
+Set the size (instance type) of an Azure VM.
+
+### azure-vm-start
+
+Start a stopped or deallocated Azure VM.
+
+## git-config-parent
+
+Configure Git to look for settings in parent directories.
+
+## git-join-repos
+
+Join multiple Git repositories into one while preserving history.
 
 # Obsolete
 

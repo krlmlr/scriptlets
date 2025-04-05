@@ -1,3 +1,3 @@
 #!/bin/bash
 
-grep --color=always "$@"
+egrep --color=always "$@"
