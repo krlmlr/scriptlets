@@ -49,16 +49,16 @@ fi
 
 install_files=$(cd "${source_dir}" && find ./* -type f | sed -r 's#^[.]/##')
 
-mkdir_args=()
+mkdir_args=""
 
 ln_args_local=(-s)
 
 if [ "$quiet" = false ]; then
-  mkdir_args+=(-v)
+  mkdir_args="-v"
   ln_args_local+=(-v)
 fi
 
-echo "${install_files}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${install_dir}"'/#' | xargs mkdir "${mkdir_args[@]}" -p
+echo "${install_files}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${install_dir}"'/#' | xargs mkdir "${mkdir_args}" -p
 
 for f in ${install_files}; do
   target_file=$(echo "${install_dir}/$f" | sed 's#dot-#.#g')
