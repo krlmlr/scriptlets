@@ -6,14 +6,10 @@ set -euo pipefail
 source_dir="home"
 install_dir="$HOME"
 quiet=false
-force=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --force)
-            force=true
-            ;;
         --quiet)
             quiet=true
             ;;
@@ -49,30 +45,17 @@ fi
 
 install_files=$(cd "${source_dir}" && find ./* -type f | sed -r 's#^[.]/##')
 
-mkdir_args=()
-
-ln_args_local=(-s)
+diff_args=(-U 3)
 
 if [ "$quiet" = false ]; then
-  mkdir_args+=(-v)
-  ln_args_local+=(-v)
+  diff_args+=(--report-identical-files)
 fi
-
-echo "${install_files}" | xargs dirname | sort | uniq | sed -r 's#^dot-#.#;s#^#'"${install_dir}"'/#' | xargs mkdir "${mkdir_args[@]}" -p
 
 for f in ${install_files}; do
   target_file=$(echo "${install_dir}/$f" | sed 's#dot-#.#g')
 
   if ! [[ "${target_file}" =~ [.]dummy$ ]]; then
     source_file="${PWD}/${source_dir}/$f"
-
-    if [ "$force" = true ]; then
-      # Always remove the target and recreate symlink if force is enabled
-      rm -f "${target_file}"
-      ln "${ln_args_local[@]}" "${source_file}" "${target_file}"
-    elif ! [ -h "${target_file}" ] || [ "$(realpath "${target_file}")" != "${source_file}" ]; then
-      # Create symlink, show error if this fails
-      ln "${ln_args_local[@]}" "${source_file}" "${target_file}" || true
-    fi
+    diff "${diff_args[@]}" "${source_file}" "${target_file}" || true
   fi
 done
