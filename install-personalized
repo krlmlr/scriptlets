@@ -64,6 +64,7 @@ fi
 
 # Create symlinks for all files, accept errors from here onwards
 set +e
-ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/Rprofile" "Rprofile"
-ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/gitconfig" "gitconfig"
-ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/ssh-config" "ssh-config"
+if ! [ -h "Rprofile" ]; then ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/Rprofile" "Rprofile"; fi
+if ! [ -h "gitconfig" ]; then ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/gitconfig" "gitconfig"; fi
+if ! [ -h "ssh-config" ]; then ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/ssh-config" "ssh-config"; fi
+true

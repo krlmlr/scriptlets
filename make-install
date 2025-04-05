@@ -129,6 +129,8 @@ for f in ${install_files}; do
     source_file="${source_dir}/${f}"
 
     if ! [[ "${target_file}" =~ [.]dummy$ ]]; then
-        echo "ln \"\${ln_args[@]}\" \"\${source_dir}/${source_file}\" \"${target_file}\""
+        echo "if ! [ -h \"${target_file}\" ]; then ln \"\${ln_args[@]}\" \"\${source_dir}/${source_file}\" \"${target_file}\"; fi"
     fi
 done
+
+echo "true"
