@@ -34,4 +34,4 @@ done
 
 # Forward just the interactive/dry-run flags
 h "${forward_flags[@]}" -- \
-  git -c color.ui=always -c color.diff=always -c color.show-branch=always "$@"
+  git -c color.ui=always -c color.diff=always "$@"
