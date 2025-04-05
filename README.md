@@ -210,4 +210,4 @@ Start multi-monitor output [on an Optimus card, using bumblebee](http://askubunt
 
 
 
-Copyright 2015-2019 Kirill Müller.
+Copyright 2015-2025 Kirill Müller.
