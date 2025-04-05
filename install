@@ -32,6 +32,7 @@ cd "${HOME}"
 # Setup command arguments based on options
 mkdir_args=(-p)
 ln_args=(-s)
+diff_args=(-U 3)
 
 if [ "$force" = true ]; then
     ln_force=true
@@ -42,6 +43,7 @@ fi
 if [ "$quiet" = false ]; then
     mkdir_args+=(-v)
     ln_args+=(-v)
+    diff_args+=(--report-identical-files)
 fi
 
 # Create required directories
@@ -225,4 +227,86 @@ if ! [ -h ".toprc" ]; then ln "${ln_args[@]}" "${source_dir}/home/dot-toprc" ".t
 if ! [ -h ".vimrc" ]; then ln "${ln_args[@]}" "${source_dir}/home/dot-vimrc" ".vimrc"; fi
 if ! [ -h "git/R/CMakeLists.txt" ]; then ln "${ln_args[@]}" "${source_dir}/home/git/R/CMakeLists.txt" "git/R/CMakeLists.txt"; fi
 if ! [ -h "git/R/clion-build.sh" ]; then ln "${ln_args[@]}" "${source_dir}/home/git/R/clion-build.sh" "git/R/clion-build.sh"; fi
+
+diff "${diff_args[@]}" "${source_dir}/home/bin/azure-resource-group-get-default" "bin/azure-resource-group-get-default"
+diff "${diff_args[@]}" "${source_dir}/home/bin/azure-vm-deallocate" "bin/azure-vm-deallocate"
+diff "${diff_args[@]}" "${source_dir}/home/bin/azure-vm-set-size" "bin/azure-vm-set-size"
+diff "${diff_args[@]}" "${source_dir}/home/bin/azure-vm-start" "bin/azure-vm-start"
+diff "${diff_args[@]}" "${source_dir}/home/bin/bash-template" "bin/bash-template"
+diff "${diff_args[@]}" "${source_dir}/home/bin/bkg" "bin/bkg"
+diff "${diff_args[@]}" "${source_dir}/home/bin/cgrep" "bin/cgrep"
+diff "${diff_args[@]}" "${source_dir}/home/bin/copy-real-path" "bin/copy-real-path"
+diff "${diff_args[@]}" "${source_dir}/home/bin/disp" "bin/disp"
+diff "${diff_args[@]}" "${source_dir}/home/bin/each" "bin/each"
+diff "${diff_args[@]}" "${source_dir}/home/bin/eachfile" "bin/eachfile"
+diff "${diff_args[@]}" "${source_dir}/home/bin/encfs-local" "bin/encfs-local"
+diff "${diff_args[@]}" "${source_dir}/home/bin/every" "bin/every"
+diff "${diff_args[@]}" "${source_dir}/home/bin/everyfile" "bin/everyfile"
+diff "${diff_args[@]}" "${source_dir}/home/bin/extmon-start" "bin/extmon-start"
+diff "${diff_args[@]}" "${source_dir}/home/bin/extmon-stop" "bin/extmon-stop"
+diff "${diff_args[@]}" "${source_dir}/home/bin/fsed" "bin/fsed"
+diff "${diff_args[@]}" "${source_dir}/home/bin/g" "bin/g"
+diff "${diff_args[@]}" "${source_dir}/home/bin/gh-mirror" "bin/gh-mirror"
+diff "${diff_args[@]}" "${source_dir}/home/bin/ghpsd" "bin/ghpsd"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-backup" "bin/git-backup"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-backup-all" "bin/git-backup-all"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-bubble" "bin/git-bubble"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-config-parent" "bin/git-config-parent"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-join-repos" "bin/git-join-repos"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-merge-into" "bin/git-merge-into"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-merge-update" "bin/git-merge-update"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-mmv" "bin/git-mmv"
+diff "${diff_args[@]}" "${source_dir}/home/bin/git-rsync" "bin/git-rsync"
+diff "${diff_args[@]}" "${source_dir}/home/bin/h" "bin/h"
+diff "${diff_args[@]}" "${source_dir}/home/bin/hi" "bin/hi"
+diff "${diff_args[@]}" "${source_dir}/home/bin/hp" "bin/hp"
+diff "${diff_args[@]}" "${source_dir}/home/bin/i4" "bin/i4"
+diff "${diff_args[@]}" "${source_dir}/home/bin/i4c" "bin/i4c"
+diff "${diff_args[@]}" "${source_dir}/home/bin/imgdiff" "bin/imgdiff"
+diff "${diff_args[@]}" "${source_dir}/home/bin/imgdiff-bg" "bin/imgdiff-bg"
+diff "${diff_args[@]}" "${source_dir}/home/bin/inside" "bin/inside"
+diff "${diff_args[@]}" "${source_dir}/home/bin/is-unmetered" "bin/is-unmetered"
+diff "${diff_args[@]}" "${source_dir}/home/bin/k" "bin/k"
+diff "${diff_args[@]}" "${source_dir}/home/bin/machine-load" "bin/machine-load"
+diff "${diff_args[@]}" "${source_dir}/home/bin/mail-after" "bin/mail-after"
+diff "${diff_args[@]}" "${source_dir}/home/bin/n" "bin/n"
+diff "${diff_args[@]}" "${source_dir}/home/bin/ogv-to-gif" "bin/ogv-to-gif"
+diff "${diff_args[@]}" "${source_dir}/home/bin/pdfcat" "bin/pdfcat"
+diff "${diff_args[@]}" "${source_dir}/home/bin/pmake" "bin/pmake"
+diff "${diff_args[@]}" "${source_dir}/home/bin/reprex" "bin/reprex"
+diff "${diff_args[@]}" "${source_dir}/home/bin/retry" "bin/retry"
+diff "${diff_args[@]}" "${source_dir}/home/bin/rh" "bin/rh"
+diff "${diff_args[@]}" "${source_dir}/home/bin/rpt" "bin/rpt"
+diff "${diff_args[@]}" "${source_dir}/home/bin/s" "bin/s"
+diff "${diff_args[@]}" "${source_dir}/home/bin/sh-template" "bin/sh-template"
+diff "${diff_args[@]}" "${source_dir}/home/bin/si" "bin/si"
+diff "${diff_args[@]}" "${source_dir}/home/bin/slecho" "bin/slecho"
+diff "${diff_args[@]}" "${source_dir}/home/bin/soR" "bin/soR"
+diff "${diff_args[@]}" "${source_dir}/home/bin/soffice-macos" "bin/soffice-macos"
+diff "${diff_args[@]}" "${source_dir}/home/bin/sp" "bin/sp"
+diff "${diff_args[@]}" "${source_dir}/home/bin/tbca" "bin/tbca"
+diff "${diff_args[@]}" "${source_dir}/home/bin/texstudio-here" "bin/texstudio-here"
+diff "${diff_args[@]}" "${source_dir}/home/bin/undock" "bin/undock"
+diff "${diff_args[@]}" "${source_dir}/home/bin/update-scriptlets" "bin/update-scriptlets"
+diff "${diff_args[@]}" "${source_dir}/home/bin/xpra-attach-ssh" "bin/xpra-attach-ssh"
+diff "${diff_args[@]}" "${source_dir}/home/dot-Rprofile" ".Rprofile"
+diff "${diff_args[@]}" "${source_dir}/home/dot-autoscreen" ".autoscreen"
+diff "${diff_args[@]}" "${source_dir}/home/dot-bash_aliases" ".bash_aliases"
+diff "${diff_args[@]}" "${source_dir}/home/dot-bash_profile" ".bash_profile"
+diff "${diff_args[@]}" "${source_dir}/home/dot-bashrc" ".bashrc"
+diff "${diff_args[@]}" "${source_dir}/home/dot-config/diffuse/diffuserc" ".config/diffuse/diffuserc"
+diff "${diff_args[@]}" "${source_dir}/home/dot-editorconfig" ".editorconfig"
+diff "${diff_args[@]}" "${source_dir}/home/dot-finicky.js" ".finicky.js"
+diff "${diff_args[@]}" "${source_dir}/home/dot-gitaliases" ".gitaliases"
+diff "${diff_args[@]}" "${source_dir}/home/dot-gitconfig" ".gitconfig"
+diff "${diff_args[@]}" "${source_dir}/home/dot-gitignore" ".gitignore"
+diff "${diff_args[@]}" "${source_dir}/home/dot-screenrc" ".screenrc"
+diff "${diff_args[@]}" "${source_dir}/home/dot-screenrc-xpra" ".screenrc-xpra"
+diff "${diff_args[@]}" "${source_dir}/home/dot-ssh/config" ".ssh/config"
+diff "${diff_args[@]}" "${source_dir}/home/dot-tigrc" ".tigrc"
+diff "${diff_args[@]}" "${source_dir}/home/dot-toprc" ".toprc"
+diff "${diff_args[@]}" "${source_dir}/home/dot-vimrc" ".vimrc"
+diff "${diff_args[@]}" "${source_dir}/home/git/R/CMakeLists.txt" "git/R/CMakeLists.txt"
+diff "${diff_args[@]}" "${source_dir}/home/git/R/clion-build.sh" "git/R/clion-build.sh"
+
 true

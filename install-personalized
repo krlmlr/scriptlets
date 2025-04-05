@@ -33,6 +33,7 @@ cd "${HOME}/scriptlets"
 # Setup command arguments based on options
 mkdir_args=(-p)
 ln_args=(-s)
+diff_args=(-U 3)
 
 if [ "$force" = true ]; then
     ln_force=true
@@ -43,6 +44,7 @@ fi
 if [ "$quiet" = false ]; then
     mkdir_args+=(-v)
     ln_args+=(-v)
+    diff_args+=(--report-identical-files)
 fi
 
 # Create required directories
@@ -67,4 +69,9 @@ set +e
 if ! [ -h "Rprofile" ]; then ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/Rprofile" "Rprofile"; fi
 if ! [ -h "gitconfig" ]; then ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/gitconfig" "gitconfig"; fi
 if ! [ -h "ssh-config" ]; then ln "${ln_args[@]}" "${source_dir}/personalized/${USER}/ssh-config" "ssh-config"; fi
+
+diff "${diff_args[@]}" "${source_dir}/personalized/${USER}/Rprofile" "Rprofile"
+diff "${diff_args[@]}" "${source_dir}/personalized/${USER}/gitconfig" "gitconfig"
+diff "${diff_args[@]}" "${source_dir}/personalized/${USER}/ssh-config" "ssh-config"
+
 true

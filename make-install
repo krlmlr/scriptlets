@@ -76,6 +76,7 @@ cat << 'HEADER'
 # Setup command arguments based on options
 mkdir_args=(-p)
 ln_args=(-s)
+diff_args=(-U 3)
 
 if [ "$force" = true ]; then
     ln_force=true
@@ -86,6 +87,7 @@ fi
 if [ "$quiet" = false ]; then
     mkdir_args+=(-v)
     ln_args+=(-v)
+    diff_args+=(--report-identical-files)
 fi
 
 # Create required directories
@@ -133,4 +135,17 @@ for f in ${install_files}; do
     fi
 done
 
+echo
+
+# Generate diff commands for all files
+for f in ${install_files}; do
+    target_file=${f//dot-/\.}
+    source_file="${source_dir}/${f}"
+
+    if ! [[ "${target_file}" =~ [.]dummy$ ]]; then
+        echo "diff \"\${diff_args[@]}\" \"\${source_dir}/${source_file}\" \"${target_file}\""
+    fi
+done
+
+echo
 echo "true"
