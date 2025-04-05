@@ -4,12 +4,12 @@ all: install
 
 install:
 	./install
-	if [ -d scriptlets/$${USER} ]; then ./install scriptlets/$${USER} $${HOME}/scriptlets; fi
+	if [ -d personalized/$${USER} ]; then ./install personalized/$${USER} $${HOME}/scriptlets; fi
 
 quiet-install:
 	./install --quiet
-	if [ -d scriptlets/$${USER} ]; then ./install --quiet scriptlets/$${USER} $${HOME}/scriptlets; fi
+	if [ -d personalized/$${USER} ]; then ./install --quiet personalized/$${USER} $${HOME}/scriptlets; fi
 
 force-install:
 	./install --force
-	if [ -d scriptlets/$${USER} ]; then ./install --force scriptlets/$${USER} $${HOME}/scriptlets; fi
+	if [ -d personalized/$${USER} ]; then ./install --force personalized/$${USER} $${HOME}/scriptlets; fi
