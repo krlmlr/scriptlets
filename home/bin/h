@@ -115,18 +115,25 @@ process_git_dirs() {
 
   local i=0
   while IFS= read -r line; do
-    printf "sh -c 'cd %q &&" "$line"
-    printf ' %q' "$@"
-    if ! $interactive; then
-      local color="${colors[i % ${#colors[@]}]}"
-      printf ' 2>&1 | sed s#^#'
-      printf "\e[%sm" "$color"
-      printf '%q:' "$line"
-      printf "\e[0m"
-      printf '\ #'
-      ((i++))
-    fi
-    printf "'\n"
+    local command
+
+    local color="${colors[i % ${#colors[@]}]}"
+    ((i++))
+
+    command="$(
+      printf "cd %q &&" "$line"
+      printf ' %q' "$@"
+      if ! $interactive; then
+        printf ' 2>&1 | sed s#^#'
+        printf "\e[%sm" "$color"
+        printf '%q:' "$line"
+        printf "\e[0m"
+        printf '\ #'
+      fi
+      printf "\n"
+    )"
+
+    printf "bash -c %q\n" "$command"
   done
 }
 
@@ -162,6 +169,6 @@ process_cmd() {
 # 5. Pass the generated commands to `process_cmd` for execution or display.
 # gfind . -mindepth 2 -follow -type d -name .git -prune 2>/dev/null |
 fd -t d -HILg .git |
-  gsed --unbuffered -r 's#^[.]/##;s#/[.]git/?$##' |
+  gsed --unbuffered -r '/^[.]git./D;s#^[.]/##;s#/[.]git/?$##' |
   { if ! $unsorted; then gsort -u | process_git_dirs "$@"; else process_git_dirs "$@"; fi; } |
   process_cmd
