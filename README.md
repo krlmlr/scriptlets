@@ -1,6 +1,6 @@
 # scriptlets
 
-A collection of tiny but helpful shell scripts for personal use.
+A collection of tiny but helpful shell scripts and configuration files for personal use.
 Tested with current Ubuntu and macOS.
 Licensed under [GPL v3](http://www.gnu.org/copyleft/gpl.html).
 
