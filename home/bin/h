@@ -155,9 +155,9 @@ process_cmd() {
     cat > "$cmds"
     sh "$cmds" < /dev/tty > /dev/tty 2>&1
   elif $paged; then
-    parallel | less -FRX
+    parallel -k | less -FRX
   else
-    parallel
+    parallel -k
   fi
 }
 
