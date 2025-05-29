@@ -56,10 +56,6 @@ Run `gsed` on files in subdirectories.
 Run `air format` on a single file.
 Useful as a formatter in the RStudio IDE.
 
-## air-format-all
-
-Run `air format` on all R files in the current directory and subdirectories.
-
 ## git-mmv
 
 Allows you to write `git mmv` to move several Git-controlled files at once, with the usual `mmv` syntax.
