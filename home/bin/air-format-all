@@ -1,0 +1,3 @@
+#!/bin/bash
+
+fd -t f '[.]R$' -x air-format "$@"
