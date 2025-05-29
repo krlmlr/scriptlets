@@ -162,13 +162,14 @@ process_cmd() {
 }
 
 # Main pipeline:
-# 1. Find all Git repositories under the current directory using `gfind`.
+# 1. Find all Git repositories under the current directory using `fd`.
+#    This includes worktrees with a `.git` file, by design.
 # 2. Format the paths by removing "./" and ".git" suffix using `gsed`.
 # 3. Sort the paths uniquely using `gsort` unless `--unsorted` is active.
 # 4. Pass the sorted paths to `process_git_dirs` to generate commands.
 # 5. Pass the generated commands to `process_cmd` for execution or display.
-# gfind . -mindepth 2 -follow -type d -name .git -prune 2>/dev/null |
-fd -t d -HILg .git |
+# gfind . -mindepth 2 -follow -name .git -prune 2>/dev/null |
+fd -HILg .git |
   gsed --unbuffered -r '/^[.]git./D;s#^[.]/##;s#/[.]git/?$##' |
   { if ! $unsorted; then gsort -u | process_git_dirs "$@"; else process_git_dirs "$@"; fi; } |
   process_cmd
