@@ -1,3 +1,8 @@
 #!/bin/bash
 
+if ! [ -f "$(git rev-parse --show-toplevel)/air.toml" ]; then
+  echo "air.toml not found in the Git repository root, not formatting."
+  exit 0
+fi
+
 air format "$@"
