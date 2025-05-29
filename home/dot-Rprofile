@@ -137,6 +137,17 @@ options(deparse.max.lines = 2)
 
 options(boomer.ignore = c("~", "{", "("))
 
+setHook(packageEvent("lintr", "onLoad"), action = "append", function(...) {
+  options(
+    lintr.linters = lintr::linters_with_defaults(
+      lintr::line_length_linter(120)
+    ),
+    lintr.exclusions = c(
+      "R/cpp11.R"
+    )
+  )
+})
+
 # Set to true to make these checks an error
 Sys.setenv("_R_CHECK_LENGTH_1_CONDITION_" = "warn")
 Sys.setenv("_R_CHECK_LENGTH_1_LOGIC2_" = "warn")
@@ -167,6 +178,27 @@ options(
     LDFLAGS = "--coverage"
   )
 )
+
+if (Sys.getenv("RSTUDIO") == "1" && interactive()) {
+  invisible(addTaskCallback(function(expr, value, ok, visible, data = NULL) {
+    if (!rstudioapi::isAvailable()) {
+      return(FALSE)
+    }
+
+    dark <- suppressWarnings(system("defaults read -g AppleInterfaceStyle", ignore.stderr = TRUE, intern = TRUE))
+    if (identical(dark, "Dark")) {
+      theme <- "Tomorrow Night"
+    } else {
+      theme <- "Tomorrow"
+    }
+
+    if (rstudioapi::getThemeInfo()$editor != theme) {
+      rstudioapi::applyTheme(theme)
+    }
+
+    TRUE
+  }))
+}
 
 setHook("rstudio.sessionInit", action = "append", function(newSession) {
   dark <- suppressWarnings(system("defaults read -g AppleInterfaceStyle", ignore.stderr = TRUE, intern = TRUE))
