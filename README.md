@@ -53,7 +53,7 @@ Run `gsed` on files in subdirectories.
 
 ## air-format
 
-Run `air format` on a single file.
+Run `air format` on a single file if the containing Git repository has an `air.toml` file.
 Useful as a formatter in the RStudio IDE.
 
 ## git-mmv
