@@ -62,7 +62,7 @@ mkdir "${mkdir_args[@]}" \
 # Remove existing files if force option is enabled
 if [ "$ln_force" = true ]; then
   rm -f \
-    "bin/air-format" \
+    "air.toml" \
     "bin/azure-resource-group-get-default" \
     "bin/azure-vm-deallocate" \
     "bin/azure-vm-set-size" \
@@ -130,7 +130,7 @@ fi
 
 # Create symlinks for all files, accept errors from here onwards
 set +e
-if ! [ -h "bin/air-format" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/air-format" "bin/air-format"; fi
+if ! [ -h "air.toml" ]; then ln "${ln_args[@]}" "${source_dir}/home/air.toml" "air.toml"; fi
 if ! [ -h "bin/azure-resource-group-get-default" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/azure-resource-group-get-default" "bin/azure-resource-group-get-default"; fi
 if ! [ -h "bin/azure-vm-deallocate" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/azure-vm-deallocate" "bin/azure-vm-deallocate"; fi
 if ! [ -h "bin/azure-vm-set-size" ]; then ln "${ln_args[@]}" "${source_dir}/home/bin/azure-vm-set-size" "bin/azure-vm-set-size"; fi
@@ -194,7 +194,7 @@ if ! [ -h ".vimrc" ]; then ln "${ln_args[@]}" "${source_dir}/home/dot-vimrc" ".v
 if ! [ -h "git/R/CMakeLists.txt" ]; then ln "${ln_args[@]}" "${source_dir}/home/git/R/CMakeLists.txt" "git/R/CMakeLists.txt"; fi
 if ! [ -h "git/R/clion-build.sh" ]; then ln "${ln_args[@]}" "${source_dir}/home/git/R/clion-build.sh" "git/R/clion-build.sh"; fi
 
-diff "${diff_args[@]}" "${source_dir}/home/bin/air-format" "bin/air-format"
+diff "${diff_args[@]}" "${source_dir}/home/air.toml" "air.toml"
 diff "${diff_args[@]}" "${source_dir}/home/bin/azure-resource-group-get-default" "bin/azure-resource-group-get-default"
 diff "${diff_args[@]}" "${source_dir}/home/bin/azure-vm-deallocate" "bin/azure-vm-deallocate"
 diff "${diff_args[@]}" "${source_dir}/home/bin/azure-vm-set-size" "bin/azure-vm-set-size"
