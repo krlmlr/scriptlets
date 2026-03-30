@@ -18,15 +18,20 @@
 	co = checkout
 	coa = checkout .
 	cop = checkout --patch
+	# ---
+	e = restore
+	w = switch
 	# clean
 	# ---
 	l = log --numstat --graph --decorate
 	ll = log --oneline --graph --decorate
 	lp = log --patch --graph --decorate
+	l1 = log --oneline --decorate
 	# ---
 	# blame
 	# ---
 	qhp = reset HEAD^
+	qu = reset @{u}
 	# === Interactive commands
 	ci = commit -v
 	cia = commit --amend -v
@@ -90,7 +95,7 @@
 	pl = pull
 	plf = pull --ff-only
 	plr = pull --rebase
-	du = !git diff $(git rev-parse --abbrev-ref --symbolic-full-name @{u}) "$@"
+	du = diff @{u}
 	qh = reset HEAD
 	sp = status --porcelain
 	# https://stackoverflow.com/a/5201642/946850
