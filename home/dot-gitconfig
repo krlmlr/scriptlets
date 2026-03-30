@@ -4,6 +4,7 @@
 	conflictstyle = diff3
 	ff = false
 [diff]
+	algorithm = histogram
 	tool = imgdiff
 	colorMoved = default
 [diff "pdf"]
