@@ -1,6 +1,3 @@
-# From cynkra's Gitea
-Include ~/git/cynkra/gitea/ansible/ansible/ssh.cfg
-
 # macOS only
 Host *
   UseKeychain yes
