@@ -9,6 +9,11 @@ Include ~/.colima/ssh_config
 # OrbStack standard location
 Include ~/.orbstack/ssh/config
 
+# BEGIN managed-infra config
+# Created by: make ssh-sync (managed-infra)
+Include ~/.ssh/managed-infra
+# END managed-infra config
+
 # Created by scriptlets
 Include ~/scriptlets/ssh-config
 
