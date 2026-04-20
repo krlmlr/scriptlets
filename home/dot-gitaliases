@@ -16,7 +16,7 @@
 	ciao = commit --amend --no-edit
 	# ---
 	co = checkout
-	coa = checkout .
+	coa = checkout -- .
 	cop = checkout --patch
 	# ---
 	e = restore
