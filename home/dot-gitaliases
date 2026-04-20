@@ -19,6 +19,8 @@
 	coa = checkout -- .
 	cop = checkout --patch
 	# ---
+	# switch + restore
+	# ---
 	e = restore
 	w = switch
 	# clean
