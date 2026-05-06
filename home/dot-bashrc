@@ -118,23 +118,39 @@ if [ -f ~/.env ]; then
 fi
 
 
-# https://stackoverflow.com/a/19533853/946850
-
 # Eternal bash history.
 # ---------------------
-# Undocumented feature which sets the size to "unlimited".
-# http://stackoverflow.com/questions/9457233/unlimited-bash-history
-export HISTFILESIZE=-1
-export HISTSIZE=-1
+# History is split into per-day files under ~/.bash_history.d/ so individual
+# files stay bounded.  HISTTIMEFORMAT records a timestamp for each command;
+# 'history -a' then 'history -n' in PROMPT_COMMAND keep concurrent shells in
+# sync after every command, including empty ones (just press Enter).
+#
+# Migration: a pre-existing ~/.bash_eternal_history (the previous single-file
+# layout) is moved to ~/.bash_history.d/legacy.log the first time this runs.
+# Older entries remain searchable on disk; grep the directory to find them.
 export HISTTIMEFORMAT="[%F %T] "
-# Change the file location because certain bash sessions truncate .bash_history file upon close.
-# http://superuser.com/questions/575479/bash-history-truncated-to-500-lines-on-each-login
-export HISTFILE=~/.bash_eternal_history
-# Force prompt to write history after every command.
-# http://superuser.com/questions/20900/bash-history-loss
 
-# Is there a reason to avoid history -n?
-PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+__bash_history_dir="$HOME/.bash_history.d"
+mkdir -p "$__bash_history_dir"
+
+if [ -f "$HOME/.bash_eternal_history" ] && [ ! -e "$__bash_history_dir/legacy.log" ]; then
+    mv "$HOME/.bash_eternal_history" "$__bash_history_dir/legacy.log" 2>/dev/null
+fi
+
+# Today's file; bash auto-loads HISTFILE at shell start.
+HISTFILE="$__bash_history_dir/$(date +%Y-%m-%d).log"
+
+__bash_history_sync() {
+    local today="$__bash_history_dir/$(date +%Y-%m-%d).log"
+    if [ "$HISTFILE" != "$today" ]; then
+        history -a
+        HISTFILE="$today"
+    fi
+    history -a   # flush this session's new commands to today's file
+    history -n   # pull commands appended by other sessions
+}
+
+PROMPT_COMMAND="__bash_history_sync${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
 
 
 # bash-git-prompt, must come after history
