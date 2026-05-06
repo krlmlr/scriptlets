@@ -140,6 +140,21 @@ fi
 # Today's file; bash auto-loads HISTFILE at shell start.
 HISTFILE="$__bash_history_dir/$(date +%Y-%m-%d).log"
 
+# Pull prior days (and the migrated legacy file) into the in-memory history
+# list so Ctrl-R reaches them.  Today's file is skipped here because bash
+# auto-loads $HISTFILE after .bashrc; loading it twice would duplicate entries.
+__bash_history_preload() {
+    local f
+    [ -f "$__bash_history_dir/legacy.log" ] && history -r "$__bash_history_dir/legacy.log"
+    for f in "$__bash_history_dir"/[0-9]*.log; do
+        [ -e "$f" ] || break
+        [ "$f" = "$HISTFILE" ] && continue
+        history -r "$f"
+    done
+}
+__bash_history_preload
+unset -f __bash_history_preload
+
 __bash_history_sync() {
     local today="$__bash_history_dir/$(date +%Y-%m-%d).log"
     if [ "$HISTFILE" != "$today" ]; then
