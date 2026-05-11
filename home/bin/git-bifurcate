@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ns="refs/bifurcation"
+mode="apply"
+quiet=0
+
+usage() {
+  cat <<EOF
+Usage: git bifurcate [-q|--quiet] [-r|--remove]
+
+Create a named reference under $ns/<short-hash> for every commit that
+has more than one child (a "bifurcation" point), so they show up in
+big-picture views like
+
+  git log --simplify-by-decoration \\
+          --decorate-refs=refs/heads \\
+          --decorate-refs=refs/tags \\
+          --decorate-refs=refs/remotes \\
+          --decorate-refs=$ns
+
+Commits that already carry a branch, tag, or remote ref are skipped to
+avoid duplicate decoration. Reruns are idempotent: refs whose target
+is no longer a bifurcation, or whose short hash has shifted, are
+deleted and new ones added.
+
+Options:
+  -r, --remove   delete all refs under $ns/ and exit
+  -q, --quiet    suppress the summary line
+  -h, --help     show this help
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -r|--remove) mode="remove" ;;
+    -q|--quiet)  quiet=1 ;;
+    -h|--help)   usage; exit 0 ;;
+    --)          shift; break ;;
+    -*)          printf 'git-bifurcate: unknown option: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+    *)           printf 'git-bifurcate: unexpected argument: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+  shift
+done
+
+say() { [ "$quiet" -eq 1 ] || printf '%s\n' "$*"; }
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# Snapshot of refs currently under our namespace, sorted "<refname> <oid>".
+git for-each-ref --format='%(refname) %(objectname)' "$ns" \
+  | LC_ALL=C sort > "$tmp/existing"
+
+if [ "$mode" = "remove" ]; then
+  removed=0
+  if [ -s "$tmp/existing" ]; then
+    while IFS=' ' read -r ref oid; do
+      printf 'delete %s %s\n' "$ref" "$oid"
+    done < "$tmp/existing" | git update-ref --stdin
+    removed=$(wc -l < "$tmp/existing" | tr -d ' ')
+  fi
+  say "git-bifurcate: removed $removed ref(s) under $ns/."
+  exit 0
+fi
+
+# Commits already decorated by heads/tags/remotes -- those would show in
+# --simplify-by-decoration with the default decoration filter, so we don't
+# add a duplicate ref of our own.
+git for-each-ref --format='%(objectname)' \
+  refs/heads refs/tags refs/remotes \
+  | LC_ALL=C sort -u > "$tmp/decorated"
+
+# Bifurcation commits: every commit that is recorded as the parent of more
+# than one commit somewhere in the reachable graph.
+git rev-list --all --parents \
+  | awk '{ for (i = 2; i <= NF; i++) ++c[$i] } END { for (k in c) if (c[k] > 1) print k }' \
+  | LC_ALL=C sort -u > "$tmp/bifurcations"
+
+LC_ALL=C comm -23 "$tmp/bifurcations" "$tmp/decorated" > "$tmp/targets"
+
+# Desired ref list "<refname> <oid>". Auto-disambiguated short hashes
+# keep reruns stable for unchanged commits.
+: > "$tmp/desired"
+if [ -s "$tmp/targets" ]; then
+  while IFS= read -r oid; do
+    short=$(git rev-parse --short "$oid")
+    printf '%s/%s %s\n' "$ns" "$short" "$oid"
+  done < "$tmp/targets" | LC_ALL=C sort > "$tmp/desired"
+fi
+
+LC_ALL=C comm -23 "$tmp/existing" "$tmp/desired" > "$tmp/to-remove"
+LC_ALL=C comm -13 "$tmp/existing" "$tmp/desired" > "$tmp/to-add"
+
+{
+  while IFS=' ' read -r ref oid; do
+    printf 'delete %s %s\n' "$ref" "$oid"
+  done < "$tmp/to-remove"
+  while IFS=' ' read -r ref oid; do
+    printf 'update %s %s\n' "$ref" "$oid"
+  done < "$tmp/to-add"
+} | git update-ref --stdin
+
+added=$(wc -l < "$tmp/to-add" | tr -d ' ')
+removed=$(wc -l < "$tmp/to-remove" | tr -d ' ')
+total=$(git for-each-ref --format='%(refname)' "$ns" | wc -l | tr -d ' ')
+
+if [ "$added" -eq 0 ] && [ "$removed" -eq 0 ]; then
+  say "git-bifurcate: $total ref(s) under $ns/ (no changes)."
+else
+  say "git-bifurcate: $total ref(s) under $ns/ (+$added/-$removed)."
+fi
