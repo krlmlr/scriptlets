@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ns="refs/bifurcation"
+ns="refs/tags/bifurcation"
 mode="apply"
 quiet=0
 
@@ -9,23 +9,20 @@ usage() {
   cat <<EOF
 Usage: git bifurcate [-q|--quiet] [-r|--remove]
 
-Create a named reference under $ns/<short-hash> for every commit that
-has more than one child (a "bifurcation" point), so they show up in
-big-picture views like
+Create a lightweight tag under $ns/<short-hash> for every commit
+that has more than one child (a "bifurcation" point), so they show
+up in big-picture views such as
 
-  git log --simplify-by-decoration \\
-          --decorate-refs=refs/heads \\
-          --decorate-refs=refs/tags \\
-          --decorate-refs=refs/remotes \\
-          --decorate-refs=$ns
+  git log --simplify-by-decoration --all
+  gitk --all
 
-Commits that already carry a branch, tag, or remote ref are skipped to
-avoid duplicate decoration. Reruns are idempotent: refs whose target
-is no longer a bifurcation, or whose short hash has shifted, are
-deleted and new ones added.
+Commits already pointed at by an unrelated branch, tag, or remote
+ref are skipped to avoid duplicate decoration. Reruns are idempotent:
+tags whose target is no longer a bifurcation, or whose short hash has
+shifted, are deleted and new ones added.
 
 Options:
-  -r, --remove   delete all refs under $ns/ and exit
+  -r, --remove   delete all tags under $ns/ and exit
   -q, --quiet    suppress the summary line
   -h, --help     show this help
 EOF
@@ -60,15 +57,16 @@ if [ "$mode" = "remove" ]; then
     done < "$tmp/existing" | git update-ref --stdin
     removed=$(wc -l < "$tmp/existing" | tr -d ' ')
   fi
-  say "git-bifurcate: removed $removed ref(s) under $ns/."
+  say "git-bifurcate: removed $removed tag(s) under $ns/."
   exit 0
 fi
 
-# Commits already decorated by heads/tags/remotes -- those would show in
-# --simplify-by-decoration with the default decoration filter, so we don't
-# add a duplicate ref of our own.
-git for-each-ref --format='%(objectname)' \
+# Commits already decorated by an unrelated head/tag/remote ref -- those
+# would show in --simplify-by-decoration anyway, so we don't add a
+# duplicate. Tags we own (under $ns/) are excluded to keep reruns stable.
+git for-each-ref --format='%(refname) %(objectname)' \
   refs/heads refs/tags refs/remotes \
+  | awk -v ns="$ns/" 'index($1, ns) != 1 { print $2 }' \
   | LC_ALL=C sort -u > "$tmp/decorated"
 
 # Bifurcation commits: every commit that is recorded as the parent of more
@@ -106,7 +104,7 @@ removed=$(wc -l < "$tmp/to-remove" | tr -d ' ')
 total=$(git for-each-ref --format='%(refname)' "$ns" | wc -l | tr -d ' ')
 
 if [ "$added" -eq 0 ] && [ "$removed" -eq 0 ]; then
-  say "git-bifurcate: $total ref(s) under $ns/ (no changes)."
+  say "git-bifurcate: $total tag(s) under $ns/ (no changes)."
 else
-  say "git-bifurcate: $total ref(s) under $ns/ (+$added/-$removed)."
+  say "git-bifurcate: $total tag(s) under $ns/ (+$added/-$removed)."
 fi

@@ -97,28 +97,10 @@ FIXME: Add option to run code (check for semantic conflicts).
 
 ## git-bifurcate
 
-Create a named reference under `refs/bifurcation/<short-hash>` for every commit that has more than one child, so big-picture views like
-
-```sh
-git log --simplify-by-decoration \
-        --decorate-refs=refs/heads \
-        --decorate-refs=refs/tags \
-        --decorate-refs=refs/remotes \
-        --decorate-refs=refs/bifurcation
-```
-
-surface fork points that no branch or tag already names.
-Commits already decorated by a branch, tag, or remote ref are skipped to avoid duplicate decoration.
-Reruns are idempotent: refs whose target is no longer a bifurcation are dropped, new ones are added.
-`-r` / `--remove` deletes all refs in the namespace; `-q` / `--quiet` suppresses the summary line.
-
-`gitk` only reads refs from `refs/heads`, `refs/tags`, and `refs/remotes` and has no flag to extend that list, so `refs/bifurcation/*` is invisible to it. Pass the refs explicitly as positional revisions to make them appear in the view and in the side panel:
-
-```sh
-gitk --all -- $(git for-each-ref --format='%(refname)' refs/bifurcation)
-```
-
-A shell alias or function makes that ergonomic.
+Create a lightweight tag under `refs/tags/bifurcation/<short-hash>` for every commit that has more than one child, so fork points show up in big-picture views (`git log --simplify-by-decoration --all`, `gitk --all`) without extra flags.
+Commits already pointed at by an unrelated branch, tag, or remote ref are skipped to avoid duplicate decoration; tags under `bifurcation/` are managed exclusively by this script.
+Reruns are idempotent: tags whose target is no longer a bifurcation are dropped, new ones are added.
+`-r` / `--remove` deletes all tags in the namespace and leaves every other tag alone; `-q` / `--quiet` suppresses the summary line.
 
 ## soffice-macos
 
