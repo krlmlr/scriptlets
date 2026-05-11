@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ns="refs/tags/bifurcation"
+ns="refs/tags/bif"
 mode="apply"
 quiet=0
 
@@ -9,17 +9,20 @@ usage() {
   cat <<EOF
 Usage: git bifurcate [-q|--quiet] [-r|--remove]
 
-Create a lightweight tag under $ns/<short-hash> for every commit
-that has more than one child (a "bifurcation" point), so they show
-up in big-picture views such as
+Create a lightweight tag under $ns/<shortest-unique-prefix> for every
+commit that has more than one child (a "bifurcation" point), so they
+show up in big-picture views such as
 
   git log --simplify-by-decoration --all
   gitk --all
 
-Commits already pointed at by an unrelated branch, tag, or remote
-ref are skipped to avoid duplicate decoration. Reruns are idempotent:
-tags whose target is no longer a bifurcation, or whose short hash has
-shifted, are deleted and new ones added.
+The prefix is the shortest one that is unique within the bifurcation
+set, so reruns rename tags (lengthen/shorten) as bifurcation points
+are added or removed.
+
+Commits already pointed at by an unrelated branch, tag, or remote ref
+(including annotated tags, dereferenced to the commit) are skipped to
+avoid duplicate decoration.
 
 Options:
   -r, --remove   delete all tags under $ns/ and exit
@@ -45,7 +48,6 @@ say() { [ "$quiet" -eq 1 ] || printf '%s\n' "$*"; }
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-# Snapshot of refs currently under our namespace, sorted "<refname> <oid>".
 git for-each-ref --format='%(refname) %(objectname)' "$ns" \
   | LC_ALL=C sort > "$tmp/existing"
 
@@ -61,30 +63,49 @@ if [ "$mode" = "remove" ]; then
   exit 0
 fi
 
-# Commits already decorated by an unrelated head/tag/remote ref -- those
-# would show in --simplify-by-decoration anyway, so we don't add a
-# duplicate. Tags we own (under $ns/) are excluded to keep reruns stable.
-git for-each-ref --format='%(refname) %(objectname)' \
+# Commits already decorated by an unrelated head/tag/remote ref.
+# - Skip refs in our own namespace so reruns don't see themselves.
+# - For annotated tags %(objectname) is the tag-object SHA; the
+#   peeled commit is in %(*objectname). Pick the commit either way.
+git for-each-ref --format='%(refname) %(objectname) %(*objectname)' \
   refs/heads refs/tags refs/remotes \
-  | awk -v ns="$ns/" 'index($1, ns) != 1 { print $2 }' \
+  | awk -v ns="$ns/" '
+      index($1, ns) == 1 { next }
+      $3 != "" { print $3; next }
+      { print $2 }
+    ' \
   | LC_ALL=C sort -u > "$tmp/decorated"
 
-# Bifurcation commits: every commit that is recorded as the parent of more
-# than one commit somewhere in the reachable graph.
 git rev-list --all --parents \
   | awk '{ for (i = 2; i <= NF; i++) ++c[$i] } END { for (k in c) if (c[k] > 1) print k }' \
   | LC_ALL=C sort -u > "$tmp/bifurcations"
 
 LC_ALL=C comm -23 "$tmp/bifurcations" "$tmp/decorated" > "$tmp/targets"
 
-# Desired ref list "<refname> <oid>". Auto-disambiguated short hashes
-# keep reruns stable for unchanged commits.
+# Desired tags. Prefix length is the shortest one that is unique within
+# the (sorted) target set: each commit needs enough characters to
+# distinguish it from its sort-neighbors. Reruns naturally re-derive
+# these, so additions/removals lengthen/shorten names as needed.
 : > "$tmp/desired"
 if [ -s "$tmp/targets" ]; then
-  while IFS= read -r oid; do
-    short=$(git rev-parse --short "$oid")
-    printf '%s/%s %s\n' "$ns" "$short" "$oid"
-  done < "$tmp/targets" | LC_ALL=C sort > "$tmp/desired"
+  awk -v ns="$ns/" '
+    function common(a, b,    i, n) {
+      n = length(a) < length(b) ? length(a) : length(b)
+      for (i = 1; i <= n; i++)
+        if (substr(a, i, 1) != substr(b, i, 1)) return i - 1
+      return n
+    }
+    { sha[NR] = $1 }
+    END {
+      n = NR
+      for (i = 1; i <= n; i++) {
+        L = 1
+        if (i > 1) { c = common(sha[i - 1], sha[i]) + 1; if (c > L) L = c }
+        if (i < n) { c = common(sha[i], sha[i + 1]) + 1; if (c > L) L = c }
+        printf "%s%s %s\n", ns, substr(sha[i], 1, L), sha[i]
+      }
+    }
+  ' "$tmp/targets" | LC_ALL=C sort > "$tmp/desired"
 fi
 
 LC_ALL=C comm -23 "$tmp/existing" "$tmp/desired" > "$tmp/to-remove"

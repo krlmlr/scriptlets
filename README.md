@@ -97,9 +97,9 @@ FIXME: Add option to run code (check for semantic conflicts).
 
 ## git-bifurcate
 
-Create a lightweight tag under `refs/tags/bifurcation/<short-hash>` for every commit that has more than one child, so fork points show up in big-picture views (`git log --simplify-by-decoration --all`, `gitk --all`) without extra flags.
-Commits already pointed at by an unrelated branch, tag, or remote ref are skipped to avoid duplicate decoration; tags under `bifurcation/` are managed exclusively by this script.
-Reruns are idempotent: tags whose target is no longer a bifurcation are dropped, new ones are added.
+Create a lightweight tag under `refs/tags/bif/<shortest-unique-prefix>` for every commit that has more than one child, so fork points show up in big-picture views (`git log --simplify-by-decoration --all`, `gitk --all`) without extra flags.
+The short prefix is the minimum unique within the bifurcation set, so reruns rename tags (lengthen/shorten) as fork points are added or removed.
+Commits already pointed at by an unrelated branch, tag, or remote ref are skipped to avoid duplicate decoration; annotated tags are dereferenced to their commit, so a `v1.0` release tag at a fork point is recognised.
 `-r` / `--remove` deletes all tags in the namespace and leaves every other tag alone; `-q` / `--quiet` suppresses the summary line.
 
 ## soffice-macos
