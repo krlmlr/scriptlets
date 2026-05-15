@@ -35,6 +35,7 @@ Supported switches:
 - `-p` or `--paged`: show the output of the command in a pager (with aliases `hp` and `sp`)
 - `-n` or `--dry-run`: show the command that would be executed, but do not execute it
 - `-x` or `--log-commands`: also log the commands that are executed
+- `--color=auto|always|never`, `--no-color`: control colored output. Default is `auto`: color is enabled when stdout is a TTY (or `--paged` is set), and disabled otherwise. The `NO_COLOR` environment variable (https://no-color.org/) also disables color unless `--color=always` is given.
 
 `gita` both does too much and not enough, let's see how far I can get with home-grown scripts.
 
