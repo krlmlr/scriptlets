@@ -7,6 +7,7 @@ dry_run=false
 paged=false
 log_commands=false
 unsorted=false
+color_mode=auto
 
 # Parse arguments
 # This block processes command-line arguments, supporting long options (--interactive, --dry-run, --log-commands, --unsorted),
@@ -33,6 +34,25 @@ while [[ $# -gt 0 ]]; do
     # Performance: https://github.com/sharkdp/fd/issues/1706
     --unsorted)
       unsorted=true
+      shift
+      ;;
+    --color=*)
+      color_mode="${arg#--color=}"
+      case "$color_mode" in
+        auto|always|never) ;;
+        *)
+          echo "$0: Invalid --color value: $color_mode" >&2
+          exit 1
+          ;;
+      esac
+      shift
+      ;;
+    --color)
+      color_mode=always
+      shift
+      ;;
+    --no-color)
+      color_mode=never
       shift
       ;;
     -[!-]*)
@@ -83,6 +103,27 @@ if $log_commands; then
   set -x
 fi
 
+# Resolve color mode. NO_COLOR (https://no-color.org/) disables color in auto
+# mode but is overridden by an explicit --color=always. When --paged is set the
+# final destination is `less`, which is a real terminal, so treat that as TTY.
+case "$color_mode" in
+  always)
+    use_color=true
+    ;;
+  never)
+    use_color=false
+    ;;
+  auto)
+    if [[ -n "${NO_COLOR:-}" ]]; then
+      use_color=false
+    elif [[ -t 1 ]] || $paged; then
+      use_color=true
+    else
+      use_color=false
+    fi
+    ;;
+esac
+
 # Function: process_git_dirs
 # Reads a list of Git repository directories from stdin and generates shell commands
 # to execute the provided arguments in each directory.
@@ -125,9 +166,13 @@ process_git_dirs() {
       printf ' %q' "$@"
       if ! $interactive; then
         printf ' 2>&1 | sed s#^#'
-        printf "\e[%sm" "$color"
+        if $use_color; then
+          printf "\e[%sm" "$color"
+        fi
         printf '%q:' "$line"
-        printf "\e[0m"
+        if $use_color; then
+          printf "\e[0m"
+        fi
         printf '\ #'
       fi
       printf "\n"

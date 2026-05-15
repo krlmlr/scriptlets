@@ -1,10 +1,39 @@
 #!/bin/bash
 
 forward_flags=()
+color_mode=auto
+paged=false
 
 while [[ $# -gt 0 ]]; do
   arg="$1"
   case "$arg" in
+    --color=*)
+      color_mode="${arg#--color=}"
+      case "$color_mode" in
+        auto|always|never) ;;
+        *)
+          echo "$0: Invalid --color value: $color_mode" >&2
+          exit 1
+          ;;
+      esac
+      forward_flags+=("$arg")
+      shift
+      ;;
+    --color)
+      color_mode=always
+      forward_flags+=("$arg")
+      shift
+      ;;
+    --no-color)
+      color_mode=never
+      forward_flags+=("$arg")
+      shift
+      ;;
+    --paged)
+      paged=true
+      forward_flags+=("$arg")
+      shift
+      ;;
     --?*)
       forward_flags+=("$arg")
       shift
@@ -14,6 +43,9 @@ while [[ $# -gt 0 ]]; do
       combined="${arg:1}"
       for (( i=0; i<${#combined}; i++ )); do
         flag="${combined:$i:1}"
+        case "$flag" in
+          p) paged=true ;;
+        esac
         forward_flags+=("-$flag")
       done
       shift
@@ -32,6 +64,33 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Resolve color mode. Mirrors the logic in `h`: NO_COLOR disables color in auto
+# mode unless --color=always overrides it; --paged ultimately routes output to
+# `less`, which counts as a TTY.
+case "$color_mode" in
+  always)
+    use_color=true
+    ;;
+  never)
+    use_color=false
+    ;;
+  auto)
+    if [[ -n "${NO_COLOR:-}" ]]; then
+      use_color=false
+    elif [[ -t 1 ]] || $paged; then
+      use_color=true
+    else
+      use_color=false
+    fi
+    ;;
+esac
+
+if $use_color; then
+  git_color=(-c color.ui=always -c color.diff=always)
+else
+  git_color=(-c color.ui=never -c color.diff=never)
+fi
+
 # Forward just the interactive/dry-run flags
 h "${forward_flags[@]}" -- \
-  git -c color.ui=always -c color.diff=always "$@"
+  git "${git_color[@]}" "$@"
