@@ -96,6 +96,7 @@
 	mu = merge-update
 	ph = push
 	phf = push --force-with-lease
+	pht = push --follow-tags
 	phu = push --set-upstream
 	phuc = push --set-upstream cynkra HEAD
 	phuo = push --set-upstream origin HEAD
