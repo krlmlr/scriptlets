@@ -7,6 +7,6 @@ cd
 mkdir -p git
 cd git
 rm -rf scriptlets
-git clone https://github.com/krlmlr/scriptlets.git
+git clone --recurse-submodules https://github.com/krlmlr/scriptlets.git
 cd scriptlets
 make

@@ -1,0 +1,57 @@
+- defaults:
+    link:
+      create: true
+      relink: true
+
+# Remove symlinks that point into this repository but no longer resolve,
+# so that renaming or deleting a file here cleans up after itself.
+- clean:
+    ~/:
+    ~/bin:
+    ~/.ssh:
+    ~/.config/diffuse:
+    ~/git/R:
+    ~/scriptlets:
+
+- create:
+    - ~/log
+
+- link:
+    # Scripts and the CLion helpers: whole directories, matched by glob,
+    # so a new file needs no change here.
+    ~/bin:
+      glob: true
+      path: home/bin/*
+    ~/git/R:
+      glob: true
+      path: home/git/R/*
+
+    # Everything else is listed explicitly. The `dot-` prefix is a convention
+    # of this repository, not of dotbot, so the mapping has to be spelled out.
+    ~/air.toml: home/air.toml
+    ~/.Rprofile: home/dot-Rprofile
+    ~/.autoscreen: home/dot-autoscreen
+    ~/.bash_aliases: home/dot-bash_aliases
+    ~/.bash_profile: home/dot-bash_profile
+    ~/.bashrc: home/dot-bashrc
+    ~/.config/diffuse/diffuserc: home/dot-config/diffuse/diffuserc
+    ~/.editorconfig: home/dot-editorconfig
+    ~/.finicky.js: home/dot-finicky.js
+    ~/.gitaliases: home/dot-gitaliases
+    ~/.gitconfig: home/dot-gitconfig
+    ~/.gitignore: home/dot-gitignore
+    ~/.screenrc: home/dot-screenrc
+    ~/.screenrc-xpra: home/dot-screenrc-xpra
+    ~/.ssh/config: home/dot-ssh/config
+    ~/.tigrc: home/dot-tigrc
+    ~/.toprc: home/dot-toprc
+    ~/.vimrc: home/dot-vimrc
+
+    # Per-user overrides, sourced from ~/.gitconfig, ~/.Rprofile and
+    # ~/.ssh/config. dotbot expands environment variables in both the target
+    # and the source, so this is the whole conditional: users without a
+    # personalized/ directory simply match nothing.
+    ~/scriptlets:
+      glob: true
+      path: personalized/$USER/*
+      ignore-missing: true
