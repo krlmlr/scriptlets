@@ -1,0 +1,12 @@
+# Use this repository as the source directory, wherever it happens to be
+# cloned, instead of chezmoi's default ~/.local/share/chezmoi.
+sourceDir = {{ .chezmoi.workingTree | quote }}
+
+# Link the target back into the source directory instead of copying it, so
+# that editing ~/.bashrc edits the file in this repository -- the workflow
+# this repository had before chezmoi.
+#
+# This does not apply to executables (~/bin/*), which chezmoi always writes as
+# real files, nor to templates (~/scriptlets/*). Both need `chezmoi apply`
+# after an edit.
+mode = "symlink"

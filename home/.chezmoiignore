@@ -1,0 +1,5 @@
+{{- /* The per-user overrides only exist for a few accounts; on any other
+       machine ~/scriptlets is not created at all. */ -}}
+{{- if not (has .chezmoi.username (list "kirill" "cynkra" "root")) }}
+scriptlets
+{{- end }}

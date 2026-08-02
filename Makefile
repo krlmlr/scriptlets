@@ -1,40 +1,35 @@
-all: run-install
+all: install
 
-# Directories exist: personalized/kirill, personalized/cynkra
-# all_personalized should then be install-kirill install-cynkra
-all_personalized=$(shell ls personalized | tr '\n' ' ')
+.PHONY: all install apply diff status check test test-local
 
-build: install install-personalized
+# `chezmoi init` writes ~/.config/chezmoi/chezmoi.toml from .chezmoi.toml.tmpl,
+# pointing sourceDir at this working tree; `--apply` then does the work.
+# Safe to rerun.
+install:
+	chezmoi init --source "$(CURDIR)" --apply
 
-.PHONY: run-install run-quiet-install run-force-install
+# Once installed, sourceDir is recorded in the config, so these need no
+# arguments and work from any directory.
+apply:
+	chezmoi apply
 
-install: make-install Makefile
-	./make-install home '$${HOME}' > $@
-	chmod +x $@
+diff:
+	chezmoi diff
 
-install-personalized: make-install Makefile
-	./make-install personalized/kirill '$${HOME}/scriptlets' | sed 's#kirill#$${USER}#g' > $@
-	chmod +x $@
+status:
+	chezmoi status
 
-run-install:
-	./install
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized; fi
-
-run-quiet-install:
-	./install --quiet
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized --quiet; fi
-
-run-force-install:
-	./install --force
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized --force; fi
+# Report what `make apply` would do, without touching the filesystem.
+check:
+	chezmoi apply --dry-run --verbose
 
 test:
-	docker run --rm -v $(shell pwd):/scriptlets -w /scriptlets buildpack-deps:latest make test-local
+	docker run --rm -v $(shell pwd):/scriptlets -w /scriptlets buildpack-deps:latest \
+	  sh -c 'sh -c "$$(curl -fsLS get.chezmoi.io)" -- -b /usr/local/bin && make test-local'
 
 test-local:
-	make run-quiet-install
+	make install
 	ls -lRa $${HOME}
-	make run-quiet-install
+	make install
 	ls -lRa $${HOME}
-	make run-force-install
-	ls -lRa $${HOME}
+	chezmoi status

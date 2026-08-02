@@ -3,6 +3,11 @@
 set -e
 set -x
 
+command -v chezmoi >/dev/null || {
+  echo "chezmoi is required: https://www.chezmoi.io/install/" >&2
+  exit 1
+}
+
 cd
 mkdir -p git
 cd git
