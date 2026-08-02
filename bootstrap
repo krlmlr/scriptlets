@@ -3,10 +3,16 @@
 set -e
 set -x
 
-cd
-mkdir -p git
-cd git
-rm -rf scriptlets
-git clone https://github.com/krlmlr/scriptlets.git
-cd scriptlets
+# homeshick keeps its castles in ~/.homesick/repos; install it first if needed.
+if [ ! -d "${HOME}/.homesick/repos/homeshick" ]; then
+  git clone https://github.com/andsens/homeshick.git \
+    "${HOME}/.homesick/repos/homeshick"
+fi
+
+HOMESHICK="${HOME}/.homesick/repos/homeshick/bin/homeshick"
+
+rm -rf "${HOME}/.homesick/repos/scriptlets"
+"${HOMESHICK}" --batch clone https://github.com/krlmlr/scriptlets.git
+
+cd "${HOME}/.homesick/repos/scriptlets"
 make

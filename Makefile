@@ -1,40 +1,38 @@
-all: run-install
+all: install
 
-# Directories exist: personalized/kirill, personalized/cynkra
-# all_personalized should then be install-kirill install-cynkra
-all_personalized=$(shell ls personalized | tr '\n' ' ')
+CASTLE = scriptlets
+HOMESHICK = $${HOME}/.homesick/repos/homeshick/bin/homeshick
 
-build: install install-personalized
+.PHONY: all install install-personalized check pull test test-local
 
-.PHONY: run-install run-quiet-install run-force-install
+# homeshick links everything under home/ into $HOME, creating real
+# directories and symlinking the files -- including nested and hidden ones.
+install:
+	$(HOMESHICK) --batch link $(CASTLE)
+	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then $(MAKE) install-personalized; fi
 
-install: make-install Makefile
-	./make-install home '$${HOME}' > $@
-	chmod +x $@
+# homeshick has no per-user or per-machine mechanism: one castle installs the
+# same files everywhere. The per-user overrides are therefore linked here, by
+# hand, the way `install-personalized` used to.
+install-personalized:
+	mkdir -p "$${HOME}/scriptlets"
+	for f in personalized/$${USER}/*; do \
+	  ln -sfn "$(CURDIR)/$${f}" "$${HOME}/scriptlets/$$(basename "$${f}")"; \
+	done
 
-install-personalized: make-install Makefile
-	./make-install personalized/kirill '$${HOME}/scriptlets' | sed 's#kirill#$${USER}#g' > $@
-	chmod +x $@
+# Report which links are missing or out of date.
+check:
+	$(HOMESHICK) check $(CASTLE)
+	$(HOMESHICK) --batch --pretend link $(CASTLE)
 
-run-install:
-	./install
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized; fi
-
-run-quiet-install:
-	./install --quiet
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized --quiet; fi
-
-run-force-install:
-	./install --force
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized --force; fi
+pull:
+	$(HOMESHICK) --batch pull $(CASTLE)
 
 test:
 	docker run --rm -v $(shell pwd):/scriptlets -w /scriptlets buildpack-deps:latest make test-local
 
 test-local:
-	make run-quiet-install
+	make install
 	ls -lRa $${HOME}
-	make run-quiet-install
-	ls -lRa $${HOME}
-	make run-force-install
+	make install
 	ls -lRa $${HOME}
