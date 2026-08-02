@@ -3,6 +3,11 @@
 set -e
 set -x
 
+command -v rcup >/dev/null || {
+  echo "rcm is required: apt install rcm / brew install rcm" >&2
+  exit 1
+}
+
 cd
 mkdir -p git
 cd git

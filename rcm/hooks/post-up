@@ -1,0 +1,5 @@
+#!/bin/sh
+# rcm skips files whose name starts with a dot, so rcm/log/.dummy keeps the
+# directory in Git without being installed. Create ~/log explicitly.
+set -e
+mkdir -p "${HOME}/log"
