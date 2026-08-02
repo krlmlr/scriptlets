@@ -1,0 +1,4 @@
+--dir=stow
+--target=$HOME
+--dotfiles
+--no-folding

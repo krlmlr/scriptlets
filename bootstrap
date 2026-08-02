@@ -3,6 +3,11 @@
 set -e
 set -x
 
+command -v stow >/dev/null || {
+  echo "GNU Stow is required: apt install stow / brew install stow" >&2
+  exit 1
+}
+
 cd
 mkdir -p git
 cd git
