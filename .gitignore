@@ -1,3 +1,9 @@
+/.Rhistory
 .Rproj.user
+.Rhistory
+.Rdata
+.DS_Store
+
+# This repository's work tree is $HOME.
 private/
 .vscode/
