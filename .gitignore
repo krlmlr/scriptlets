@@ -1,3 +1,9 @@
+/.Rhistory
 .Rproj.user
+.Rhistory
+.Rdata
+.DS_Store
+
+# The work tree of the dotfiles repository is $HOME.
 private/
 .vscode/

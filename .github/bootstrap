@@ -1,0 +1,21 @@
+#!/bin/sh
+
+set -e
+set -x
+
+GIT_DIR_PATH="${DOTFILES_GIT_DIR:-${HOME}/.dotfiles.git}"
+
+git clone --bare https://github.com/krlmlr/scriptlets.git "${GIT_DIR_PATH}"
+
+dotfiles() {
+  git --git-dir="${GIT_DIR_PATH}" --work-tree="${HOME}" "$@"
+}
+
+# Untracked files in $HOME are none of this repository's business.
+dotfiles config status.showUntrackedFiles no
+
+# Fails, listing the offenders, if $HOME already has a file this repository
+# tracks. Move those aside and rerun; nothing is overwritten silently.
+dotfiles checkout
+
+"${HOME}/bin/personalize"

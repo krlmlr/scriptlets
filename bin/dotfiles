@@ -1,0 +1,15 @@
+#!/bin/sh
+# Run git against the dotfiles repository: a bare repository whose work tree
+# is $HOME.
+#
+#   dotfiles status
+#   dotfiles add ~/.bashrc
+#   dotfiles commit
+#   dotfiles push
+#
+# This is the whole "dotfile manager". Everything else is Git.
+
+exec git \
+  --git-dir="${DOTFILES_GIT_DIR:-${HOME}/.dotfiles.git}" \
+  --work-tree="${HOME}" \
+  "$@"

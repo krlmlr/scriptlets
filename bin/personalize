@@ -1,0 +1,20 @@
+#!/bin/sh
+# Point ~/scriptlets/<name> at the variant for the current user.
+#
+# Plain Git has no per-user mechanism: every tracked file is checked out on
+# every machine. ~/scriptlets holds one variant per user (gitconfig.kirill,
+# gitconfig.root, ...) and this script links the matching one into place.
+# ~/.gitconfig, ~/.Rprofile and ~/.ssh/config all tolerate the link being
+# absent, so an unknown user is a no-op.
+
+set -e
+
+user="${1:-$(id -un)}"
+cd "${HOME}/scriptlets"
+
+for variant in *."${user}"; do
+  [ -e "${variant}" ] || continue
+  name="${variant%".${user}"}"
+  ln -sfn "${variant}" "${name}"
+  echo "${HOME}/scriptlets/${name} -> ${variant}"
+done
