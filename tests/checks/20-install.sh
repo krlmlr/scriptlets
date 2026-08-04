@@ -1,5 +1,5 @@
 #!/bin/sh
-# What `make install` promises, it delivers: every destination rcm lists is
+# What `mise run install` promises, it delivers: every destination rcm lists is
 # really there, the scripts are executable, and installing twice changes
 # nothing.
 
@@ -7,7 +7,7 @@ set -u
 
 . "$(dirname -- "$0")/../lib.sh"
 
-mapping=$(make -s -C "$REPO" check)
+mapping=$(mise -C "$REPO" run check 2>/dev/null)
 
 missing=
 for dest in $(printf '%s\n' "$mapping" | cut -d: -f1); do
@@ -52,6 +52,6 @@ else
     fail "every script in ~/bin is executable" "not executable:$not_executable"
 fi
 
-assert_ok "installing twice succeeds" make -C "$REPO" install
+assert_ok "installing twice succeeds" mise -C "$REPO" run install
 assert_equal "installing twice changes nothing" \
-    "$mapping" "$(make -s -C "$REPO" check)"
+    "$mapping" "$(mise -C "$REPO" run check 2>/dev/null)"

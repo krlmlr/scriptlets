@@ -1,5 +1,5 @@
-# Installed as ~/.rcrc, and also read directly by `make install` on a machine
-# that does not have it yet (via the RCRC environment variable).
+# Installed as ~/.rcrc, and also read directly by `mise run install` on a
+# machine that does not have it yet (via the RCRC environment variable).
 
 DOTFILES_DIRS="$HOME/git/scriptlets/rcm"
 

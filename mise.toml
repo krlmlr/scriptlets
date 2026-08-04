@@ -1,0 +1,42 @@
+# Tasks for installing this repository, replacing the Makefile.
+# `mise run` on its own installs; `mise tasks` lists everything;
+# `mise run` with no task on a terminal opens a picker.
+
+[env]
+# RCRC points rcm at the copy in this repository, so the first run works on a
+# machine that has no ~/.rcrc yet. DOTFILES overrides DOTFILES_DIRS, so the
+# repository does not have to sit in ~/git/scriptlets.
+RCRC = "{{config_root}}/rcm/rcrc"
+DOTFILES = "{{config_root}}/rcm"
+
+[tasks.install]
+description = "Link every file into the home directory"
+alias = "default"
+run = 'rcup -d "$DOTFILES"'
+
+[tasks.force]
+description = "Link every file, replacing ones that already exist"
+run = 'rcup -f -d "$DOTFILES"'
+
+[tasks.check]
+description = "List the mapping without touching the filesystem"
+run = 'lsrc -d "$DOTFILES"'
+
+[tasks.uninstall]
+description = "Remove every symbolic link rcm owns"
+run = 'rcdn -d "$DOTFILES"'
+
+[tasks.test]
+description = "Run the checks against a throw-away home directory"
+run = './tests/run'
+
+[tasks.test-container]
+description = "Run the checks on Linux, from a machine that is not Linux"
+# CI covers Ubuntu and macOS; this is for a quick check in between.
+run = '''
+docker run --rm -v "$PWD:/scriptlets" -w /scriptlets buildpack-deps:latest sh -c '
+  apt-get update && apt-get install -y rcm &&
+  curl -fsSL https://mise.run | sh &&
+  MISE_TRUSTED_CONFIG_PATHS=/scriptlets ~/.local/bin/mise run test
+'
+'''

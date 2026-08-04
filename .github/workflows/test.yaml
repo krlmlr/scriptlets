@@ -43,7 +43,20 @@ jobs:
             ;;
           esac
 
+      - uses: jdx/mise-action@v4
+        with:
+          # There are no tools to install; the tasks are all this repository
+          # needs mise for.
+          install: false
+          cache: false
+
+      # A checkout is not trusted until it is said to be, and `mise run` reads
+      # no config it does not trust. tests/run passes the same trust down to
+      # the tasks it runs against its throw-away home directory.
+      - name: Trust the checkout
+        run: mise trust
+
       # tests/run installs into a home directory of its own, so nothing here
       # depends on -- or disturbs -- the runner's own home directory.
       - name: Run checks
-        run: make test-local
+        run: mise run test

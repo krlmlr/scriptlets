@@ -18,6 +18,17 @@ if ! command -v rcup >/dev/null; then
     exit 1
 fi
 
+if ! command -v mise >/dev/null; then
+    echo "mise is required: https://mise.run" >&2
+    exit 1
+fi
+
+# The checks run tasks with HOME pointing at the throw-away directory, where
+# mise finds none of the trust it recorded for the real one. Naming the
+# repository here trusts it without writing state anywhere.
+MISE_TRUSTED_CONFIG_PATHS=$REPO
+export MISE_TRUSTED_CONFIG_PATHS
+
 TEST_HOME=$(mktemp -d "${TMPDIR:-/tmp}/scriptlets-home.XXXXXX")
 TEST_FAILURES=$(mktemp "${TMPDIR:-/tmp}/scriptlets-failures.XXXXXX")
 export TEST_FAILURES
@@ -60,11 +71,11 @@ export HOME
 echo "# repo:   $REPO"
 echo "# home:   $TEST_HOME"
 echo "# seeded:${seeded:- nothing}"
-echo "# make install"
+echo "# mise run install"
 
 # Stdin comes from /dev/null throughout: rcup asks before replacing a file that
 # already exists and differs, and a check must never wait for an answer.
-make -C "$REPO" install >/dev/null </dev/null
+mise -C "$REPO" run install >/dev/null </dev/null
 
 status=0
 

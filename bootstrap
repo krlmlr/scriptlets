@@ -8,6 +8,11 @@ command -v rcup >/dev/null || {
   exit 1
 }
 
+command -v mise >/dev/null || {
+  echo "mise is required: curl https://mise.run | sh" >&2
+  exit 1
+}
+
 # Piped into a shell (curl ... | sh), stdin is the download, not the terminal.
 # rcup asks before replacing a file that already exists and differs, and reads
 # the answer from stdin -- so without this it would consume the rest of this
@@ -39,4 +44,7 @@ echo "Answering 'a' replaces every conflicting file without keeping a backup."
 echo
 set -x
 
-make
+# A freshly cloned config is untrusted, and `mise run` refuses to read it until
+# it is told otherwise.
+mise trust
+mise run install
