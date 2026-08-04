@@ -51,9 +51,9 @@ Tags are not limited to user names —
 
 - [`rcm/rcrc`](rcm/rcrc): installed as `~/.rcrc`, and read directly by `make install`
   on a machine that does not have it yet.
-- [`rcm/hooks/post-up`](rcm/hooks/post-up): creates `~/log`.
-  rcm skips names starting with a dot,
-  so `rcm/log/.dummy` keeps the directory in Git without being installed.
+- [`rcm/log/dummy`](rcm/log) is a placeholder that exists only to create `~/log`.
+  Git cannot track an empty directory, and rcm skips names starting with a dot,
+  so the placeholder has to be visible to rcm to bring its parent along.
 - [`Makefile`](Makefile): `make` links everything,
   `make force` replaces existing files,
   `make uninstall` runs `rcdn`,

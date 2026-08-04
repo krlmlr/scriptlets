@@ -8,9 +8,6 @@ DOTFILES_DIRS="$HOME/git/scriptlets/rcm"
 # ~/.ssh/config. Listing a directory covers everything below it.
 UNDOTTED="air.toml bin git log scriptlets"
 
-# `hooks` is rcm's own hook directory, not something to install.
-EXCLUDES="hooks"
-
 # rcrc is sourced as shell, so the per-user overrides in tag-<user>/ are
 # selected automatically -- an account with no matching directory installs
 # nothing extra. This replaces the old `if [ -d personalized/$USER ]`.
