@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+dry_run=0
+any_host=0
+
+usage() {
+  cat <<'EOF'
+Usage: git ssh-remote [-n|--dry-run] [-a|--all-hosts] [<remote>...]
+
+Rewrite the HTTPS URLs of GitHub remotes as their SSH equivalents:
+
+  https://github.com/krlmlr/scriptlets.git  ->  git@github.com:krlmlr/scriptlets.git
+
+Named remotes are converted, all of them when none is named. Fetch and
+push URLs alike, and every URL of a remote that has more than one.
+Remotes that already speak SSH, and HTTPS remotes on other hosts, are
+left as they are.
+
+Credentials in the URL (https://token@github.com/...) are dropped, and
+so is a port, which says nothing about where SSH listens. A missing
+`.git` suffix is added.
+
+Options:
+  -n, --dry-run    show what would change, change nothing
+  -a, --all-hosts  convert HTTPS remotes on any host, not GitHub alone
+  -h, --help       show this help
+EOF
+}
+
+remotes=
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -n|--dry-run)   dry_run=1 ;;
+    -a|--all-hosts) any_host=1 ;;
+    -h|--help)      usage; exit 0 ;;
+    --)             shift; break ;;
+    -*)             printf 'git-ssh-remote: unknown option: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+    *)              remotes="$remotes$1
+" ;;
+  esac
+  shift
+done
+
+for argument in "$@"; do
+  remotes="$remotes$argument
+"
+done
+
+# Says "fatal: not a git repository" in git's own words, and stops.
+git rev-parse --git-dir >/dev/null
+
+if [ -z "$remotes" ]; then
+  remotes=$(git remote)
+  if [ -z "$remotes" ]; then
+    printf 'git-ssh-remote: this repository has no remotes\n' >&2
+    exit 1
+  fi
+fi
+
+# gist.github.com is a host of its own, and a GitHub Enterprise installation
+# answers to a name nothing here can guess -- that one is what --all-hosts is
+# for.
+is_target_host() {
+  if [ "$any_host" -eq 1 ]; then
+    return 0
+  fi
+
+  case "$1" in
+    github.com|*.github.com) return 0 ;;
+  esac
+
+  return 1
+}
+
+# to_ssh URL -- the scp-like SSH spelling of URL, or nothing and a non-zero
+# status when URL is not an HTTPS URL this command converts.
+to_ssh() {
+  local url=$1 rest host path
+
+  case "$url" in
+    http://*|https://*) rest=${url#*://} ;;
+    *) return 1 ;;
+  esac
+
+  # Without a path there is no repository to name.
+  case "$rest" in
+    */?*) ;;
+    *) return 1 ;;
+  esac
+
+  host=${rest%%/*}
+  path=${rest#*/}
+
+  host=${host##*@}  # user[:password]@ -- a token, most likely
+  host=${host%%:*}  # the HTTPS port, which SSH does not listen on
+  path=${path%/}
+
+  if [ -z "$host" ] || [ -z "$path" ]; then
+    return 1
+  fi
+
+  if ! is_target_host "$host"; then
+    return 1
+  fi
+
+  case "$path" in
+    *.git) ;;
+    *) path=$path.git ;;
+  esac
+
+  printf 'git@%s:%s\n' "$host" "$path"
+}
+
+changed_remotes=0
+
+while IFS= read -r remote; do
+  [ -n "$remote" ] || continue
+
+  if ! git remote | grep -qxF -- "$remote"; then
+    printf 'git-ssh-remote: no such remote: %s\n' "$remote" >&2
+    exit 1
+  fi
+
+  # `git config` rather than `git remote get-url`, which invents a push URL
+  # from the fetch URL where there is none, and would have us write that
+  # invention back.
+  for key in url pushurl; do
+    urls=$(git config --get-all "remote.$remote.$key" || true)
+    [ -n "$urls" ] || continue
+
+    new_urls=
+    changed=0
+
+    while IFS= read -r url; do
+      [ -n "$url" ] || continue
+
+      if new_url=$(to_ssh "$url") && [ "$new_url" != "$url" ]; then
+        printf '%s\t%s -> %s\n' "$remote" "$url" "$new_url"
+        changed=1
+      else
+        new_url=$url
+      fi
+
+      new_urls="$new_urls$new_url
+"
+    done <<EOF
+$urls
+EOF
+
+    [ "$changed" -eq 1 ] || continue
+    changed_remotes=$((changed_remotes + 1))
+    [ "$dry_run" -eq 0 ] || continue
+
+    # --replace-all for the first URL and --add for any further one: the
+    # remote keeps a URL throughout, which --unset-all would take away for as
+    # long as the rewrite takes.
+    first=1
+    while IFS= read -r url; do
+      [ -n "$url" ] || continue
+
+      if [ "$first" -eq 1 ]; then
+        git config --replace-all "remote.$remote.$key" "$url"
+        first=0
+      else
+        git config --add "remote.$remote.$key" "$url"
+      fi
+    done <<EOF
+$new_urls
+EOF
+  done
+done <<EOF
+$remotes
+EOF
+
+if [ "$changed_remotes" -eq 0 ]; then
+  printf 'git-ssh-remote: nothing to convert\n' >&2
+elif [ "$dry_run" -eq 1 ]; then
+  printf 'git-ssh-remote: dry run, nothing changed\n' >&2
+fi
