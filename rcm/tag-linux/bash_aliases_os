@@ -1,0 +1,31 @@
+#! /bin/bash
+# Sourced from ~/.bash_aliases, installed only on Linux.
+# Everything here needs the X11 clipboard (xclip), xdg-utils, or a path that
+# only Debian and Ubuntu use.
+
+alias pxc='echo -n $(pwd) | xclip -se c'
+alias xo='xdg-open'
+
+# Useful for gitpod
+export PATH=/usr/lib/ccache:${PATH}
+
+# http://stackoverflow.com/a/1088763/946850
+_xdiscard() {
+    echo -n "${READLINE_LINE:0:$READLINE_POINT}" | xclip -se c
+    READLINE_LINE="${READLINE_LINE:$READLINE_POINT}"
+    READLINE_POINT=0
+}
+_xkill() {
+    echo -n "${READLINE_LINE:$READLINE_POINT}" | xclip -se c
+    READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}"
+}
+_xcopy() {
+    echo -n "${READLINE_LINE:$READLINE_POINT}" | xclip -se c
+}
+
+if [ -n "$BASH_VERSION" ]
+then
+  bind -m emacs -x '"\eu": _xdiscard'
+  bind -m emacs -x '"\ek": _xkill'
+  bind -m emacs -x '"\ec": _xcopy'
+fi

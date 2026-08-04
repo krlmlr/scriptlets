@@ -18,40 +18,18 @@ export HUB_PROTOCOL=ssh
 
 export MAKEFLAGS="-j $(nproc 2> /dev/null || sysctl -n hw.logicalcpu) -O"
 alias sake="make -j1 -Onone"
-alias pxc='echo -n $(pwd) | xclip -se c'
-alias csv='soffice-macos --calc --infilter="Text - txt - csv (StarCalc)":44,34,76,1,,,,'
-alias csv2='soffice-macos --calc --infilter="Text - txt - csv (StarCalc)":59,34,76,1,,,,'
-alias tsv='soffice-macos --calc --infilter="Text - txt - csv (StarCalc)":9,34,76,1,,,,'
-alias xo='xdg-open'
 alias fclean="fsed -i 's/ +$//' && fsed -e :a -e '/^\n*$/{$d;N;};/\n$/ba'"
-
-# Useful for gitpod
-export PATH=/usr/lib/ccache:${PATH}
 
 # Was necessary for RStudio < 1.2
 #export QT_DEVICE_PIXEL_RATIO=2
 
-# http://stackoverflow.com/a/1088763/946850
-_xdiscard() {
-    echo -n "${READLINE_LINE:0:$READLINE_POINT}" | xclip -se c
-    READLINE_LINE="${READLINE_LINE:$READLINE_POINT}"
-    READLINE_POINT=0
-}
-_xkill() {
-    echo -n "${READLINE_LINE:$READLINE_POINT}" | xclip -se c
-    READLINE_LINE="${READLINE_LINE:0:$READLINE_POINT}"
-}
-_xcopy() {
-    echo -n "${READLINE_LINE:$READLINE_POINT}" | xclip -se c
-}
-
-if [ -n "$BASH_VERSION" ]
-then
-  bind -m emacs -x '"\eu": _xdiscard'
-  bind -m emacs -x '"\ek": _xkill'
-  bind -m emacs -x '"\ec": _xcopy'
-fi
-
 # export DOCKER_DEFAULT_PLATFORM=linux/amd64
+
+# Aliases, completions and key bindings that only work on one operating
+# system. rcm installs the matching rcm/tag-macos/bash_aliases_os or
+# rcm/tag-linux/bash_aliases_os, and nothing on any other system.
+if [ -f ~/.bash_aliases_os ]; then
+  . ~/.bash_aliases_os
+fi
 
 . ~/.bash_secrets

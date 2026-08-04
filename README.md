@@ -56,6 +56,50 @@ and [`rcm/Rprofile`](rcm/Rprofile) sources `~/scriptlets/Rprofile` if it exists.
 Each tolerates the file being absent,
 which is why an unknown account needs no tag directory.
 
+## Per-platform overrides
+
+Files that only work on one operating system live in
+[`rcm/tag-macos/`](rcm/tag-macos) or [`rcm/tag-linux/`](rcm/tag-linux),
+and are installed nowhere else.
+[`rcm/rcrc`](rcm/rcrc) picks the tag from `uname -s`:
+
+```sh
+case "$(uname -s)" in
+  Darwin) OS_TAG="macos" ;;
+  Linux) OS_TAG="linux" ;;
+  *) OS_TAG="" ;;
+esac
+
+TAGS="$(id -un) $OS_TAG"
+```
+
+A system that is neither gets no platform tag,
+and therefore only the shared files.
+Windows is out of scope.
+
+| macOS only | Linux only |
+| --- | --- |
+| `finicky.js` — browser picker, macOS-only app | `toprc` — `top`'s Linux configuration format |
+| `bin/n`, `bin/bkg` — notify via `terminal-notifier` | `screenrc-xpra` — starts an xpra X11 session |
+| `bin/soffice-macos` — drives `/Applications/LibreOffice.app` | |
+| `bash_aliases_os` — `csv`/`csv2`/`tsv`, `bit` completion | `bash_aliases_os` — `pxc`, `xo`, the `xclip` key bindings, `/usr/lib/ccache` |
+
+The shared [`rcm/bash_aliases`](rcm/bash_aliases) sources `~/.bash_aliases_os`
+if it exists, so each platform picks up its own aliases and nothing else.
+`rcm/tag-macos/screenrc-xpra` is a placeholder:
+`~/.screenrc` sources `.screenrc-xpra` unconditionally,
+and screen complains about a missing file.
+
+Everything that is portable stays shared,
+including code that already adapts at runtime —
+`bin/fsed` prefers `gsed` over `sed`,
+`bin/rh` prefers `RStudio.app` over `rstudio`,
+and `~/.bashrc` extends `PATH` only when `/opt/homebrew` exists.
+
+An upgrade from a version without platform tags leaves the links that no longer apply behind,
+dangling because their target moved into a tag directory.
+`find ~ ~/bin -maxdepth 1 -xtype l` lists them, `-delete` removes them.
+
 ## Files
 
 - [`rcm/rcrc`](rcm/rcrc): sets `DOTFILES_DIRS`, `UNDOTTED` and `TAGS`,
@@ -170,12 +214,12 @@ The principal differences:
 ### n
 
 Execute command in the foreground and show desktop notification after completion.
-Currently macOS only.
+Notifies through `terminal-notifier`, so it is installed on macOS only.
 
 ### bkg
 
 Execute command in the background and show desktop notification *in case of error*.
-Currently macOS only.
+Installed on macOS only, for the same reason as `n`.
 
 ## h and s
 
@@ -254,6 +298,7 @@ Commits already pointed at by an unrelated branch, tag, or remote ref are skippe
 ## soffice-macos
 
 Launch LibreOffice/OpenOffice on macOS with proper environment setup.
+Installed on macOS only, together with the `csv`, `csv2` and `tsv` aliases that use it.
 
 ## k
 
