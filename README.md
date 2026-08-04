@@ -72,12 +72,13 @@ installs to `~/scriptlets/gitconfig`.
 [`rcm/rcrc`](rcm/rcrc) is sourced as shell, so it selects the tag itself:
 
 ```sh
-TAGS="$(id -un)"
+TAGS="$(id -un) $OS_TAG"
 ```
 
 An account with no matching `tag-` directory installs nothing extra.
+`$OS_TAG` is the platform tag described in the next section.
 Tags are not limited to user names:
-`rcup -t work` selects a `tag-work/` directory *instead of* the per-user one,
+`rcup -t work` selects a `tag-work/` directory *instead of* both of these,
 and a `host-<hostname>/` directory is picked up automatically like a tag.
 
 The three files under `~/scriptlets/` are read by the configuration that ships here —
@@ -86,6 +87,50 @@ The three files under `~/scriptlets/` are read by the configuration that ships h
 and [`rcm/Rprofile`](rcm/Rprofile) sources `~/scriptlets/Rprofile` if it exists.
 Each tolerates the file being absent,
 which is why an unknown account needs no tag directory.
+
+## Per-platform overrides
+
+Files that only work on one operating system live in
+[`rcm/tag-macos/`](rcm/tag-macos) or [`rcm/tag-linux/`](rcm/tag-linux),
+and are installed nowhere else.
+[`rcm/rcrc`](rcm/rcrc) picks the tag from `uname -s`:
+
+```sh
+case "$(uname -s)" in
+  Darwin) OS_TAG="macos" ;;
+  Linux) OS_TAG="linux" ;;
+  *) OS_TAG="" ;;
+esac
+
+TAGS="$(id -un) $OS_TAG"
+```
+
+A system that is neither gets no platform tag,
+and therefore only the shared files.
+Windows is out of scope.
+
+| macOS only | Linux only |
+| --- | --- |
+| `finicky.js` — browser picker, macOS-only app | `toprc` — `top`'s Linux configuration format |
+| `bin/n`, `bin/bkg` — notify via `terminal-notifier` | `screenrc-xpra` — starts an xpra X11 session |
+| `bin/soffice-macos` — drives `/Applications/LibreOffice.app` | |
+| `bash_aliases_os` — `csv`/`csv2`/`tsv`, `bit` completion | `bash_aliases_os` — `pxc`, `xo`, the `xclip` key bindings, `/usr/lib/ccache` |
+
+The shared [`rcm/bash_aliases`](rcm/bash_aliases) sources `~/.bash_aliases_os`
+if it exists, so each platform picks up its own aliases and nothing else.
+`rcm/tag-macos/screenrc-xpra` is a placeholder:
+`~/.screenrc` sources `.screenrc-xpra` unconditionally,
+and screen complains about a missing file.
+
+Everything that is portable stays shared,
+including code that already adapts at runtime —
+`bin/fsed` prefers `gsed` over `sed`,
+`bin/rh` prefers `RStudio.app` over `rstudio`,
+and `~/.bashrc` extends `PATH` only when `/opt/homebrew` exists.
+
+An upgrade from a version without platform tags leaves the links that no longer apply behind,
+dangling because their target moved into a tag directory.
+`find ~ ~/bin -maxdepth 1 -xtype l` lists them, `-delete` removes them.
 
 ## Files
 
@@ -125,7 +170,8 @@ the scripts assume a GNU userland under Homebrew's `g` names:
 `h` and `s` need `fd`, `gsed`, `gsort` and GNU `parallel`;
 `fsed` needs `ag`, `gsed` and `gxargs`;
 `pmake` needs `gmake`; `git-merge-into` needs `gsed`;
-`n` and `bkg` need `terminal-notifier`; `rpt` needs `inotifywait` and `unbuffer`;
+`n` and `bkg` need `terminal-notifier`, and are installed on macOS only;
+`rpt` needs `inotifywait` and `unbuffer`;
 `git-mmv` needs `mmv`; `imgdiff` needs ImageMagick.
 
 Putting `~/bin` on the `PATH` is not among the things left to you:
@@ -134,12 +180,14 @@ on macOS as well as on Ubuntu — see [PATH](#path).
 
 ## Configuration files
 
-Alongside the scripts in `rcm/bin/`, these land in the home directory:
+Alongside the scripts in `rcm/bin/` and `rcm/tag-macos/bin/`,
+these land in the home directory:
 
 | File | Installed as | |
 | --- | --- | --- |
 | [`profile`](rcm/profile), [`zprofile`](rcm/zprofile) | `~/.profile`, `~/.zprofile` | login shells of any kind: `~/bin` and `~/.local/bin` on the `PATH` |
 | [`bashrc`](rcm/bashrc), [`bash_profile`](rcm/bash_profile), [`bash_aliases`](rcm/bash_aliases) | `~/.bashrc`, `~/.bash_profile`, `~/.bash_aliases` | interactive bash: prompt, history, aliases |
+| [`tag-macos/bash_aliases_os`](rcm/tag-macos/bash_aliases_os), [`tag-linux/bash_aliases_os`](rcm/tag-linux/bash_aliases_os) | `~/.bash_aliases_os` | the aliases, completions and bindings of one platform, sourced from `~/.bash_aliases` |
 | [`autoscreen`](rcm/autoscreen) | `~/.autoscreen` | drop into `screen` automatically on an interactive SSH login |
 | [`gitconfig`](rcm/gitconfig), [`gitaliases`](rcm/gitaliases) | `~/.gitconfig`, `~/.gitaliases` | Git settings and aliases; pulls in several optional `~/.gitconfig.*` includes |
 | [`gitignore`](rcm/gitignore) | `~/.gitignore` | global excludes, wired up via `core.excludesfile` |
@@ -147,10 +195,11 @@ Alongside the scripts in `rcm/bin/`, these land in the home directory:
 | [`Rprofile`](rcm/Rprofile) | `~/.Rprofile` | R defaults: CRAN mirror selection, `usethis`/`testthat`/`pillar` options, per-project `.lib` and `Makevars` hooks |
 | [`air.toml`](rcm/air.toml) | `~/air.toml` | fallback config for the `air` R formatter — formats nothing unless a project overrides it |
 | [`editorconfig`](rcm/editorconfig) | `~/.editorconfig` | indentation defaults |
-| [`vimrc`](rcm/vimrc), [`tigrc`](rcm/tigrc), [`toprc`](rcm/toprc) | `~/.vimrc`, `~/.tigrc`, `~/.toprc` | vim, tig and top |
-| [`screenrc`](rcm/screenrc), [`screenrc-xpra`](rcm/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window |
+| [`vimrc`](rcm/vimrc), [`tigrc`](rcm/tigrc) | `~/.vimrc`, `~/.tigrc` | vim and tig |
+| [`tag-linux/toprc`](rcm/tag-linux/toprc) | `~/.toprc` | top; the format is the Linux one, so it installs there only |
+| [`screenrc`](rcm/screenrc), [`tag-linux/screenrc-xpra`](rcm/tag-linux/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window on Linux, and is a placeholder on macOS |
 | [`config/diffuse/diffuserc`](rcm/config/diffuse/diffuserc) | `~/.config/diffuse/diffuserc` | dark colour scheme for the Diffuse merge tool |
-| [`finicky.js`](rcm/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky (macOS) |
+| [`tag-macos/finicky.js`](rcm/tag-macos/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky; macOS only |
 | [`git/R/`](rcm/git/R) | `~/git/R/` | CMake and build helpers for working on the R sources in CLion |
 
 Several of these source files that this repository does *not* ship —
@@ -220,6 +269,7 @@ The previous layout is preserved on the
 | `home/dot-ssh/config` | `rcm/ssh/config` |
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
+| `home/dot-finicky.js`, `home/dot-toprc` | `rcm/tag-macos/finicky.js`, `rcm/tag-linux/toprc` |
 | `make` | `make` — unchanged |
 | `make build` (regenerate the installers) | — nothing to regenerate |
 | `make run-force-install` | `make force` |
@@ -243,6 +293,9 @@ The principal differences:
 - **The tag is chosen with `id -un` rather than `$USER`,**
   so it also works where `$USER` is unset, such as launchd jobs
   and some non-interactive sessions.
+- **Single-platform files are no longer installed everywhere.**
+  The old installers linked `home/dot-finicky.js` and `home/dot-toprc` on every machine;
+  a second tag now keeps each to the system it works on.
 - **`~/log/dummy` is now a symbolic link.**
   Previously `home/log/.dummy` was skipped and the directory created directly.
 
@@ -253,12 +306,12 @@ The principal differences:
 ### n
 
 Execute command in the foreground and show desktop notification after completion.
-Currently macOS only.
+Notifies through `terminal-notifier`, so it is installed on macOS only.
 
 ### bkg
 
 Execute command in the background and show desktop notification *in case of error*.
-Currently macOS only.
+Installed on macOS only, for the same reason as `n`.
 
 ## h and s
 
@@ -337,6 +390,7 @@ Commits already pointed at by an unrelated branch, tag, or remote ref are skippe
 ## soffice-macos
 
 Launch LibreOffice/OpenOffice on macOS with proper environment setup.
+Installed on macOS only, together with the `csv`, `csv2` and `tsv` aliases that use it.
 
 ## k
 

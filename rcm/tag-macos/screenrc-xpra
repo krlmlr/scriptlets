@@ -1,0 +1,4 @@
+# Placeholder. ~/.screenrc sources .screenrc-xpra unconditionally, and screen
+# complains about a missing file, so the name has to exist on every platform.
+# The xpra window itself starts an X11 server session and lives in
+# rcm/tag-linux/screenrc-xpra.

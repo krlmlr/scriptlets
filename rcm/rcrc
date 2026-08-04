@@ -8,7 +8,17 @@ DOTFILES_DIRS="$HOME/git/scriptlets/rcm"
 # ~/.ssh/config. Listing a directory covers everything below it.
 UNDOTTED="air.toml bin git log scriptlets"
 
-# rcrc is sourced as shell, so the per-user overrides in tag-<user>/ are
-# selected automatically -- an account with no matching directory installs
-# nothing extra. This replaces the old `if [ -d personalized/$USER ]`.
-TAGS="$(id -un)"
+# Files that only work on one operating system live in tag-macos/ or
+# tag-linux/, and are installed nowhere else. A system that is neither gets no
+# platform tag, and therefore only the shared files.
+case "$(uname -s)" in
+  Darwin) OS_TAG="macos" ;;
+  Linux) OS_TAG="linux" ;;
+  *) OS_TAG="" ;;
+esac
+
+# rcrc is sourced as shell, so the per-user overrides in tag-<user>/ and the
+# platform files above are selected automatically -- a name with no matching
+# directory installs nothing extra. This replaces the old
+# `if [ -d personalized/$USER ]`.
+TAGS="$(id -un) $OS_TAG"
