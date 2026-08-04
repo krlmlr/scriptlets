@@ -108,6 +108,7 @@
 	sp = status --porcelain
 	# https://stackoverflow.com/a/5201642/946850
 	sq = !sh -c 'git reset --soft ${1:-main} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
+	sr = ssh-remote
 	# hub
 	pr = !sh -c 'hub pull-request "$@"'
 	prm = !sh -c 'hub pull-request -b main "$@"'

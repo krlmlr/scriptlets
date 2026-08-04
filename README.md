@@ -361,6 +361,9 @@ and they run in name order:
 - `60-zsh-completion`: `~/.zshrc` binds `mise` to the stub, the generated
   completion is *not* loaded at startup, and the first completion loads it and
   rebinds to it.
+- `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub remotes of a
+  throw-away repository and leaves every other remote alone,
+  through `~/bin` and through the `git sr` alias alike.
 - `90-force`: `mise run force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check that rewrites what the others read.
@@ -505,6 +508,26 @@ Create a lightweight tag under `refs/tags/bif/<shortest-unique-prefix>` for ever
 The short prefix is the minimum unique within the bifurcation set, so reruns rename tags (lengthen/shorten) as fork points are added or removed.
 Commits already pointed at by an unrelated branch, tag, or remote ref are skipped to avoid duplicate decoration; annotated tags are dereferenced to their commit, so a `v1.0` release tag at a fork point is recognised.
 `-r` / `--remove` deletes all tags in the namespace and leaves every other tag alone; `-q` / `--quiet` suppresses the summary line.
+
+## git-ssh-remote
+
+Rewrite the HTTPS URLs of a repository's GitHub remotes as their SSH equivalents,
+turning `https://github.com/krlmlr/scriptlets.git` into `git@github.com:krlmlr/scriptlets.git`.
+This is the repair for a clone made with the URL GitHub offers first,
+which asks for a password on every push.
+The `git sr` alias is the short spelling.
+
+Named remotes are converted, all of them when none is named,
+and fetch and push URLs alike — including every URL of a remote that has more than one.
+Remotes that already speak SSH, and HTTPS remotes on other hosts, are left as they are.
+Credentials in the URL (`https://token@github.com/...`) are dropped,
+and so is a port, which says nothing about where SSH listens;
+a missing `.git` suffix is added.
+
+`-n` / `--dry-run` prints what would change and changes nothing;
+`-a` / `--all-hosts` converts HTTPS remotes on any host, not GitHub alone,
+which is what a GitHub Enterprise installation or a GitLab remote needs.
+`-h` shows the help — spelled `--help`, git looks for a man page instead.
 
 ## soffice-macos
 
