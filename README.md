@@ -6,7 +6,7 @@ Licensed under [GPL v3](http://www.gnu.org/copyleft/gpl.html).
 
 To install all scripts to `~/bin` (by creating symbolic links),
 install [rcm](https://github.com/thoughtbot/rcm),
-clone the project and run `make` — or `mise run`,
+clone the project and run `make` — or `mise run install`,
 if you have [mise](https://mise.jdx.dev).
 rcm is the only thing this needs; mise is optional.
 Or run the [`bootstrap`](bootstrap) script:
@@ -29,7 +29,7 @@ reachable through [mise](https://mise.jdx.dev) or through `make`:
 
 | Task | `make` | |
 | --- | --- | --- |
-| `mise run`, `mise run install` | `make` | link every file into the home directory |
+| `mise run install` | `make` | link every file into the home directory |
 | `mise run force` | `make force` | link every file, replacing ones that already exist |
 | `mise run check` | `make check` | list the mapping without touching the filesystem |
 | `mise run uninstall` | `make uninstall` | remove every symbolic link rcm owns |
@@ -52,7 +52,9 @@ construction cannot: that no task was added without a target to reach it by.
 
 What mise adds, if you have it:
 `mise tasks` lists the tasks with their descriptions,
-`mise run` with no task opens a picker on a terminal,
+`mise run` with no task at all opens a picker on a terminal —
+no task is aliased to `default`, so a bare `mise run` asks rather than installs,
+and [`tests/checks/15-tasks.sh`](tests/checks/15-tasks.sh) keeps it that way,
 `mise run import` is the one task `make` cannot offer,
 and the completion described [below](#picking-the-file).
 Its one obligation is trust —
@@ -348,6 +350,7 @@ and they run in name order:
 
 - `10-path`: the scripts are on the `PATH` of a login shell, in every shell an
   account may log in with, and they run.
+- `15-tasks`: a bare `mise run` offers the task list instead of running one.
 - `20-install`: every destination rcm lists exists, configuration files are
   symbolic links, and installing twice changes nothing.
 - `30-preexisting`: an account that came with its own `~/.bash_profile` keeps it,
@@ -390,7 +393,7 @@ The previous layout is preserved on the
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
 | `home/dot-finicky.js`, `home/dot-toprc` | `rcm/tag-macos/finicky.js`, `rcm/tag-linux/toprc` |
-| `make` | `make` — unchanged, or `mise run`, which runs the same scripts |
+| `make` | `make` — unchanged, or `mise run install`, which runs the same script |
 | `make build` (regenerate the installers) | — nothing to regenerate |
 | `make run-force-install` | `mise run force` |
 | — | `mise run uninstall`, `mise run check`, `mise run import` |
