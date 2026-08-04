@@ -5,8 +5,10 @@ Tested with current Ubuntu and macOS.
 Licensed under [GPL v3](http://www.gnu.org/copyleft/gpl.html).
 
 To install all scripts to `~/bin` (by creating symbolic links),
-install [rcm](https://github.com/thoughtbot/rcm) and [mise](https://mise.jdx.dev),
-clone the project and run `mise run`.
+install [rcm](https://github.com/thoughtbot/rcm),
+clone the project and run `make` — or `mise run`,
+if you have [mise](https://mise.jdx.dev).
+rcm is the only thing this needs; mise is optional.
 Or run the [`bootstrap`](bootstrap) script:
 
 ```sh
@@ -22,38 +24,40 @@ and [`mise run import`](#importing-a-file-you-already-have) moves an existing on
 
 ## Tasks
 
-Everything is a [mise](https://mise.jdx.dev) task.
-Each one is a script in [`mise-tasks/`](mise-tasks) — one file, one task:
+Each task is a script in [`mise-tasks/`](mise-tasks) — one file, one task —
+reachable through [mise](https://mise.jdx.dev) or through `make`:
 
-| Task | |
-| --- | --- |
-| `mise run`, `mise run install` | link every file into the home directory |
-| `mise run force` | link every file, replacing ones that already exist |
-| `mise run check` | list the mapping without touching the filesystem |
-| `mise run uninstall` | remove every symbolic link rcm owns |
-| `mise run import <file>` | move a file in from the home directory |
-| `mise run test` | run the checks against a throw-away home directory |
-| `mise run test-container` | the same on Linux, from a machine that is not |
+| Task | `make` | |
+| --- | --- | --- |
+| `mise run`, `mise run install` | `make` | link every file into the home directory |
+| `mise run force` | `make force` | link every file, replacing ones that already exist |
+| `mise run check` | `make check` | list the mapping without touching the filesystem |
+| `mise run uninstall` | `make uninstall` | remove every symbolic link rcm owns |
+| `mise run import <file>` | — | move a file in from the home directory |
+| `mise run test` | — | run the checks against a throw-away home directory |
+| `mise run test-container` | — | the same on Linux, from a machine that is not |
 
-`mise tasks` lists them with their descriptions,
-and `mise run` with no task opens a picker on a terminal.
-
-[`Makefile`](Makefile) is the fallback for a machine without mise,
-and it cannot drift:
+**mise is optional.**
+Installing needs nothing but rcm and `make`:
 `make install` runs [`mise-tasks/install`](mise-tasks/install),
-the same file `mise run install` runs.
-There is one implementation of each task and two ways to reach it.
+the very file `mise run install` runs,
+so there is one implementation of each task and two ways to reach it —
+nothing that can drift.
 
-`make import`, `make test` and `make test-container` are the exception —
+Three tasks are mise-only, and `make` names them and stops rather than pretend:
 `import` needs mise to parse its arguments,
-the test targets run tasks themselves —
-so they name the task and stop rather than pretend.
+and the two test targets run tasks themselves.
 [`tests/checks/50-makefile.sh`](tests/checks/50-makefile.sh) checks what
 construction cannot: that no task was added without a target to reach it by.
 
-A clone is not trusted until you say so —
-`mise trust` once, or `mise run` refuses to read `mise.toml`.
-[`bootstrap`](bootstrap) does it for you;
+What mise adds, if you have it:
+`mise tasks` lists the tasks with their descriptions,
+`mise run` with no task opens a picker on a terminal,
+`mise run import` is the one task `make` cannot offer,
+and the completion described [below](#picking-the-file).
+Its one obligation is trust —
+`mise trust` once per clone, or `mise run` refuses to read `mise.toml`.
+[`bootstrap`](bootstrap) does that for you;
 so does [`tests/run`](tests/run), for the throw-away home directory it installs into.
 
 ## Layout
@@ -265,9 +269,11 @@ it creates one of its own, which is also why it is safe to run anywhere.
 
 ## Prerequisites
 
-Beyond [rcm](https://github.com/thoughtbot/rcm) and [mise](https://mise.jdx.dev)
-(`curl https://mise.run | sh`, or Homebrew; `make` installs without it),
-the scripts assume a GNU userland under Homebrew's `g` names:
+[rcm](https://github.com/thoughtbot/rcm) is the one hard prerequisite.
+[mise](https://mise.jdx.dev) (`curl https://mise.run | sh`, or Homebrew) is
+optional — `make` installs without it, and only `import` and the tests need it.
+
+The scripts themselves assume a GNU userland under Homebrew's `g` names:
 `h` and `s` need `fd`, `gsed`, `gsort` and GNU `parallel`;
 `fsed` needs `ag`, `gsed` and `gxargs`;
 `pmake` needs `gmake`; `git-merge-into` needs `gsed`;
@@ -324,7 +330,8 @@ on Ubuntu the scripts are found because the stock `~/.profile` finds them,
 on macOS only because this repository ships the equivalent,
 so a break in `rcm/profile` or `rcm/zprofile` shows up in the macOS job alone.
 
-[`tests/run`](tests/run) needs `rcup` and `mise` on the `PATH`.
+[`tests/run`](tests/run) needs `rcup` and `mise` on the `PATH` —
+this is the one place mise is not optional, because the checks run tasks.
 It creates the home directory
 and seeds it the way a stock account is seeded:
 on Ubuntu with `.bashrc`, `.profile` and `.bash_logout` from `/etc/skel`,
@@ -380,18 +387,16 @@ The previous layout is preserved on the
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
 | `home/dot-finicky.js`, `home/dot-toprc` | `rcm/tag-macos/finicky.js`, `rcm/tag-linux/toprc` |
-| `make` | `mise run` — or still `make`, which now wraps the same commands |
+| `make` | `make` — unchanged, or `mise run`, which runs the same scripts |
 | `make build` (regenerate the installers) | — nothing to regenerate |
 | `make run-force-install` | `mise run force` |
 | — | `mise run uninstall`, `mise run check`, `mise run import` |
 
 The principal differences:
 
-- **rcm and mise are new prerequisites** —
-  `apt install rcm` or `brew install rcm`,
-  and `curl https://mise.run | sh`.
-  The targets are [tasks](#tasks) now;
-  `make` stays as a fallback for the simple ones.
+- **rcm is a new prerequisite** — `apt install rcm`, `brew install rcm`.
+  The targets are [tasks](#tasks) now, and `make` still reaches them;
+  mise is optional, and adds `import`, the tests and completion.
 - **`make-install`, `install` and `install-personalized` are gone.**
   The two installers were generated files that had to be refreshed with `make build`
   after every change; rcm links straight out of `rcm/`, so there is nothing to regenerate.
