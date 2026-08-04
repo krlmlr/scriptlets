@@ -40,4 +40,16 @@ if [ -d "$HOME/.local/bin" ]; then
     esac
 fi
 
+# rig appends this line to every startup file it knows about,
+# and only ever checks that the line is there.
+# This is the one copy that runs;
+# the ones in ~/.bashrc, ~/.bash_profile, ~/.zshrc and ~/.zprofile
+# are parked behind `if false`.
+#
+# The guard is what makes a machine without rig survive:
+# `.` on a missing file ends a POSIX sh outright,
+# taking the rest of this file, and the PATH set above, with it.
+# The line itself is left verbatim and unindented, for rig to find.
+if [ -f "$HOME/.local/bin/rigenv" ]; then
 . "$HOME/.local/bin/rigenv"
+fi
