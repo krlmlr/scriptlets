@@ -29,7 +29,10 @@ fi
 MISE_TRUSTED_CONFIG_PATHS=$REPO
 export MISE_TRUSTED_CONFIG_PATHS
 
-TEST_HOME=$(mktemp -d "${TMPDIR:-/tmp}/scriptlets-home.XXXXXX")
+# `pwd -P` because macOS puts $TMPDIR below /var, a symlink to /private/var:
+# rcm records the physical path, and a check comparing the two spellings would
+# fail for no reason. It also drops the trailing slash $TMPDIR carries there.
+TEST_HOME=$(cd "$(mktemp -d "${TMPDIR:-/tmp}/scriptlets-home.XXXXXX")" && pwd -P)
 TEST_FAILURES=$(mktemp "${TMPDIR:-/tmp}/scriptlets-failures.XXXXXX")
 export TEST_FAILURES
 
@@ -75,7 +78,7 @@ echo "# mise run install"
 
 # Stdin comes from /dev/null throughout: rcup asks before replacing a file that
 # already exists and differs, and a check must never wait for an answer.
-mise -C "$REPO" run install >/dev/null </dev/null
+mise -q -C "$REPO" run install >/dev/null </dev/null
 
 status=0
 

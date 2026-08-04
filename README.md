@@ -38,6 +38,13 @@ defined in [`mise.toml`](mise.toml):
 `mise tasks` lists them with their descriptions,
 and `mise run` with no task opens a picker on a terminal.
 
+[`Makefile`](Makefile) is a fallback for a machine without mise:
+`make`, `make force`, `make check` and `make uninstall` are the same one-line
+rcm commands, and nothing else is duplicated there.
+`make import`, `make test` and `make test-container` name the mise task and
+fail, rather than growing a second implementation that drifts —
+[`tests/checks/50-makefile.sh`](tests/checks/50-makefile.sh) holds them to it.
+
 A clone is not trusted until you say so —
 `mise trust` once, or `mise run` refuses to read `mise.toml`.
 [`bootstrap`](bootstrap) does it for you;
@@ -217,6 +224,8 @@ Without `usage` on the `PATH`, mise's completion script says so instead of compl
   Keep the name dotless — rcm skips names starting with a dot.
 - [`mise.toml`](mise.toml): the tasks, and the `RCRC` and `DOTFILES`
   environment they all share.
+- [`Makefile`](Makefile): the same one-liners for a machine without mise,
+  and a pointer to the task for everything else.
 - [`mise-tasks/import`](mise-tasks/import): the one task too long for a
   one-liner, described [below](#importing-a-file-you-already-have).
 - [`bootstrap`](bootstrap): one-shot setup.
@@ -236,7 +245,7 @@ it creates one of its own, which is also why it is safe to run anywhere.
 ## Prerequisites
 
 Beyond [rcm](https://github.com/thoughtbot/rcm) and [mise](https://mise.jdx.dev)
-(`curl https://mise.run | sh`, or Homebrew),
+(`curl https://mise.run | sh`, or Homebrew; `make` installs without it),
 the scripts assume a GNU userland under Homebrew's `g` names:
 `h` and `s` need `fd`, `gsed`, `gsort` and GNU `parallel`;
 `fsed` needs `ag`, `gsed` and `gxargs`;
@@ -319,6 +328,8 @@ and they run in name order:
 - `40-import`: `mise run import` puts a dotfile and an `UNDOTTED` name where
   they belong, refuses what it should, and leaves the real repository alone.
   It works on a copy, because importing *moves* files into the repository.
+- `50-makefile`: the `Makefile` fallback agrees with the tasks it stands in
+  for, and the targets it does not implement say so instead of pretending.
 - `90-force`: `mise run force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check that rewrites what the others read.
@@ -345,7 +356,7 @@ The previous layout is preserved on the
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
 | `home/dot-finicky.js`, `home/dot-toprc` | `rcm/tag-macos/finicky.js`, `rcm/tag-linux/toprc` |
-| `make` | `mise run` |
+| `make` | `mise run` — or still `make`, which now wraps the same commands |
 | `make build` (regenerate the installers) | — nothing to regenerate |
 | `make run-force-install` | `mise run force` |
 | — | `mise run uninstall`, `mise run check`, `mise run import` |
@@ -355,7 +366,8 @@ The principal differences:
 - **rcm and mise are new prerequisites** —
   `apt install rcm` or `brew install rcm`,
   and `curl https://mise.run | sh`.
-  `make` is gone: the targets are [tasks](#tasks) now.
+  The targets are [tasks](#tasks) now;
+  `make` stays as a fallback for the simple ones.
 - **`make-install`, `install` and `install-personalized` are gone.**
   The two installers were generated files that had to be refreshed with `make build`
   after every change; rcm links straight out of `rcm/`, so there is nothing to regenerate.

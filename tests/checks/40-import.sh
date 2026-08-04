@@ -14,7 +14,9 @@ set -u
 
 . "$(dirname -- "$0")/../lib.sh"
 
-work=$(mktemp -d "${TMPDIR:-/tmp}/scriptlets-import.XXXXXX")
+# `pwd -P`: on macOS $TMPDIR lives below /var, a symlink to /private/var, and
+# the symlinks rcm writes point at the physical path.
+work=$(cd "$(mktemp -d "${TMPDIR:-/tmp}/scriptlets-import.XXXXXX")" && pwd -P)
 copy=$work/repo
 home=$work/home
 
