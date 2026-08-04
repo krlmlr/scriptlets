@@ -23,15 +23,20 @@ Everything that ends up in the home directory lives in [`rcm/`](rcm).
 A name there gains a leading dot on the way to `$HOME`,
 so `rcm/bashrc` becomes `~/.bashrc` and `rcm/ssh/config` becomes `~/.ssh/config`.
 
-The exceptions are listed in `UNDOTTED`:
+The exceptions are listed in the `UNDOTTED` variable in [`rcm/rcrc`](rcm/rcrc):
 `air.toml`, `bin`, `git`, `log` and `scriptlets` keep their names,
 so `rcm/bin/h` becomes `~/bin/h`.
 Naming a directory covers everything below it.
 
+`rcup` asks before replacing a file that already exists and differs
+(`[ynaq]` — `n` and Enter skip it, `y` replaces one, `a` replaces all without backup, `q` aborts).
+Identical files are linked silently, and files that do not exist yet are created without asking.
+
 ## Per-user overrides
 
 A `tag-<NAME>/` directory holds files for one account:
-[`rcm/tag-kirill/scriptlets/gitconfig`](rcm/tag-kirill) installs to `~/scriptlets/gitconfig`.
+[`rcm/tag-kirill/scriptlets/gitconfig`](rcm/tag-kirill/scriptlets/gitconfig)
+installs to `~/scriptlets/gitconfig`.
 
 [`rcm/rcrc`](rcm/rcrc) is sourced as shell, so it selects the tag itself:
 
@@ -40,20 +45,84 @@ TAGS="$(id -un)"
 ```
 
 An account with no matching `tag-` directory installs nothing extra.
-Tags are not limited to user names —
-`rcup -t work` or a `host-<hostname>/` directory work the same way.
+Tags are not limited to user names:
+`rcup -t work` selects a `tag-work/` directory *instead of* the per-user one,
+and a `host-<hostname>/` directory is picked up automatically like a tag.
+
+The three files under `~/scriptlets/` are read by the configuration that ships here —
+[`rcm/gitconfig`](rcm/gitconfig) includes `scriptlets/gitconfig`,
+[`rcm/ssh/config`](rcm/ssh/config) includes `~/scriptlets/ssh-config`,
+and [`rcm/Rprofile`](rcm/Rprofile) sources `~/scriptlets/Rprofile` if it exists.
+Each tolerates the file being absent,
+which is why an unknown account needs no tag directory.
 
 ## Files
 
-- [`rcm/rcrc`](rcm/rcrc): installed as `~/.rcrc`, and read directly by `make install`
-  on a machine that does not have it yet.
+- [`rcm/rcrc`](rcm/rcrc): sets `DOTFILES_DIRS`, `UNDOTTED` and `TAGS`,
+  and is installed as `~/.rcrc`.
+  Every `make` target also points `RCRC` at this copy, so it takes effect
+  even before — or instead of — an existing `~/.rcrc`.
+  It hardcodes `DOTFILES_DIRS="$HOME/git/scriptlets/rcm"`,
+  so a bare `rcup` or `lsrc` finds nothing unless the clone lives at `~/git/scriptlets`
+  (where [`bootstrap`](bootstrap) puts it).
+  `make` passes `-d` and works from any location.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
 - [`Makefile`](Makefile): `make` links everything,
-  `make force` replaces existing files,
+  `make force` replaces existing files without asking,
   `make uninstall` runs `rcdn`,
   and `make check` lists the mapping without touching the filesystem.
-- [`bootstrap`](bootstrap): one-shot setup: clones the repo to `~/git/scriptlets` and runs `make`.
+  `make test` runs an install in a throwaway container, `make test-local` inside one.
+- [`bootstrap`](bootstrap): one-shot setup.
+  It requires `rcup` on `PATH`, **deletes any existing `~/git/scriptlets`**,
+  clones the repo there and runs `make`.
+
+`rcup` does not prune orphans:
+deleting a file from `rcm/` leaves a dangling symlink in `$HOME`.
+Run `make uninstall` *before* removing a file, or delete the stale link by hand.
+`make uninstall` also removes directories it leaves empty,
+walking up as far as `$HOME` itself — harmless on a real home directory,
+which always has unrelated content, but worth knowing in a container.
+
+## Prerequisites
+
+Beyond [rcm](https://github.com/thoughtbot/rcm),
+the scripts assume a GNU userland under Homebrew's `g` names:
+`h` and `s` need `fd`, `gsed`, `gsort` and GNU `parallel`;
+`fsed` needs `ag`, `gsed` and `gxargs`;
+`pmake` needs `gmake`; `git-merge-into` needs `gsed`;
+`n` and `bkg` need `terminal-notifier`; `rpt` needs `inotifywait` and `unbuffer`;
+`git-mmv` needs `mmv`; `imgdiff` needs ImageMagick.
+
+Nothing here puts `~/bin` on `PATH`.
+On Ubuntu the distribution's own `~/.profile` happens to add it;
+on macOS it does not, and zsh — the default login shell — reads none of the
+bash files shipped here, so add `~/bin` to `PATH` yourself.
+
+## Configuration files
+
+Alongside the scripts in `rcm/bin/`, these land in the home directory:
+
+| File | Installed as | |
+| --- | --- | --- |
+| [`bashrc`](rcm/bashrc), [`bash_profile`](rcm/bash_profile), [`bash_aliases`](rcm/bash_aliases) | `~/.bashrc`, `~/.bash_profile`, `~/.bash_aliases` | interactive bash: prompt, history, aliases |
+| [`autoscreen`](rcm/autoscreen) | `~/.autoscreen` | drop into `screen` automatically on an interactive SSH login |
+| [`gitconfig`](rcm/gitconfig), [`gitaliases`](rcm/gitaliases) | `~/.gitconfig`, `~/.gitaliases` | Git settings and aliases; pulls in several optional `~/.gitconfig.*` includes |
+| [`gitignore`](rcm/gitignore) | `~/.gitignore` | global excludes, wired up via `core.excludesfile` |
+| [`ssh/config`](rcm/ssh/config) | `~/.ssh/config` | keep-alives plus `Include`s for Colima, OrbStack and the per-user overrides |
+| [`Rprofile`](rcm/Rprofile) | `~/.Rprofile` | R defaults: CRAN mirror selection, `usethis`/`testthat`/`pillar` options, per-project `.lib` and `Makevars` hooks |
+| [`air.toml`](rcm/air.toml) | `~/air.toml` | fallback config for the `air` R formatter — formats nothing unless a project overrides it |
+| [`editorconfig`](rcm/editorconfig) | `~/.editorconfig` | indentation defaults |
+| [`vimrc`](rcm/vimrc), [`tigrc`](rcm/tigrc), [`toprc`](rcm/toprc) | `~/.vimrc`, `~/.tigrc`, `~/.toprc` | vim, tig and top |
+| [`screenrc`](rcm/screenrc), [`screenrc-xpra`](rcm/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window |
+| [`config/diffuse/diffuserc`](rcm/config/diffuse/diffuserc) | `~/.config/diffuse/diffuserc` | dark colour scheme for the Diffuse merge tool |
+| [`finicky.js`](rcm/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky (macOS) |
+| [`git/R/`](rcm/git/R) | `~/git/R/` | CMake and build helpers for working on the R sources in CLion |
+
+Several of these source files that this repository does *not* ship —
+`~/.bash_secrets`, `~/git/bash-git-prompt`, `~/git/complete-alias` —
+without guarding for their absence,
+so a fresh shell reports errors until they exist or the lines are removed.
 
 # Coming from the previous version
 
@@ -72,8 +141,10 @@ The previous layout is preserved on the
 | `home/dot-ssh/config` | `rcm/ssh/config` |
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
-| `make build`, then `./install` | `make` |
+| `make` | `make` — unchanged |
+| `make build` (regenerate the installers) | — nothing to regenerate |
 | `make run-force-install` | `make force` |
+| `make run-quiet-install` | — no target; `rcup -q` |
 | — | `make uninstall`, `make check` |
 
 The principal differences:
@@ -82,9 +153,15 @@ The principal differences:
 - **`make-install`, `install` and `install-personalized` are gone.**
   The two installers were generated files that had to be refreshed with `make build`
   after every change; rcm links straight out of `rcm/`, so there is nothing to regenerate.
-- **Removing a file now removes its link.**
-  `make uninstall` (`rcdn`) unlinks everything, and `make force` replaces existing files;
-  the old installer could only add.
+- **Uninstalling is now possible.**
+  `make uninstall` (`rcdn`) unlinks everything rcm currently owns,
+  and `make force` replaces existing files; the old installer could only add.
+  Neither installer prunes orphans, so a file deleted from `rcm/`
+  still leaves its link behind — see the note above.
+- **Existing files are no longer skipped in silence.**
+  The old installer left any pre-existing file alone and moved on;
+  `rcup` asks what to do with one that differs.
+  A first run on a machine that already has a `~/.gitconfig` will stop and prompt.
 - **The tag is chosen with `id -un` rather than `$USER`,**
   so it also works where `$USER` is unset, such as launchd jobs
   and some non-interactive sessions.
@@ -107,7 +184,8 @@ Currently macOS only.
 
 ## h and s
 
-Iterate over all worktrees under the current Git repository and execute a command in each of them.
+Find every Git repository below the current directory and execute a command in each of them.
+Linked worktrees are included, since they carry a `.git` file.
 With `h`, the command is executed directly.
 The `s` command prepends `git`, it is a wrapper around `h git` .
 Supported switches:
@@ -116,6 +194,7 @@ Supported switches:
 - `-p` or `--paged`: show the output of the command in a pager (with aliases `hp` and `sp`)
 - `-n` or `--dry-run`: show the command that would be executed, but do not execute it
 - `-x` or `--log-commands`: also log the commands that are executed
+- `-u` or `--unsorted`: skip the sort/dedup pass over the discovered repositories
 - `--color=auto|always|never`, `--no-color`: control colored output. Default is `auto`: color is enabled when stdout is a TTY (or `--paged` is set), and disabled otherwise. The `NO_COLOR` environment variable (https://no-color.org/) also disables color unless `--color=always` is given.
 
 `gita` both does too much and not enough, let's see how far I can get with home-grown scripts.
@@ -131,7 +210,8 @@ If no project file is found, it is created using `usethis::use_rstudio()`.
 
 ## fsed
 
-Run `gsed` on files in subdirectories.
+Run `gsed` over the whole tree below the current directory, `.git` excluded.
+Files are discovered with `ag`.
 
 ## air-format
 
@@ -160,7 +240,8 @@ Colorful `egrep` .
 
 ## pdfcat
 
-Concatenate multiple PDF files into a single document.
+Dump the text of a single PDF file to stdout, a thin wrapper around `pdftotext`.
+The name is a misnomer: it concatenates nothing.
 
 ## git-bubble
 
@@ -239,10 +320,11 @@ Connects to remote machines and shows the top 5 processes by CPU consumption.
 ## ogv-to-gif
 
 Convert a video to an animated GIF.
+Currently broken: the script exits after the frame-export step, and the rest is unreachable.
 
 ## slecho
 
-Echoes each of its parameters on a single line.
+Echoes each of its parameters on a line of its own.
 
 ## rpt
 
@@ -316,7 +398,7 @@ Join multiple Git repositories into one while preserving history.
 
 # Obsolete
 
-In the [`obsolete`](obsolete) directory.
+In the [`obsolete`](obsolete) directory, catalogued in [`obsolete/README.md`](obsolete/README.md).
 
 
 
