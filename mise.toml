@@ -1,0 +1,6 @@
+# The tasks live in mise-tasks/ as ordinary scripts, one file each, so that
+# `mise run <task>`, `make <target>` and running the script by hand are the
+# same thing rather than three copies of it. `mise tasks` lists them.
+#
+# This file stays because it is what marks the directory as a mise project,
+# and what `mise trust` trusts.

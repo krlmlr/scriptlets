@@ -1,0 +1,6 @@
+#!/bin/sh
+#MISE description="Link every file, replacing ones that already exist"
+set -eu
+. "$(dirname -- "$0")/lib.sh"
+
+exec rcup -f -d "$DOTFILES" "$@"

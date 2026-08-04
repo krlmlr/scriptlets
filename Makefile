@@ -1,36 +1,18 @@
+# A fallback for a machine without mise.
+#
+# There is nothing to keep in step: the tasks are ordinary scripts in
+# mise-tasks/, and these targets run the very same files that `mise run` runs.
+# Only the ones that work without mise are here -- `import` needs mise to
+# parse its arguments, and the test targets run tasks themselves -- so those
+# name the task and stop rather than pretend.
+
 all: install
 
-.PHONY: all install force check uninstall test test-local
+.PHONY: all install force check uninstall import test test-container
 
-# RCRC points rcm at the copy in this repository, so the first run works on a
-# machine that has no ~/.rcrc yet; -d overrides DOTFILES_DIRS, so the
-# repository does not have to sit in ~/git/scriptlets.
-RCM = RCRC="$(CURDIR)/rcm/rcrc"
-DOTDIR = -d "$(CURDIR)/rcm"
+install force check uninstall:
+	@$(CURDIR)/mise-tasks/$@
 
-install:
-	$(RCM) rcup $(DOTDIR)
-
-# Replace existing files instead of skipping them. This is what
-# `make run-force-install` used to do.
-force:
-	$(RCM) rcup -f $(DOTDIR)
-
-# List the mapping without touching the filesystem.
-check:
-	$(RCM) lsrc $(DOTDIR)
-
-# Remove every symlink rcm owns.
-uninstall:
-	$(RCM) rcdn $(DOTDIR)
-
-# The same suite in a container, for a Linux run from a machine that is not
-# Linux. CI covers Ubuntu and macOS; this is for a quick check in between.
-test:
-	docker run --rm -v $(shell pwd):/scriptlets -w /scriptlets buildpack-deps:latest \
-	  sh -c 'apt-get update && apt-get install -y rcm && make test-local'
-
-# Install into a throw-away home directory and run the checks against it. The
-# home directory of whoever runs this is left alone.
-test-local:
-	./tests/run
+import test test-container:
+	@echo "make $@: this one needs mise -- run \`mise run $@\`" >&2
+	@exit 1

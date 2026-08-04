@@ -1,0 +1,88 @@
+#!/bin/sh
+#MISE description="Move a file from the home directory into the repository and link it back"
+#USAGE arg "<file>" help="The file to import, e.g. ~/.foorc"
+#USAGE flag "-t --tag <tag>" help="Install it for one account only, under rcm/tag-<tag>/"
+#USAGE complete "file" run="find \"$HOME\" -maxdepth 1 -type f -name '.*'"
+#
+# rcm ships `mkrc` for this, and it is right for most files -- but it gets the
+# UNDOTTED names wrong: `mkrc ~/bin/foo` moves the file to rcm/bin/foo and then
+# links it back as ~/.bin/foo, because rcup applies UNDOTTED when it walks the
+# whole tree and not when it is handed a single file. This task picks the name
+# the way rcup's tree walk will, and lets rcup do the linking.
+
+set -eu
+. "$(dirname -- "$0")/lib.sh"
+
+die() {
+    echo "import: $1" >&2
+    exit 1
+}
+
+file=$usage_file
+tag=${usage_tag:-}
+
+case "$file" in
+/*) ;;
+*) file="$PWD/$file" ;;
+esac
+
+if [ -L "$file" ]; then
+    die "'$file' is a symlink -- already imported, or not yours to move"
+fi
+
+if [ ! -e "$file" ]; then
+    die "'$file' does not exist"
+fi
+
+case "$file" in
+"$HOME"/*) rel=${file#"$HOME"/} ;;
+*) die "'$file' is not below $HOME" ;;
+esac
+
+# UNDOTTED comes from rcm/rcrc, which is shell -- read it rather than repeat it.
+# shellcheck disable=SC1090
+. "$RCRC"
+
+first=${rel%%/*}
+undotted=0
+for name in $UNDOTTED; do
+    if [ "$name" = "$first" ]; then
+        undotted=1
+    fi
+done
+
+if [ "$undotted" -eq 1 ]; then
+    # The name is kept as it is: rcm/bin/foo becomes ~/bin/foo.
+    dest=$rel
+else
+    case "$rel" in
+    .*)
+        dest=${rel#.}
+        ;;
+    *)
+        die "'$rel' has no leading dot, so rcm would install it as ~/.$rel.
+       Add '$first' to UNDOTTED in rcm/rcrc first if it should keep its name."
+        ;;
+    esac
+fi
+
+if [ -n "$tag" ]; then
+    dest="tag-$tag/$dest"
+fi
+
+if [ -e "$DOTFILES/$dest" ]; then
+    die "'$DOTFILES/$dest' already exists"
+fi
+
+mkdir -p "$DOTFILES/$(dirname "$dest")"
+mv "$file" "$DOTFILES/$dest"
+
+# The whole tree, not the single file: this is the walk that applies UNDOTTED.
+rcup -d "$DOTFILES"
+
+echo "imported: rcm/$dest -> $file"
+echo "commit it with: git add rcm/$dest"
+
+if [ -n "$tag" ] && [ "$tag" != "$(id -un)" ]; then
+    echo "note: tag '$tag' is not this account, so nothing was linked here" >&2
+fi

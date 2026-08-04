@@ -4,7 +4,11 @@ A collection of tiny but helpful shell scripts and configuration files for perso
 Tested with current Ubuntu and macOS.
 Licensed under [GPL v3](http://www.gnu.org/copyleft/gpl.html).
 
-To install all scripts to `~/bin` (by creating symbolic links), install [rcm](https://github.com/thoughtbot/rcm), clone the project and type `make`.
+To install all scripts to `~/bin` (by creating symbolic links),
+install [rcm](https://github.com/thoughtbot/rcm),
+clone the project and run `make` — or `mise run`,
+if you have [mise](https://mise.jdx.dev).
+rcm is the only thing this needs; mise is optional.
 Or run the [`bootstrap`](bootstrap) script:
 
 ```sh
@@ -15,7 +19,46 @@ curl -s https://raw.githubusercontent.com/krlmlr/scriptlets/main/bootstrap | sh
 
 Installation is handled by [rcm](https://github.com/thoughtbot/rcm),
 which creates the symbolic links.
-Adding a file under `rcm/` and rerunning `make` is enough.
+Adding a file under `rcm/` and rerunning `mise run` is enough,
+and [`mise run import`](#importing-a-file-you-already-have) moves an existing one in for you.
+
+## Tasks
+
+Each task is a script in [`mise-tasks/`](mise-tasks) — one file, one task —
+reachable through [mise](https://mise.jdx.dev) or through `make`:
+
+| Task | `make` | |
+| --- | --- | --- |
+| `mise run`, `mise run install` | `make` | link every file into the home directory |
+| `mise run force` | `make force` | link every file, replacing ones that already exist |
+| `mise run check` | `make check` | list the mapping without touching the filesystem |
+| `mise run uninstall` | `make uninstall` | remove every symbolic link rcm owns |
+| `mise run import <file>` | — | move a file in from the home directory |
+| `mise run test` | — | run the checks against a throw-away home directory |
+| `mise run test-container` | — | the same on Linux, from a machine that is not |
+
+**mise is optional.**
+Installing needs nothing but rcm and `make`:
+`make install` runs [`mise-tasks/install`](mise-tasks/install),
+the very file `mise run install` runs,
+so there is one implementation of each task and two ways to reach it —
+nothing that can drift.
+
+Three tasks are mise-only, and `make` names them and stops rather than pretend:
+`import` needs mise to parse its arguments,
+and the two test targets run tasks themselves.
+[`tests/checks/50-makefile.sh`](tests/checks/50-makefile.sh) checks what
+construction cannot: that no task was added without a target to reach it by.
+
+What mise adds, if you have it:
+`mise tasks` lists the tasks with their descriptions,
+`mise run` with no task opens a picker on a terminal,
+`mise run import` is the one task `make` cannot offer,
+and the completion described [below](#picking-the-file).
+Its one obligation is trust —
+`mise trust` once per clone, or `mise run` refuses to read `mise.toml`.
+[`bootstrap`](bootstrap) does that for you;
+so does [`tests/run`](tests/run), for the throw-away home directory it installs into.
 
 ## Layout
 
@@ -54,14 +97,14 @@ and [`rcm/bash_profile`](rcm/bash_profile) has the `~/.profile` it sources.
 the default shell on macOS since Catalina,
 which never reads `~/.profile` on its own.
 rcm skips a file the account already has,
-so a machine that came with its own `~/.profile` keeps it until `make force`.
+so a machine that came with its own `~/.profile` keeps it until `mise run force`.
 
 `~/bin` stays the install target rather than `~/.local/bin`.
 Moving would gain nothing on macOS, where neither directory is automatic,
 and nothing on Ubuntu, where both already are.
 It would cost a directory of our own:
 `~/.local/bin` is shared with `pipx`, `uv` and `pip install --user`,
-while `make uninstall` (`rcdn`) is best pointed at a directory only rcm writes to.
+while `mise run uninstall` (`rcdn`) is best pointed at a directory only rcm writes to.
 
 ## Per-user overrides
 
@@ -132,41 +175,105 @@ An upgrade from a version without platform tags leaves the links that no longer 
 dangling because their target moved into a tag directory.
 `find ~ ~/bin -maxdepth 1 -xtype l` lists them, `-delete` removes them.
 
+## Importing a file you already have
+
+```sh
+mise run import ~/.foorc          # -> rcm/foorc, linked back as ~/.foorc
+mise run import ~/bin/foo         # -> rcm/bin/foo, linked back as ~/bin/foo
+mise run import -t "$(id -un)" ~/.foorc   # -> rcm/tag-<you>/foorc
+```
+
+The file moves into the repository and is linked back where it was;
+`git add` is left to you, and the task prints the command.
+
+rcm ships [`mkrc`](https://github.com/thoughtbot/rcm) for this,
+and [`mise-tasks/import`](mise-tasks/import) exists because `mkrc` gets the
+`UNDOTTED` names wrong:
+`mkrc ~/bin/foo` moves the file to `rcm/bin/foo` correctly
+but links it back as `~/.bin/foo`,
+because rcup applies `UNDOTTED` when it walks the whole tree
+and not when it is handed a single file.
+The task picks the name the way the tree walk will, then lets rcup link.
+
+It refuses a file that is already a symbolic link (imported once already),
+one outside `$HOME`,
+and one whose name has no leading dot and is not in `UNDOTTED` —
+`~/notes.txt` would come back as `~/.notes.txt`,
+so the name has to go into `UNDOTTED` in [`rcm/rcrc`](rcm/rcrc) first.
+
+### Picking the file
+
+mise has no file browser, and there is nothing to browse with.
+What it does have:
+
+- `mise run` with no task, on a terminal, opens a fuzzy picker over the task
+  list — task names only, not their arguments.
+- Argument completion, which is where the file comes in.
+  `import` declares its completion in the `#USAGE` header,
+  and offers the dotfiles in `$HOME` that are still regular files —
+  a file already imported is a symbolic link, so it drops off the list by itself.
+
+Completion needs two things:
+the [`usage`](https://usage.jdx.dev) CLI, which is what generates it
+(`mise use -g usage`),
+and mise's completions loaded in your shell.
+Without `usage` on the `PATH`, mise's completion script says so instead of completing.
+
+For zsh, [`rcm/zshrc`](rcm/zshrc) does the loading, and does it lazily:
+`mise completion zsh` shells out to `usage`,
+which is a process or two at every shell start,
+so a stub stands in until the first Tab on a `mise` command line
+and hands over to the real completion from then on.
+bash and fish are on their own — `mise completion bash` or `fish`.
+
 ## Files
 
 - [`rcm/rcrc`](rcm/rcrc): sets `DOTFILES_DIRS`, `UNDOTTED` and `TAGS`,
   and is installed as `~/.rcrc`.
-  Every `make` target also points `RCRC` at this copy, so it takes effect
+  Every task also points `RCRC` at this copy, so it takes effect
   even before — or instead of — an existing `~/.rcrc`.
 - [`rcm/profile`](rcm/profile): installed as `~/.profile`,
   puts `~/bin` and `~/.local/bin` on the `PATH` and sources `~/.bashrc` under bash.
   Equivalent to Ubuntu's stock file, and the piece macOS lacks.
 - [`rcm/zprofile`](rcm/zprofile): installed as `~/.zprofile`,
   hands `~/.profile` to zsh, which would not read it otherwise.
+- [`rcm/zshrc`](rcm/zshrc): installed as `~/.zshrc`,
+  starts the completion system and registers mise's completion lazily.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
-- [`Makefile`](Makefile): `make` links everything,
-  `make force` replaces existing files,
-  `make uninstall` runs `rcdn`,
-  `make check` lists the mapping without touching the filesystem,
-  and `make test-local` runs the checks described below.
+- [`mise-tasks/`](mise-tasks): one script per task.
+  [`lib.sh`](mise-tasks/lib.sh) holds the `REPO`, `RCRC` and `DOTFILES` they
+  share, and is deliberately not executable: mise takes every executable here
+  for a task.
+- [`mise.toml`](mise.toml): what marks the directory as a mise project, and
+  what `mise trust` trusts. The tasks are files, so it holds nothing else.
+- [`Makefile`](Makefile): runs those same scripts for a machine without mise,
+  and points at mise for the three that need it.
+- [`mise-tasks/import`](mise-tasks/import): the one task too long for a
+  one-liner, described [below](#importing-a-file-you-already-have).
 - [`bootstrap`](bootstrap): one-shot setup.
-  It requires `rcup` on `PATH`, **deletes any existing `~/git/scriptlets`**,
-  clones the repo there and runs `make`.
+  It requires `rcup`, and either `mise` or `make`,
+  **deletes any existing `~/git/scriptlets`**,
+  clones the repo there and installs —
+  trusting the clone and running `mise run install` where there is mise,
+  `make install` where there is not.
 
 `rcm/rcrc` hardcodes `DOTFILES_DIRS="$HOME/git/scriptlets/rcm"`,
 so a bare `rcup` or `lsrc` finds nothing unless the clone lives at `~/git/scriptlets`
-(where `bootstrap` puts it); `make` passes `-d` and works from any location.
-`make uninstall` removes directories it leaves empty, walking up as far as `$HOME`
+(where `bootstrap` puts it); the tasks pass `-d` and work from any location.
+`mise run uninstall` removes directories it leaves empty, walking up as far as `$HOME`
 itself — harmless on a real home directory, which always has unrelated content,
 but worth knowing in a container.
-`make test-local` never installs into your own home directory:
+`mise run test` never installs into your own home directory:
 it creates one of its own, which is also why it is safe to run anywhere.
 
 ## Prerequisites
 
-Beyond [rcm](https://github.com/thoughtbot/rcm),
-the scripts assume a GNU userland under Homebrew's `g` names:
+[rcm](https://github.com/thoughtbot/rcm) is the one hard prerequisite.
+[mise](https://mise.jdx.dev) (`curl https://mise.run | sh`, or Homebrew) is
+optional — `make` installs without it, and only `import` and the tests need it.
+
+The scripts themselves assume a GNU userland under Homebrew's `g` names:
 `h` and `s` need `fd`, `gsed`, `gsort` and GNU `parallel`;
 `fsed` needs `ag`, `gsed` and `gxargs`;
 `pmake` needs `gmake`; `git-merge-into` needs `gsed`;
@@ -209,11 +316,11 @@ so a fresh shell reports errors until they exist or the lines are removed.
 
 ## Tests
 
-`make test-local` installs everything into a throw-away home directory
+`mise run test` installs everything into a throw-away home directory
 and runs the checks in [`tests/checks`](tests/checks) against it.
 The real home directory is never touched,
 so the checks are safe to run on the machine you use.
-`make test` does the same inside a container,
+`mise run test-container` does the same inside a container,
 for a Linux run from a machine that is not Linux.
 
 [`.github/workflows/test.yaml`](.github/workflows/test.yaml) runs them
@@ -223,7 +330,9 @@ on Ubuntu the scripts are found because the stock `~/.profile` finds them,
 on macOS only because this repository ships the equivalent,
 so a break in `rcm/profile` or `rcm/zprofile` shows up in the macOS job alone.
 
-[`tests/run`](tests/run) creates the home directory
+[`tests/run`](tests/run) needs `rcup` and `mise` on the `PATH` —
+this is the one place mise is not optional, because the checks run tasks.
+It creates the home directory
 and seeds it the way a stock account is seeded:
 on Ubuntu with `.bashrc`, `.profile` and `.bash_logout` from `/etc/skel`,
 which is what `useradd -m` copies,
@@ -244,7 +353,15 @@ and they run in name order:
 - `30-preexisting`: an account that came with its own `~/.bash_profile` keeps it,
   and `make force` is what makes the scripts reachable there.
   It brings its own home directory.
-- `90-force`: `make force` replaces the files rcm skipped,
+- `40-import`: `mise run import` puts a dotfile and an `UNDOTTED` name where
+  they belong, refuses what it should, and leaves the real repository alone.
+  It works on a copy, because importing *moves* files into the repository.
+- `50-makefile`: the `Makefile` fallback agrees with the tasks it stands in
+  for, and the targets it does not implement say so instead of pretending.
+- `60-zsh-completion`: `~/.zshrc` binds `mise` to the stub, the generated
+  completion is *not* loaded at startup, and the first completion loads it and
+  rebinds to it.
+- `90-force`: `mise run force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check that rewrites what the others read.
 
@@ -270,22 +387,24 @@ The previous layout is preserved on the
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
 | `home/dot-finicky.js`, `home/dot-toprc` | `rcm/tag-macos/finicky.js`, `rcm/tag-linux/toprc` |
-| `make` | `make` — unchanged |
+| `make` | `make` — unchanged, or `mise run`, which runs the same scripts |
 | `make build` (regenerate the installers) | — nothing to regenerate |
-| `make run-force-install` | `make force` |
-| — | `make uninstall`, `make check` |
+| `make run-force-install` | `mise run force` |
+| — | `mise run uninstall`, `mise run check`, `mise run import` |
 
 The principal differences:
 
 - **rcm is a new prerequisite** — `apt install rcm`, `brew install rcm`.
+  The targets are [tasks](#tasks) now, and `make` still reaches them;
+  mise is optional, and adds `import`, the tests and completion.
 - **`make-install`, `install` and `install-personalized` are gone.**
   The two installers were generated files that had to be refreshed with `make build`
   after every change; rcm links straight out of `rcm/`, so there is nothing to regenerate.
 - **Uninstalling is now possible.**
-  `make uninstall` (`rcdn`) unlinks everything rcm currently owns,
-  and `make force` replaces existing files; the old installer could only add.
+  `mise run uninstall` (`rcdn`) unlinks everything rcm currently owns,
+  and `mise run force` replaces existing files; the old installer could only add.
   Neither prunes orphans, though: a file deleted from `rcm/` leaves a dangling
-  symlink in `$HOME`, so run `make uninstall` *before* removing one.
+  symlink in `$HOME`, so run `mise run uninstall` *before* removing one.
 - **Existing files are no longer skipped in silence.**
   The old installer left any pre-existing file alone and moved on;
   `rcup` asks what to do with one that differs.

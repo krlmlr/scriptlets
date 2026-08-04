@@ -1,0 +1,7 @@
+#!/bin/sh
+#MISE description="Link every file into the home directory"
+#MISE alias="default"
+set -eu
+. "$(dirname -- "$0")/lib.sh"
+
+exec rcup -d "$DOTFILES" "$@"

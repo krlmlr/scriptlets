@@ -1,0 +1,32 @@
+# ~/.zshrc: read by interactive zsh shells.
+#
+# The PATH is set up in ~/.profile, which ~/.zprofile hands to zsh at login;
+# this file is only for what an interactive shell needs.
+
+# The completion system, unless something has already started it.
+#
+# -i skips insecure directories rather than stopping to ask about them: with no
+# terminal to ask on -- a script, a container, `zsh -c` -- plain compinit aborts
+# and leaves no compdef behind at all.
+if ! (( $+functions[compdef] )); then
+    autoload -Uz compinit
+    compinit -i
+fi
+
+# mise's completions are generated on demand -- `mise completion zsh` shells out
+# to the `usage` CLI, which is a process or two at every single shell start.
+# This stub stands in until the first Tab on a mise command line: it then loads
+# the real completion, which rebinds `mise` to its own `_mise`, and hands that
+# first Tab over. Every later one goes straight there.
+#
+# The generated script needs the `usage` CLI on the PATH (`mise use -g usage`);
+# without it, it says so rather than completing.
+if (( $+commands[mise] && $+functions[compdef] )); then
+    _mise_lazy() {
+        unfunction _mise_lazy
+        eval "$(mise completion zsh)"
+        _mise "$@"
+    }
+
+    compdef _mise_lazy mise
+fi

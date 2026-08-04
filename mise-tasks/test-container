@@ -1,0 +1,11 @@
+#!/bin/sh
+#MISE description="Run the checks on Linux, from a machine that is not Linux"
+# CI covers Ubuntu and macOS; this is for a quick check in between.
+set -eu
+. "$(dirname -- "$0")/lib.sh"
+
+exec docker run --rm -v "$REPO:/scriptlets" -w /scriptlets buildpack-deps:latest sh -c '
+  apt-get update && apt-get install -y rcm &&
+  curl -fsSL https://mise.run | sh &&
+  MISE_TRUSTED_CONFIG_PATHS=/scriptlets ~/.local/bin/mise run test
+'
