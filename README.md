@@ -23,7 +23,7 @@ Everything that ends up in the home directory lives in [`rcm/`](rcm).
 A name there gains a leading dot on the way to `$HOME`,
 so `rcm/bashrc` becomes `~/.bashrc` and `rcm/ssh/config` becomes `~/.ssh/config`.
 
-The exceptions are listed in `UNDOTTED`:
+The exceptions are listed in the `UNDOTTED` variable in [`rcm/rcrc`](rcm/rcrc):
 `air.toml`, `bin`, `git`, `log` and `scriptlets` keep their names,
 so `rcm/bin/h` becomes `~/bin/h`.
 Naming a directory covers everything below it.
@@ -31,7 +31,8 @@ Naming a directory covers everything below it.
 ## Per-user overrides
 
 A `tag-<NAME>/` directory holds files for one account:
-[`rcm/tag-kirill/scriptlets/gitconfig`](rcm/tag-kirill) installs to `~/scriptlets/gitconfig`.
+[`rcm/tag-kirill/scriptlets/gitconfig`](rcm/tag-kirill/scriptlets/gitconfig)
+installs to `~/scriptlets/gitconfig`.
 
 [`rcm/rcrc`](rcm/rcrc) is sourced as shell, so it selects the tag itself:
 
@@ -40,13 +41,16 @@ TAGS="$(id -un)"
 ```
 
 An account with no matching `tag-` directory installs nothing extra.
-Tags are not limited to user names —
-`rcup -t work` or a `host-<hostname>/` directory work the same way.
+Tags are not limited to user names:
+`rcup -t work` selects a `tag-work/` directory *instead of* the per-user one,
+and a `host-<hostname>/` directory is picked up automatically like a tag.
 
 ## Files
 
-- [`rcm/rcrc`](rcm/rcrc): installed as `~/.rcrc`, and read directly by `make install`
-  on a machine that does not have it yet.
+- [`rcm/rcrc`](rcm/rcrc): sets `DOTFILES_DIRS`, `UNDOTTED` and `TAGS`,
+  and is installed as `~/.rcrc`.
+  Every `make` target also points `RCRC` at this copy, so it takes effect
+  even before — or instead of — an existing `~/.rcrc`.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
 - [`Makefile`](Makefile): `make` links everything,
@@ -72,7 +76,8 @@ The previous layout is preserved on the
 | `home/dot-ssh/config` | `rcm/ssh/config` |
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
-| `make build`, then `./install` | `make` |
+| `make` | `make` — unchanged |
+| `make build` (regenerate the installers) | — nothing to regenerate |
 | `make run-force-install` | `make force` |
 | — | `make uninstall`, `make check` |
 
@@ -82,9 +87,11 @@ The principal differences:
 - **`make-install`, `install` and `install-personalized` are gone.**
   The two installers were generated files that had to be refreshed with `make build`
   after every change; rcm links straight out of `rcm/`, so there is nothing to regenerate.
-- **Removing a file now removes its link.**
-  `make uninstall` (`rcdn`) unlinks everything, and `make force` replaces existing files;
-  the old installer could only add.
+- **Uninstalling is now possible.**
+  `make uninstall` (`rcdn`) unlinks everything rcm currently owns,
+  and `make force` replaces existing files; the old installer could only add.
+  Neither prunes orphans, though: a file deleted from `rcm/` leaves a dangling
+  symlink in `$HOME`, so run `make uninstall` *before* removing one.
 - **The tag is chosen with `id -un` rather than `$USER`,**
   so it also works where `$USER` is unset, such as launchd jobs
   and some non-interactive sessions.
@@ -107,7 +114,8 @@ Currently macOS only.
 
 ## h and s
 
-Iterate over all worktrees under the current Git repository and execute a command in each of them.
+Find every Git repository below the current directory and execute a command in each of them.
+Linked worktrees are included, since they carry a `.git` file.
 With `h`, the command is executed directly.
 The `s` command prepends `git`, it is a wrapper around `h git` .
 Supported switches:
@@ -116,6 +124,7 @@ Supported switches:
 - `-p` or `--paged`: show the output of the command in a pager (with aliases `hp` and `sp`)
 - `-n` or `--dry-run`: show the command that would be executed, but do not execute it
 - `-x` or `--log-commands`: also log the commands that are executed
+- `-u` or `--unsorted`: skip the sort/dedup pass over the discovered repositories
 - `--color=auto|always|never`, `--no-color`: control colored output. Default is `auto`: color is enabled when stdout is a TTY (or `--paged` is set), and disabled otherwise. The `NO_COLOR` environment variable (https://no-color.org/) also disables color unless `--color=always` is given.
 
 `gita` both does too much and not enough, let's see how far I can get with home-grown scripts.
@@ -131,7 +140,8 @@ If no project file is found, it is created using `usethis::use_rstudio()`.
 
 ## fsed
 
-Run `gsed` on files in subdirectories.
+Run `gsed` over the whole tree below the current directory, `.git` excluded.
+Files are discovered with `ag`.
 
 ## air-format
 
@@ -160,7 +170,8 @@ Colorful `egrep` .
 
 ## pdfcat
 
-Concatenate multiple PDF files into a single document.
+Dump the text of a single PDF file to stdout, a thin wrapper around `pdftotext`.
+The name is a misnomer: it concatenates nothing.
 
 ## git-bubble
 
@@ -239,10 +250,11 @@ Connects to remote machines and shows the top 5 processes by CPU consumption.
 ## ogv-to-gif
 
 Convert a video to an animated GIF.
+Currently broken: the script exits after the frame-export step, and the rest is unreachable.
 
 ## slecho
 
-Echoes each of its parameters on a single line.
+Echoes each of its parameters on a line of its own.
 
 ## rpt
 
