@@ -28,6 +28,32 @@ The exceptions are listed in the `UNDOTTED` variable in [`rcm/rcrc`](rcm/rcrc):
 so `rcm/bin/h` becomes `~/bin/h`.
 Naming a directory covers everything below it.
 
+## PATH
+
+The scripts land in `~/bin`, which no system puts on the `PATH` on its own.
+
+Ubuntu's stock `~/.profile` prepends `~/bin` and then `~/.local/bin`
+if the directories exist,
+so `~/.local/bin` ends up in front of `~/bin`.
+macOS has no counterpart:
+`/usr/libexec/path_helper`, run from `/etc/zprofile` and `/etc/profile`,
+builds the `PATH` from `/etc/paths` and `/etc/paths.d`,
+both system-wide,
+and never looks below `$HOME`.
+Neither `~/bin` nor `~/.local/bin` is special there.
+
+[`rcm/profile`](rcm/profile) closes the gap:
+it mirrors what Ubuntu does,
+so `~/bin` works the same on both platforms
+and [`rcm/bash_profile`](rcm/bash_profile) has the `~/.profile` it sources.
+
+`~/bin` stays the install target rather than `~/.local/bin`.
+Moving would gain nothing on macOS, where neither directory is automatic,
+and nothing on Ubuntu, where both already are.
+It would cost a directory of our own:
+`~/.local/bin` is shared with `pipx`, `uv` and `pip install --user`,
+while `make uninstall` (`rcdn`) is best pointed at a directory only rcm writes to.
+
 ## Per-user overrides
 
 A `tag-<NAME>/` directory holds files for one account:
@@ -51,6 +77,9 @@ and a `host-<hostname>/` directory is picked up automatically like a tag.
   and is installed as `~/.rcrc`.
   Every `make` target also points `RCRC` at this copy, so it takes effect
   even before — or instead of — an existing `~/.rcrc`.
+- [`rcm/profile`](rcm/profile): installed as `~/.profile`,
+  puts `~/bin` and `~/.local/bin` on the `PATH` and sources `~/.bashrc` under bash.
+  Equivalent to Ubuntu's stock file, and the piece macOS lacks.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
 - [`Makefile`](Makefile): `make` links everything,
