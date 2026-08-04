@@ -22,8 +22,8 @@ and [`mise run import`](#importing-a-file-you-already-have) moves an existing on
 
 ## Tasks
 
-Everything is a [mise](https://mise.jdx.dev) task,
-defined in [`mise.toml`](mise.toml):
+Everything is a [mise](https://mise.jdx.dev) task.
+Each one is a script in [`mise-tasks/`](mise-tasks) — one file, one task:
 
 | Task | |
 | --- | --- |
@@ -38,12 +38,18 @@ defined in [`mise.toml`](mise.toml):
 `mise tasks` lists them with their descriptions,
 and `mise run` with no task opens a picker on a terminal.
 
-[`Makefile`](Makefile) is a fallback for a machine without mise:
-`make`, `make force`, `make check` and `make uninstall` are the same one-line
-rcm commands, and nothing else is duplicated there.
-`make import`, `make test` and `make test-container` name the mise task and
-fail, rather than growing a second implementation that drifts —
-[`tests/checks/50-makefile.sh`](tests/checks/50-makefile.sh) holds them to it.
+[`Makefile`](Makefile) is the fallback for a machine without mise,
+and it cannot drift:
+`make install` runs [`mise-tasks/install`](mise-tasks/install),
+the same file `mise run install` runs.
+There is one implementation of each task and two ways to reach it.
+
+`make import`, `make test` and `make test-container` are the exception —
+`import` needs mise to parse its arguments,
+the test targets run tasks themselves —
+so they name the task and stop rather than pretend.
+[`tests/checks/50-makefile.sh`](tests/checks/50-makefile.sh) checks what
+construction cannot: that no task was added without a target to reach it by.
 
 A clone is not trusted until you say so —
 `mise trust` once, or `mise run` refuses to read `mise.toml`.
@@ -206,8 +212,15 @@ What it does have:
 Completion needs two things:
 the [`usage`](https://usage.jdx.dev) CLI, which is what generates it
 (`mise use -g usage`),
-and mise's completions sourced in your shell (`mise completion zsh`, `bash` or `fish`).
+and mise's completions loaded in your shell.
 Without `usage` on the `PATH`, mise's completion script says so instead of completing.
+
+For zsh, [`rcm/zshrc`](rcm/zshrc) does the loading, and does it lazily:
+`mise completion zsh` shells out to `usage`,
+which is a process or two at every shell start,
+so a stub stands in until the first Tab on a `mise` command line
+and hands over to the real completion from then on.
+bash and fish are on their own — `mise completion bash` or `fish`.
 
 ## Files
 
@@ -220,18 +233,26 @@ Without `usage` on the `PATH`, mise's completion script says so instead of compl
   Equivalent to Ubuntu's stock file, and the piece macOS lacks.
 - [`rcm/zprofile`](rcm/zprofile): installed as `~/.zprofile`,
   hands `~/.profile` to zsh, which would not read it otherwise.
+- [`rcm/zshrc`](rcm/zshrc): installed as `~/.zshrc`,
+  starts the completion system and registers mise's completion lazily.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
-- [`mise.toml`](mise.toml): the tasks, and the `RCRC` and `DOTFILES`
-  environment they all share.
-- [`Makefile`](Makefile): the same one-liners for a machine without mise,
-  and a pointer to the task for everything else.
+- [`mise-tasks/`](mise-tasks): one script per task.
+  [`lib.sh`](mise-tasks/lib.sh) holds the `REPO`, `RCRC` and `DOTFILES` they
+  share, and is deliberately not executable: mise takes every executable here
+  for a task.
+- [`mise.toml`](mise.toml): what marks the directory as a mise project, and
+  what `mise trust` trusts. The tasks are files, so it holds nothing else.
+- [`Makefile`](Makefile): runs those same scripts for a machine without mise,
+  and points at mise for the three that need it.
 - [`mise-tasks/import`](mise-tasks/import): the one task too long for a
   one-liner, described [below](#importing-a-file-you-already-have).
 - [`bootstrap`](bootstrap): one-shot setup.
-  It requires `rcup` and `mise` on `PATH`,
+  It requires `rcup`, and either `mise` or `make`,
   **deletes any existing `~/git/scriptlets`**,
-  clones the repo there, trusts it and runs `mise run install`.
+  clones the repo there and installs —
+  trusting the clone and running `mise run install` where there is mise,
+  `make install` where there is not.
 
 `rcm/rcrc` hardcodes `DOTFILES_DIRS="$HOME/git/scriptlets/rcm"`,
 so a bare `rcup` or `lsrc` finds nothing unless the clone lives at `~/git/scriptlets`
@@ -330,6 +351,9 @@ and they run in name order:
   It works on a copy, because importing *moves* files into the repository.
 - `50-makefile`: the `Makefile` fallback agrees with the tasks it stands in
   for, and the targets it does not implement say so instead of pretending.
+- `60-zsh-completion`: `~/.zshrc` binds `mise` to the stub, the generated
+  completion is *not* loaded at startup, and the first completion loads it and
+  rebinds to it.
 - `90-force`: `mise run force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check that rewrites what the others read.

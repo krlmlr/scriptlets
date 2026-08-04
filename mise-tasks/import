@@ -11,6 +11,7 @@
 # the way rcup's tree walk will, and lets rcup do the linking.
 
 set -eu
+. "$(dirname -- "$0")/lib.sh"
 
 die() {
     echo "import: $1" >&2

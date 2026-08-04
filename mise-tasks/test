@@ -1,0 +1,6 @@
+#!/bin/sh
+#MISE description="Run the checks against a throw-away home directory"
+set -eu
+. "$(dirname -- "$0")/lib.sh"
+
+exec "$REPO/tests/run" "$@"

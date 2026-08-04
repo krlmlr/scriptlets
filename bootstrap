@@ -8,8 +8,8 @@ command -v rcup >/dev/null || {
   exit 1
 }
 
-command -v mise >/dev/null || {
-  echo "mise is required: curl https://mise.run | sh" >&2
+command -v mise >/dev/null || command -v make >/dev/null || {
+  echo "mise or make is required: curl https://mise.run | sh" >&2
   exit 1
 }
 
@@ -44,7 +44,12 @@ echo "Answering 'a' replaces every conflicting file without keeping a backup."
 echo
 set -x
 
-# A freshly cloned config is untrusted, and `mise run` refuses to read it until
-# it is told otherwise.
-mise trust
-mise run install
+# mise where there is mise, make where there is not: both run mise-tasks/install,
+# so the outcome is the same either way. A freshly cloned config is untrusted,
+# and `mise run` refuses to read it until it is told otherwise.
+if command -v mise >/dev/null; then
+  mise trust
+  mise run install
+else
+  make install
+fi
