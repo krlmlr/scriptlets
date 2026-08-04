@@ -32,6 +32,37 @@ Naming a directory covers everything below it.
 (`[ynaq]` — `n` and Enter skip it, `y` replaces one, `a` replaces all without backup, `q` aborts).
 Identical files are linked silently, and files that do not exist yet are created without asking.
 
+## PATH
+
+The scripts land in `~/bin`, which no system puts on the `PATH` on its own.
+
+Ubuntu's stock `~/.profile` prepends `~/bin` and then `~/.local/bin`
+if the directories exist,
+so `~/.local/bin` ends up in front of `~/bin`.
+macOS has no counterpart:
+`/usr/libexec/path_helper`, run from `/etc/zprofile` and `/etc/profile`,
+builds the `PATH` from `/etc/paths` and `/etc/paths.d`,
+both system-wide,
+and never looks below `$HOME`.
+Neither `~/bin` nor `~/.local/bin` is special there.
+
+[`rcm/profile`](rcm/profile) closes the gap:
+it mirrors what Ubuntu does,
+so `~/bin` works the same on both platforms
+and [`rcm/bash_profile`](rcm/bash_profile) has the `~/.profile` it sources.
+[`rcm/zprofile`](rcm/zprofile) does the same for zsh,
+the default shell on macOS since Catalina,
+which never reads `~/.profile` on its own.
+rcm skips a file the account already has,
+so a machine that came with its own `~/.profile` keeps it until `make force`.
+
+`~/bin` stays the install target rather than `~/.local/bin`.
+Moving would gain nothing on macOS, where neither directory is automatic,
+and nothing on Ubuntu, where both already are.
+It would cost a directory of our own:
+`~/.local/bin` is shared with `pipx`, `uv` and `pip install --user`,
+while `make uninstall` (`rcdn`) is best pointed at a directory only rcm writes to.
+
 ## Per-user overrides
 
 A `tag-<NAME>/` directory holds files for one account:
@@ -107,12 +138,18 @@ dangling because their target moved into a tag directory.
   and is installed as `~/.rcrc`.
   Every `make` target also points `RCRC` at this copy, so it takes effect
   even before — or instead of — an existing `~/.rcrc`.
+- [`rcm/profile`](rcm/profile): installed as `~/.profile`,
+  puts `~/bin` and `~/.local/bin` on the `PATH` and sources `~/.bashrc` under bash.
+  Equivalent to Ubuntu's stock file, and the piece macOS lacks.
+- [`rcm/zprofile`](rcm/zprofile): installed as `~/.zprofile`,
+  hands `~/.profile` to zsh, which would not read it otherwise.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
 - [`Makefile`](Makefile): `make` links everything,
   `make force` replaces existing files,
   `make uninstall` runs `rcdn`,
-  and `make check` lists the mapping without touching the filesystem.
+  `make check` lists the mapping without touching the filesystem,
+  and `make test-local` runs the checks described below.
 - [`bootstrap`](bootstrap): one-shot setup.
   It requires `rcup` on `PATH`, **deletes any existing `~/git/scriptlets`**,
   clones the repo there and runs `make`.
@@ -123,7 +160,8 @@ so a bare `rcup` or `lsrc` finds nothing unless the clone lives at `~/git/script
 `make uninstall` removes directories it leaves empty, walking up as far as `$HOME`
 itself — harmless on a real home directory, which always has unrelated content,
 but worth knowing in a container.
-`make test` runs an install in a throwaway container, `make test-local` inside one.
+`make test-local` never installs into your own home directory:
+it creates one of its own, which is also why it is safe to run anywhere.
 
 ## Prerequisites
 
@@ -136,10 +174,9 @@ the scripts assume a GNU userland under Homebrew's `g` names:
 `rpt` needs `inotifywait` and `unbuffer`;
 `git-mmv` needs `mmv`; `imgdiff` needs ImageMagick.
 
-Nothing here puts `~/bin` on `PATH`.
-On Ubuntu the distribution's own `~/.profile` happens to add it;
-on macOS it does not, and zsh — the default login shell — reads none of the
-bash files shipped here, so add `~/bin` to `PATH` yourself.
+Putting `~/bin` on the `PATH` is not among the things left to you:
+[`rcm/profile`](rcm/profile) and [`rcm/zprofile`](rcm/zprofile) do it,
+on macOS as well as on Ubuntu — see [PATH](#path).
 
 ## Configuration files
 
@@ -148,6 +185,7 @@ these land in the home directory:
 
 | File | Installed as | |
 | --- | --- | --- |
+| [`profile`](rcm/profile), [`zprofile`](rcm/zprofile) | `~/.profile`, `~/.zprofile` | login shells of any kind: `~/bin` and `~/.local/bin` on the `PATH` |
 | [`bashrc`](rcm/bashrc), [`bash_profile`](rcm/bash_profile), [`bash_aliases`](rcm/bash_aliases) | `~/.bashrc`, `~/.bash_profile`, `~/.bash_aliases` | interactive bash: prompt, history, aliases |
 | [`tag-macos/bash_aliases_os`](rcm/tag-macos/bash_aliases_os), [`tag-linux/bash_aliases_os`](rcm/tag-linux/bash_aliases_os) | `~/.bash_aliases_os` | the aliases, completions and bindings of one platform, sourced from `~/.bash_aliases` |
 | [`autoscreen`](rcm/autoscreen) | `~/.autoscreen` | drop into `screen` automatically on an interactive SSH login |
@@ -168,6 +206,51 @@ Several of these source files that this repository does *not* ship —
 `~/.bash_secrets`, `~/git/bash-git-prompt`, `~/git/complete-alias` —
 without guarding for their absence,
 so a fresh shell reports errors until they exist or the lines are removed.
+
+## Tests
+
+`make test-local` installs everything into a throw-away home directory
+and runs the checks in [`tests/checks`](tests/checks) against it.
+The real home directory is never touched,
+so the checks are safe to run on the machine you use.
+`make test` does the same inside a container,
+for a Linux run from a machine that is not Linux.
+
+[`.github/workflows/test.yaml`](.github/workflows/test.yaml) runs them
+on Ubuntu and on macOS.
+Both matter:
+on Ubuntu the scripts are found because the stock `~/.profile` finds them,
+on macOS only because this repository ships the equivalent,
+so a break in `rcm/profile` or `rcm/zprofile` shows up in the macOS job alone.
+
+[`tests/run`](tests/run) creates the home directory
+and seeds it the way a stock account is seeded:
+on Ubuntu with `.bashrc`, `.profile` and `.bash_logout` from `/etc/skel`,
+which is what `useradd -m` copies,
+on macOS with nothing at all.
+The three are taken by name rather than wholesale,
+because `/etc/skel` is also where an image builder drops extras —
+the CI runner's `/etc/skel` carries a `~/.bash_profile` no stock Ubuntu account has,
+and seeding it would test the CI image instead of the platform.
+
+Each file in `tests/checks` is a separate script
+that sources [`tests/lib.sh`](tests/lib.sh) for `pass`, `fail` and the assertions,
+and they run in name order:
+
+- `10-path`: the scripts are on the `PATH` of a login shell, in every shell an
+  account may log in with, and they run.
+- `20-install`: every destination rcm lists exists, configuration files are
+  symbolic links, and installing twice changes nothing.
+- `30-preexisting`: an account that came with its own `~/.bash_profile` keeps it,
+  and `make force` is what makes the scripts reachable there.
+  It brings its own home directory.
+- `90-force`: `make force` replaces the files rcm skipped,
+  and the scripts are still found afterwards.
+  It runs last because it is the one check that rewrites what the others read.
+
+Adding a file to `tests/checks` is enough;
+`tests/run 10-path` runs one check by name,
+and `KEEP_TEST_HOME=1` leaves the home directory behind to look at.
 
 # Coming from the previous version
 

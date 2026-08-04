@@ -1,0 +1,13 @@
+# ~/.zprofile: read by login zsh shells.
+#
+# zsh has been the default shell on macOS since Catalina,
+# and it never reads ~/.profile,
+# so without this file the PATH set up there is missed entirely.
+#
+# ~/.zprofile is the right place rather than ~/.zshenv:
+# macOS runs /usr/libexec/path_helper from /etc/zprofile,
+# after ~/.zshenv and before this file,
+# and path_helper rebuilds the PATH from /etc/paths and /etc/paths.d,
+# pushing anything set earlier to the back.
+
+emulate sh -c '. "$HOME/.profile"'
