@@ -41,3 +41,89 @@ fi
 if false; then
 . "$HOME/.local/bin/rigenv"
 fi
+
+# ---------------------------------------------------------------------------
+# Eternal history
+#
+# One file per day under a directory, so no single file grows without bound
+# and everything older stays on disk and greppable.
+#
+# What bash needed PROMPT_COMMAND for, zsh does natively: SHARE_HISTORY
+# appends each command as it is entered and imports what other shells have
+# appended, so concurrent sessions stay in sync with no hook.
+# ---------------------------------------------------------------------------
+HISTSIZE=10000000
+SAVEHIST=$HISTSIZE
+
+setopt EXTENDED_HISTORY     # `: <epoch>:<elapsed>;<cmd>` -- bash's HISTTIMEFORMAT
+setopt SHARE_HISTORY        # append as you go; pick up other shells' entries
+setopt HIST_IGNORE_SPACE    # a leading space keeps a command out
+setopt HIST_IGNORE_DUPS     # collapse an immediate repeat
+setopt HIST_REDUCE_BLANKS
+
+# Deliberate, and the reason is the whole point of keeping history forever:
+# HIST_IGNORE_ALL_DUPS keeps only the most recent instance of a command, which
+# destroys the frequency information. "Which commands do I run enough that they
+# should be scripts in ~/bin" is a question only the counts can answer.
+unsetopt HIST_IGNORE_ALL_DUPS
+
+__zsh_history_dir="$HOME/.zsh_history.d"
+[[ -d $__zsh_history_dir ]] || mkdir -p "$__zsh_history_dir"
+
+# One-time migration of a single-file history, matching what the bash side does
+# with ~/.bash_eternal_history.
+if [[ -f $HOME/.zsh_history && ! -e $__zsh_history_dir/legacy.log ]]; then
+  mv "$HOME/.zsh_history" "$__zsh_history_dir/legacy.log"
+fi
+
+# ${(%):-%D{...}} is strftime via prompt expansion -- the same string $(date)
+# would give, without the fork. This runs at every prompt below, so a fork here
+# would be a fork per command.
+HISTFILE="$__zsh_history_dir/${(%):-%D{%Y-%m-%d}}.log"
+
+# Pull prior days into the in-memory list so Ctrl-R reaches them. Today's file
+# is skipped: zsh loads $HISTFILE itself, and reading it twice duplicates every
+# entry. (N) is null-glob, so an empty directory is not an error.
+() {
+  local f
+  for f in "$__zsh_history_dir"/legacy.log(N) "$__zsh_history_dir"/[0-9]*.log(N); do
+    [[ $f == $HISTFILE ]] && continue
+    fc -R "$f"
+  done
+}
+
+# Roll over at midnight without needing a new shell. `fc -A` appends only what
+# is new -- never `fc -W`, which would write the entire preloaded history into
+# today's file and duplicate every prior day.
+autoload -Uz add-zsh-hook
+__zsh_history_rotate() {
+  local today="$__zsh_history_dir/${(%):-%D{%Y-%m-%d}}.log"
+  [[ $HISTFILE == $today ]] && return
+  fc -A
+  HISTFILE=$today
+}
+add-zsh-hook precmd __zsh_history_rotate
+
+# ---------------------------------------------------------------------------
+# The bash bridge
+#
+# bashcompinit first: ~/.bash_aliases (via ~/.bash_aliases_os on macOS) calls
+# `complete`, which is not a zsh builtin without it.
+#
+# ~/.bash_secrets is sourced unguarded by bash_aliases itself, so it has to
+# exist: `touch ~/.bash_secrets` if it does not.
+# ---------------------------------------------------------------------------
+autoload -Uz bashcompinit && bashcompinit
+[[ -r $HOME/.bash_aliases ]] && source "$HOME/.bash_aliases"
+
+# ---------------------------------------------------------------------------
+# Editor and aliases
+# ---------------------------------------------------------------------------
+if [[ $TERM_PROGRAM == vscode ]]; then
+  case $__CFBundleIdentifier in
+    com.microsoft.VSCode) export EDITOR="code --wait" ;;
+    co.posit.positron)    export EDITOR="positron --wait" ;;
+  esac
+fi
+
+compdef g=git
