@@ -112,10 +112,16 @@ on Ubuntu the scripts are found because the stock `~/.profile` finds them,
 on macOS only because this repository ships the equivalent,
 so a break in `rcm/profile` or `rcm/zprofile` shows up in the macOS job alone.
 
-[`tests/run`](tests/run) creates the home directory,
-seeding it from `/etc/skel` where that exists —
-which is what `useradd -m` does,
-and the reason a fresh Ubuntu account has a `~/.profile` while a macOS one does not.
+[`tests/run`](tests/run) creates the home directory
+and seeds it the way a stock account is seeded:
+on Ubuntu with `.bashrc`, `.profile` and `.bash_logout` from `/etc/skel`,
+which is what `useradd -m` copies,
+on macOS with nothing at all.
+The three are taken by name rather than wholesale,
+because `/etc/skel` is also where an image builder drops extras —
+the CI runner's `/etc/skel` carries a `~/.bash_profile` no stock Ubuntu account has,
+and seeding it would test the CI image instead of the platform.
+
 Each file in `tests/checks` is a separate script
 that sources [`tests/lib.sh`](tests/lib.sh) for `pass`, `fail` and the assertions,
 and they run in name order:
@@ -124,6 +130,9 @@ and they run in name order:
   account may log in with, and they run.
 - `20-install`: every destination rcm lists exists, configuration files are
   symbolic links, and installing twice changes nothing.
+- `30-preexisting`: an account that came with its own `~/.bash_profile` keeps it,
+  and `make force` is what makes the scripts reachable there.
+  It brings its own home directory.
 - `90-force`: `make force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check that rewrites what the others read.

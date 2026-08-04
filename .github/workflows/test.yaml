@@ -29,12 +29,14 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # zsh comes with macOS; on Ubuntu it is installed so that the checks
+      # cover it there too, rather than skipping it.
       - name: Install rcm
         run: |
           case "$RUNNER_OS" in
           Linux)
             sudo apt-get update
-            sudo apt-get install -y rcm
+            sudo apt-get install -y rcm zsh
             ;;
           macOS)
             brew install rcm

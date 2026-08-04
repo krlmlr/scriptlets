@@ -32,21 +32,39 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# What a fresh account starts with. `useradd -m` seeds it from /etc/skel, which
-# is where Ubuntu's stock ~/.profile -- the file that puts ~/bin on the PATH --
-# comes from. macOS has no /etc/skel and gives a new account no shell dotfiles
-# at all, which is the case these checks exist to cover.
-if [ -d /etc/skel ]; then
-    cp -R /etc/skel/. "$TEST_HOME"/
-fi
+# What a stock account starts with:
+#
+#   Ubuntu -- .bashrc, .profile and .bash_logout, copied from /etc/skel by
+#             `useradd -m`. The ~/.profile from there is what puts ~/bin on the
+#             PATH on a machine that has never been touched.
+#   macOS  -- nothing at all. There is no /etc/skel, and a new account gets no
+#             shell dotfiles, which is the case these checks exist to cover.
+#
+# The three files are named rather than copied wholesale, because /etc/skel is
+# also where an image builder drops extras: the GitHub Actions Ubuntu runner
+# ships a ~/.bash_profile that no stock Ubuntu account has. bash reads
+# ~/.bash_profile *instead of* ~/.profile, so seeding that file would test the
+# CI image rather than the platform. The case is covered on purpose in
+# tests/checks/30-preexisting.sh instead.
+seeded=
+for name in .bashrc .profile .bash_logout; do
+    if [ -f "/etc/skel/$name" ]; then
+        cp "/etc/skel/$name" "$TEST_HOME/$name"
+        seeded="$seeded $name"
+    fi
+done
 
 HOME=$TEST_HOME
 export HOME
 
-echo "# repo: $REPO"
-echo "# home: $TEST_HOME"
+echo "# repo:   $REPO"
+echo "# home:   $TEST_HOME"
+echo "# seeded:${seeded:- nothing}"
 echo "# make install"
-make -C "$REPO" install >/dev/null
+
+# Stdin comes from /dev/null throughout: rcup asks before replacing a file that
+# already exists and differs, and a check must never wait for an answer.
+make -C "$REPO" install >/dev/null </dev/null
 
 status=0
 
@@ -59,7 +77,7 @@ for check in "$REPO"/tests/checks/*.sh; do
     fi
 
     echo "# $name"
-    sh "$check" || status=1
+    sh "$check" </dev/null || status=1
 done
 
 failures=$(wc -l <"$TEST_FAILURES" | tr -d ' ')

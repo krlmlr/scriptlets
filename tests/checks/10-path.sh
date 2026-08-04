@@ -45,6 +45,15 @@ done
 
 # Beyond being found, a script has to run. `g` forwards to git, which every
 # machine running these checks has.
-assert_equal "a script found on the PATH runs" \
-    "$(git --version)" \
-    "$(login_output bash 'g --version')"
+#
+# Both versions are read inside the login shell, not one there and one here:
+# the git a login shell finds is not always the git this script finds. On macOS
+# it is Apple's, while the checkout was made with the one from Homebrew.
+git_version=$(login_output bash 'git --version')
+
+if [ -z "$git_version" ]; then
+    fail "a script found on the PATH runs" "a login shell finds no git at all"
+else
+    assert_equal "a script found on the PATH runs" \
+        "$git_version" "$(login_output bash 'g --version')"
+fi
