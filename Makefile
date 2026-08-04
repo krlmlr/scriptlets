@@ -24,14 +24,13 @@ check:
 uninstall:
 	$(RCM) rcdn $(DOTDIR)
 
+# The same suite in a container, for a Linux run from a machine that is not
+# Linux. CI covers Ubuntu and macOS; this is for a quick check in between.
 test:
 	docker run --rm -v $(shell pwd):/scriptlets -w /scriptlets buildpack-deps:latest \
 	  sh -c 'apt-get update && apt-get install -y rcm && make test-local'
 
+# Install into a throw-away home directory and run the checks against it. The
+# home directory of whoever runs this is left alone.
 test-local:
-	make install
-	ls -lRa $${HOME}
-	make install
-	ls -lRa $${HOME}
-	make force
-	ls -lRa $${HOME}
+	./tests/run

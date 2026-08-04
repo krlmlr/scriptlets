@@ -1,0 +1,41 @@
+# ~/.profile: read by login shells, and by ~/.bash_profile explicitly.
+#
+# Ubuntu ships a stock ~/.profile that puts ~/bin and ~/.local/bin on the PATH.
+# macOS ships nothing of the sort: there, the PATH is assembled by
+# /usr/libexec/path_helper from /etc/paths and /etc/paths.d, both system-wide,
+# and no directory below $HOME is ever consulted.
+# This file makes the two platforms agree,
+# so ~/bin works on macOS without hand-written dotfiles outside this repository.
+#
+# rcm skips a file that already exists,
+# so an Ubuntu box keeps its stock ~/.profile unless `make force` is used.
+# The two are kept equivalent on purpose: same order, same conditions.
+
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+        . "$HOME/.bashrc"
+    fi
+fi
+
+# set PATH so it includes user's private bin if it exists
+#
+# The case guard is the one deviation from the stock file:
+# a login shell started from a shell that already ran this file
+# (screen, ssh to localhost, `bash -l`)
+# would otherwise prepend the same entry again on every nesting level.
+if [ -d "$HOME/bin" ]; then
+    case ":$PATH:" in
+        *":$HOME/bin:"*) ;;
+        *) PATH="$HOME/bin:$PATH" ;;
+    esac
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ]; then
+    case ":$PATH:" in
+        *":$HOME/.local/bin:"*) ;;
+        *) PATH="$HOME/.local/bin:$PATH" ;;
+    esac
+fi
