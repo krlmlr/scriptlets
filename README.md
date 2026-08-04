@@ -241,6 +241,11 @@ bash and fish are on their own — `mise completion bash` or `fish`.
   hands `~/.profile` to zsh, which would not read it otherwise.
 - [`rcm/zshrc`](rcm/zshrc): installed as `~/.zshrc`,
   starts the completion system and registers mise's completion lazily.
+- [`rcm/zshenv`](rcm/zshenv): installed as `~/.zshenv`, read by every zsh
+  before anything else.
+  It loads the startup profiler where that exists, and defines a no-op
+  `zsh_startup_mark` where it does not, which is what keeps the marks in the
+  other two files quiet on a machine that has never seen the profiler.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
 - [`mise-tasks/`](mise-tasks): one script per task.
@@ -361,9 +366,9 @@ and they run in name order:
   It works on a copy, because importing *moves* files into the repository.
 - `50-makefile`: the `Makefile` fallback agrees with the tasks it stands in
   for, and the targets it does not implement say so instead of pretending.
-- `60-zsh-completion`: `~/.zshrc` binds `mise` to the stub, the generated
-  completion is *not* loaded at startup, and the first completion loads it and
-  rebinds to it.
+- `60-zsh-startup`: a zsh startup says nothing at all, and `~/.zshrc` binds
+  `mise` to the stub — the generated completion is *not* loaded at startup, and
+  the first completion loads it and rebinds to it.
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub remotes of a
   throw-away repository and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.

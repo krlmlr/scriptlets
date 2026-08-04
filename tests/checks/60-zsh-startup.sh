@@ -1,7 +1,14 @@
 #!/bin/sh
-# ~/.zshrc registers mise's completion lazily: a stub stands in until the first
-# Tab, which then loads the generated completion and hands over. Both halves are
-# checked -- a stub that never loads the real thing completes nothing, and an
+# The zsh startup files: quiet, and lazy about mise's completion.
+#
+# Quiet, because a line that only works on one machine is easy to add and hard
+# to notice -- the profiling marks called a function that only the author's
+# profiler defines, so every zsh start elsewhere said `command not found`, once
+# per startup file.
+#
+# Lazy, because ~/.zshrc registers mise's completion through a stub that stands
+# in until the first Tab and then loads the generated completion. Both halves
+# are checked: a stub that never loads the real thing completes nothing, and an
 # eager load costs a `usage` run at every shell start, which is the thing being
 # avoided.
 
@@ -28,6 +35,17 @@ probe() {
 
 assert_equal "~/.zshrc is installed" \
     "$REPO/rcm/zshrc" "$(readlink "$HOME/.zshrc" 2>/dev/null)"
+
+# Interactive *and* login, so that all three files are read. Only complaints
+# that name a file in this home directory count: a system-wide zshrc with
+# opinions of its own is not ours to fix.
+noise=$(zsh -ilc true </dev/null 2>&1 >/dev/null | grep -F "$HOME" || true)
+
+if [ -z "$noise" ]; then
+    pass "a zsh startup says nothing"
+else
+    fail "a zsh startup says nothing" "$noise"
+fi
 
 assert_equal "zsh binds mise to the lazy stub" \
     "_mise_lazy" "$(probe 'print "probe=${_comps[mise]}"')"
