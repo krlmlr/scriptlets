@@ -1,0 +1,14 @@
+# Installed as ~/.rcrc, and also read directly by `make install` on a machine
+# that does not have it yet (via the RCRC environment variable).
+
+DOTFILES_DIRS="$HOME/git/scriptlets/rcm"
+
+# Names that must *not* gain a leading dot. Everything else in the dotfiles
+# directory does: `bashrc` becomes ~/.bashrc, `ssh/config` becomes
+# ~/.ssh/config. Listing a directory covers everything below it.
+UNDOTTED="air.toml bin git log scriptlets"
+
+# rcrc is sourced as shell, so the per-user overrides in tag-<user>/ are
+# selected automatically -- an account with no matching directory installs
+# nothing extra. This replaces the old `if [ -d personalized/$USER ]`.
+TAGS="$(id -un)"

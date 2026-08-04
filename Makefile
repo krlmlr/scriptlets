@@ -1,40 +1,37 @@
-all: run-install
+all: install
 
-# Directories exist: personalized/kirill, personalized/cynkra
-# all_personalized should then be install-kirill install-cynkra
-all_personalized=$(shell ls personalized | tr '\n' ' ')
+.PHONY: all install force check uninstall test test-local
 
-build: install install-personalized
+# RCRC points rcm at the copy in this repository, so the first run works on a
+# machine that has no ~/.rcrc yet; -d overrides DOTFILES_DIRS, so the
+# repository does not have to sit in ~/git/scriptlets.
+RCM = RCRC="$(CURDIR)/rcm/rcrc"
+DOTDIR = -d "$(CURDIR)/rcm"
 
-.PHONY: run-install run-quiet-install run-force-install
+install:
+	$(RCM) rcup $(DOTDIR)
 
-install: make-install Makefile
-	./make-install home '$${HOME}' > $@
-	chmod +x $@
+# Replace existing files instead of skipping them. This is what
+# `make run-force-install` used to do.
+force:
+	$(RCM) rcup -f $(DOTDIR)
 
-install-personalized: make-install Makefile
-	./make-install personalized/kirill '$${HOME}/scriptlets' | sed 's#kirill#$${USER}#g' > $@
-	chmod +x $@
+# List the mapping without touching the filesystem.
+check:
+	$(RCM) lsrc $(DOTDIR)
 
-run-install:
-	./install
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized; fi
-
-run-quiet-install:
-	./install --quiet
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized --quiet; fi
-
-run-force-install:
-	./install --force
-	if [ -n "$${USER}" ] && [ -d personalized/$${USER} ]; then ./install-personalized --force; fi
+# Remove every symlink rcm owns.
+uninstall:
+	$(RCM) rcdn $(DOTDIR)
 
 test:
-	docker run --rm -v $(shell pwd):/scriptlets -w /scriptlets buildpack-deps:latest make test-local
+	docker run --rm -v $(shell pwd):/scriptlets -w /scriptlets buildpack-deps:latest \
+	  sh -c 'apt-get update && apt-get install -y rcm && make test-local'
 
 test-local:
-	make run-quiet-install
+	make install
 	ls -lRa $${HOME}
-	make run-quiet-install
+	make install
 	ls -lRa $${HOME}
-	make run-force-install
+	make force
 	ls -lRa $${HOME}
