@@ -15,3 +15,5 @@ zsh_startup_mark zprofile
 # pushing anything set earlier to the back.
 
 emulate sh -c '. "$HOME/.profile"'
+
+. "$HOME/.local/bin/rigenv"

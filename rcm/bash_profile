@@ -5,3 +5,5 @@ keychain ~/.ssh/id_rsa
 . ~/.keychain/$HOSTNAME-sh
 
 . ~/.autoscreen
+
+. "$HOME/.local/bin/rigenv"

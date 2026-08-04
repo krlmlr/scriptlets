@@ -34,3 +34,5 @@ if (( $+commands[mise] && $+functions[compdef] )); then
 
     compdef _mise_lazy mise
 fi
+
+. "$HOME/.local/bin/rigenv"

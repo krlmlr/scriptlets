@@ -210,3 +210,5 @@ alias gco="git co"
 if [ -d /opt/homebrew ]; then
   export PATH=/opt/homebrew/bin:$PATH
 fi
+
+. "$HOME/.local/bin/rigenv"
