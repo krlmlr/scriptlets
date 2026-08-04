@@ -41,12 +41,13 @@ installs to `~/scriptlets/gitconfig`.
 [`rcm/rcrc`](rcm/rcrc) is sourced as shell, so it selects the tag itself:
 
 ```sh
-TAGS="$(id -un)"
+TAGS="$(id -un) $OS_TAG"
 ```
 
 An account with no matching `tag-` directory installs nothing extra.
+`$OS_TAG` is the platform tag described in the next section.
 Tags are not limited to user names:
-`rcup -t work` selects a `tag-work/` directory *instead of* the per-user one,
+`rcup -t work` selects a `tag-work/` directory *instead of* both of these,
 and a `host-<hostname>/` directory is picked up automatically like a tag.
 
 The three files under `~/scriptlets/` are read by the configuration that ships here —
@@ -131,7 +132,8 @@ the scripts assume a GNU userland under Homebrew's `g` names:
 `h` and `s` need `fd`, `gsed`, `gsort` and GNU `parallel`;
 `fsed` needs `ag`, `gsed` and `gxargs`;
 `pmake` needs `gmake`; `git-merge-into` needs `gsed`;
-`n` and `bkg` need `terminal-notifier`; `rpt` needs `inotifywait` and `unbuffer`;
+`n` and `bkg` need `terminal-notifier`, and are installed on macOS only;
+`rpt` needs `inotifywait` and `unbuffer`;
 `git-mmv` needs `mmv`; `imgdiff` needs ImageMagick.
 
 Nothing here puts `~/bin` on `PATH`.
@@ -141,11 +143,13 @@ bash files shipped here, so add `~/bin` to `PATH` yourself.
 
 ## Configuration files
 
-Alongside the scripts in `rcm/bin/`, these land in the home directory:
+Alongside the scripts in `rcm/bin/` and `rcm/tag-macos/bin/`,
+these land in the home directory:
 
 | File | Installed as | |
 | --- | --- | --- |
 | [`bashrc`](rcm/bashrc), [`bash_profile`](rcm/bash_profile), [`bash_aliases`](rcm/bash_aliases) | `~/.bashrc`, `~/.bash_profile`, `~/.bash_aliases` | interactive bash: prompt, history, aliases |
+| [`tag-macos/bash_aliases_os`](rcm/tag-macos/bash_aliases_os), [`tag-linux/bash_aliases_os`](rcm/tag-linux/bash_aliases_os) | `~/.bash_aliases_os` | the aliases, completions and bindings of one platform, sourced from `~/.bash_aliases` |
 | [`autoscreen`](rcm/autoscreen) | `~/.autoscreen` | drop into `screen` automatically on an interactive SSH login |
 | [`gitconfig`](rcm/gitconfig), [`gitaliases`](rcm/gitaliases) | `~/.gitconfig`, `~/.gitaliases` | Git settings and aliases; pulls in several optional `~/.gitconfig.*` includes |
 | [`gitignore`](rcm/gitignore) | `~/.gitignore` | global excludes, wired up via `core.excludesfile` |
@@ -153,10 +157,11 @@ Alongside the scripts in `rcm/bin/`, these land in the home directory:
 | [`Rprofile`](rcm/Rprofile) | `~/.Rprofile` | R defaults: CRAN mirror selection, `usethis`/`testthat`/`pillar` options, per-project `.lib` and `Makevars` hooks |
 | [`air.toml`](rcm/air.toml) | `~/air.toml` | fallback config for the `air` R formatter — formats nothing unless a project overrides it |
 | [`editorconfig`](rcm/editorconfig) | `~/.editorconfig` | indentation defaults |
-| [`vimrc`](rcm/vimrc), [`tigrc`](rcm/tigrc), [`toprc`](rcm/toprc) | `~/.vimrc`, `~/.tigrc`, `~/.toprc` | vim, tig and top |
-| [`screenrc`](rcm/screenrc), [`screenrc-xpra`](rcm/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window |
+| [`vimrc`](rcm/vimrc), [`tigrc`](rcm/tigrc) | `~/.vimrc`, `~/.tigrc` | vim and tig |
+| [`tag-linux/toprc`](rcm/tag-linux/toprc) | `~/.toprc` | top; the format is the Linux one, so it installs there only |
+| [`screenrc`](rcm/screenrc), [`tag-linux/screenrc-xpra`](rcm/tag-linux/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window on Linux, and is a placeholder on macOS |
 | [`config/diffuse/diffuserc`](rcm/config/diffuse/diffuserc) | `~/.config/diffuse/diffuserc` | dark colour scheme for the Diffuse merge tool |
-| [`finicky.js`](rcm/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky (macOS) |
+| [`tag-macos/finicky.js`](rcm/tag-macos/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky; macOS only |
 | [`git/R/`](rcm/git/R) | `~/git/R/` | CMake and build helpers for working on the R sources in CLion |
 
 Several of these source files that this repository does *not* ship —
@@ -181,6 +186,7 @@ The previous layout is preserved on the
 | `home/dot-ssh/config` | `rcm/ssh/config` |
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
+| `home/dot-finicky.js`, `home/dot-toprc` | `rcm/tag-macos/finicky.js`, `rcm/tag-linux/toprc` |
 | `make` | `make` — unchanged |
 | `make build` (regenerate the installers) | — nothing to regenerate |
 | `make run-force-install` | `make force` |
@@ -204,6 +210,9 @@ The principal differences:
 - **The tag is chosen with `id -un` rather than `$USER`,**
   so it also works where `$USER` is unset, such as launchd jobs
   and some non-interactive sessions.
+- **Single-platform files are no longer installed everywhere.**
+  The old installers linked `home/dot-finicky.js` and `home/dot-toprc` on every machine;
+  a second tag now keeps each to the system it works on.
 - **`~/log/dummy` is now a symbolic link.**
   Previously `home/log/.dummy` was skipped and the directory created directly.
 
