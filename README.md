@@ -46,6 +46,11 @@ Neither `~/bin` nor `~/.local/bin` is special there.
 it mirrors what Ubuntu does,
 so `~/bin` works the same on both platforms
 and [`rcm/bash_profile`](rcm/bash_profile) has the `~/.profile` it sources.
+[`rcm/zprofile`](rcm/zprofile) does the same for zsh,
+the default shell on macOS since Catalina,
+which never reads `~/.profile` on its own.
+rcm skips a file the account already has,
+so a machine that came with its own `~/.profile` keeps it until `make force`.
 
 `~/bin` stays the install target rather than `~/.local/bin`.
 Moving would gain nothing on macOS, where neither directory is automatic,
@@ -80,13 +85,52 @@ and a `host-<hostname>/` directory is picked up automatically like a tag.
 - [`rcm/profile`](rcm/profile): installed as `~/.profile`,
   puts `~/bin` and `~/.local/bin` on the `PATH` and sources `~/.bashrc` under bash.
   Equivalent to Ubuntu's stock file, and the piece macOS lacks.
+- [`rcm/zprofile`](rcm/zprofile): installed as `~/.zprofile`,
+  hands `~/.profile` to zsh, which would not read it otherwise.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
 - [`Makefile`](Makefile): `make` links everything,
   `make force` replaces existing files,
   `make uninstall` runs `rcdn`,
-  and `make check` lists the mapping without touching the filesystem.
+  `make check` lists the mapping without touching the filesystem,
+  and `make test-local` runs the checks described below.
 - [`bootstrap`](bootstrap): one-shot setup: clones the repo to `~/git/scriptlets` and runs `make`.
+
+## Tests
+
+`make test-local` installs everything into a throw-away home directory
+and runs the checks in [`tests/checks`](tests/checks) against it.
+The real home directory is never touched,
+so the checks are safe to run on the machine you use.
+`make test` does the same inside a container,
+for a Linux run from a machine that is not Linux.
+
+[`.github/workflows/test.yaml`](.github/workflows/test.yaml) runs them
+on Ubuntu and on macOS.
+Both matter:
+on Ubuntu the scripts are found because the stock `~/.profile` finds them,
+on macOS only because this repository ships the equivalent,
+so a break in `rcm/profile` or `rcm/zprofile` shows up in the macOS job alone.
+
+[`tests/run`](tests/run) creates the home directory,
+seeding it from `/etc/skel` where that exists —
+which is what `useradd -m` does,
+and the reason a fresh Ubuntu account has a `~/.profile` while a macOS one does not.
+Each file in `tests/checks` is a separate script
+that sources [`tests/lib.sh`](tests/lib.sh) for `pass`, `fail` and the assertions,
+and they run in name order:
+
+- `10-path`: the scripts are on the `PATH` of a login shell, in every shell an
+  account may log in with, and they run.
+- `20-install`: every destination rcm lists exists, configuration files are
+  symbolic links, and installing twice changes nothing.
+- `90-force`: `make force` replaces the files rcm skipped,
+  and the scripts are still found afterwards.
+  It runs last because it is the one check that rewrites what the others read.
+
+Adding a file to `tests/checks` is enough;
+`tests/run 10-path` runs one check by name,
+and `KEEP_TEST_HOME=1` leaves the home directory behind to look at.
 
 # Coming from the previous version
 

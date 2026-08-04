@@ -1,0 +1,72 @@
+#!/bin/sh
+# Install this repository into a throw-away home directory that looks like a
+# brand-new account, then run every check in tests/checks against it.
+#
+# Usage:
+#   tests/run            run every check
+#   tests/run 10-path    run the named checks only
+#
+# KEEP_TEST_HOME=1 leaves the home directory behind for inspection.
+
+set -eu
+
+REPO=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+export REPO
+
+if ! command -v rcup >/dev/null; then
+    echo "rcm is required: apt install rcm / brew install rcm" >&2
+    exit 1
+fi
+
+TEST_HOME=$(mktemp -d "${TMPDIR:-/tmp}/scriptlets-home.XXXXXX")
+TEST_FAILURES=$(mktemp "${TMPDIR:-/tmp}/scriptlets-failures.XXXXXX")
+export TEST_FAILURES
+
+cleanup() {
+    rm -f "$TEST_FAILURES"
+    if [ -n "${KEEP_TEST_HOME:-}" ]; then
+        echo "# home kept at $TEST_HOME"
+    else
+        rm -rf "$TEST_HOME"
+    fi
+}
+trap cleanup EXIT
+
+# What a fresh account starts with. `useradd -m` seeds it from /etc/skel, which
+# is where Ubuntu's stock ~/.profile -- the file that puts ~/bin on the PATH --
+# comes from. macOS has no /etc/skel and gives a new account no shell dotfiles
+# at all, which is the case these checks exist to cover.
+if [ -d /etc/skel ]; then
+    cp -R /etc/skel/. "$TEST_HOME"/
+fi
+
+HOME=$TEST_HOME
+export HOME
+
+echo "# repo: $REPO"
+echo "# home: $TEST_HOME"
+echo "# make install"
+make -C "$REPO" install >/dev/null
+
+status=0
+
+for check in "$REPO"/tests/checks/*.sh; do
+    name=${check##*/}
+    name=${name%.sh}
+
+    if [ $# -gt 0 ] && ! printf '%s\n' "$@" | grep -qxF "$name"; then
+        continue
+    fi
+
+    echo "# $name"
+    sh "$check" || status=1
+done
+
+failures=$(wc -l <"$TEST_FAILURES" | tr -d ' ')
+
+if [ "$failures" -gt 0 ] || [ "$status" -ne 0 ]; then
+    echo "# $failures failed"
+    exit 1
+fi
+
+echo "# all checks passed"
