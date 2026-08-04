@@ -28,6 +28,10 @@ The exceptions are listed in the `UNDOTTED` variable in [`rcm/rcrc`](rcm/rcrc):
 so `rcm/bin/h` becomes `~/bin/h`.
 Naming a directory covers everything below it.
 
+`rcup` asks before replacing a file that already exists and differs
+(`[ynaq]` — `n` and Enter skip it, `y` replaces one, `a` replaces all without backup, `q` aborts).
+Identical files are linked silently, and files that do not exist yet are created without asking.
+
 ## Per-user overrides
 
 A `tag-<NAME>/` directory holds files for one account:
@@ -45,6 +49,13 @@ Tags are not limited to user names:
 `rcup -t work` selects a `tag-work/` directory *instead of* the per-user one,
 and a `host-<hostname>/` directory is picked up automatically like a tag.
 
+The three files under `~/scriptlets/` are read by the configuration that ships here —
+[`rcm/gitconfig`](rcm/gitconfig) includes `scriptlets/gitconfig`,
+[`rcm/ssh/config`](rcm/ssh/config) includes `~/scriptlets/ssh-config`,
+and [`rcm/Rprofile`](rcm/Rprofile) sources `~/scriptlets/Rprofile` if it exists.
+Each tolerates the file being absent,
+which is why an unknown account needs no tag directory.
+
 ## Files
 
 - [`rcm/rcrc`](rcm/rcrc): sets `DOTFILES_DIRS`, `UNDOTTED` and `TAGS`,
@@ -57,7 +68,57 @@ and a `host-<hostname>/` directory is picked up automatically like a tag.
   `make force` replaces existing files,
   `make uninstall` runs `rcdn`,
   and `make check` lists the mapping without touching the filesystem.
-- [`bootstrap`](bootstrap): one-shot setup: clones the repo to `~/git/scriptlets` and runs `make`.
+- [`bootstrap`](bootstrap): one-shot setup.
+  It requires `rcup` on `PATH`, **deletes any existing `~/git/scriptlets`**,
+  clones the repo there and runs `make`.
+
+`rcm/rcrc` hardcodes `DOTFILES_DIRS="$HOME/git/scriptlets/rcm"`,
+so a bare `rcup` or `lsrc` finds nothing unless the clone lives at `~/git/scriptlets`
+(where `bootstrap` puts it); `make` passes `-d` and works from any location.
+`make uninstall` removes directories it leaves empty, walking up as far as `$HOME`
+itself — harmless on a real home directory, which always has unrelated content,
+but worth knowing in a container.
+`make test` runs an install in a throwaway container, `make test-local` inside one.
+
+## Prerequisites
+
+Beyond [rcm](https://github.com/thoughtbot/rcm),
+the scripts assume a GNU userland under Homebrew's `g` names:
+`h` and `s` need `fd`, `gsed`, `gsort` and GNU `parallel`;
+`fsed` needs `ag`, `gsed` and `gxargs`;
+`pmake` needs `gmake`; `git-merge-into` needs `gsed`;
+`n` and `bkg` need `terminal-notifier`; `rpt` needs `inotifywait` and `unbuffer`;
+`git-mmv` needs `mmv`; `imgdiff` needs ImageMagick.
+
+Nothing here puts `~/bin` on `PATH`.
+On Ubuntu the distribution's own `~/.profile` happens to add it;
+on macOS it does not, and zsh — the default login shell — reads none of the
+bash files shipped here, so add `~/bin` to `PATH` yourself.
+
+## Configuration files
+
+Alongside the scripts in `rcm/bin/`, these land in the home directory:
+
+| File | Installed as | |
+| --- | --- | --- |
+| [`bashrc`](rcm/bashrc), [`bash_profile`](rcm/bash_profile), [`bash_aliases`](rcm/bash_aliases) | `~/.bashrc`, `~/.bash_profile`, `~/.bash_aliases` | interactive bash: prompt, history, aliases |
+| [`autoscreen`](rcm/autoscreen) | `~/.autoscreen` | drop into `screen` automatically on an interactive SSH login |
+| [`gitconfig`](rcm/gitconfig), [`gitaliases`](rcm/gitaliases) | `~/.gitconfig`, `~/.gitaliases` | Git settings and aliases; pulls in several optional `~/.gitconfig.*` includes |
+| [`gitignore`](rcm/gitignore) | `~/.gitignore` | global excludes, wired up via `core.excludesfile` |
+| [`ssh/config`](rcm/ssh/config) | `~/.ssh/config` | keep-alives plus `Include`s for Colima, OrbStack and the per-user overrides |
+| [`Rprofile`](rcm/Rprofile) | `~/.Rprofile` | R defaults: CRAN mirror selection, `usethis`/`testthat`/`pillar` options, per-project `.lib` and `Makevars` hooks |
+| [`air.toml`](rcm/air.toml) | `~/air.toml` | fallback config for the `air` R formatter — formats nothing unless a project overrides it |
+| [`editorconfig`](rcm/editorconfig) | `~/.editorconfig` | indentation defaults |
+| [`vimrc`](rcm/vimrc), [`tigrc`](rcm/tigrc), [`toprc`](rcm/toprc) | `~/.vimrc`, `~/.tigrc`, `~/.toprc` | vim, tig and top |
+| [`screenrc`](rcm/screenrc), [`screenrc-xpra`](rcm/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window |
+| [`config/diffuse/diffuserc`](rcm/config/diffuse/diffuserc) | `~/.config/diffuse/diffuserc` | dark colour scheme for the Diffuse merge tool |
+| [`finicky.js`](rcm/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky (macOS) |
+| [`git/R/`](rcm/git/R) | `~/git/R/` | CMake and build helpers for working on the R sources in CLion |
+
+Several of these source files that this repository does *not* ship —
+`~/.bash_secrets`, `~/git/bash-git-prompt`, `~/git/complete-alias` —
+without guarding for their absence,
+so a fresh shell reports errors until they exist or the lines are removed.
 
 # Coming from the previous version
 
@@ -92,6 +153,10 @@ The principal differences:
   and `make force` replaces existing files; the old installer could only add.
   Neither prunes orphans, though: a file deleted from `rcm/` leaves a dangling
   symlink in `$HOME`, so run `make uninstall` *before* removing one.
+- **Existing files are no longer skipped in silence.**
+  The old installer left any pre-existing file alone and moved on;
+  `rcup` asks what to do with one that differs.
+  A first run on a machine that already has a `~/.gitconfig` will stop and prompt.
 - **The tag is chosen with `id -un` rather than `$USER`,**
   so it also works where `$USER` is unset, such as launchd jobs
   and some non-interactive sessions.
@@ -328,7 +393,7 @@ Join multiple Git repositories into one while preserving history.
 
 # Obsolete
 
-In the [`obsolete`](obsolete) directory.
+In the [`obsolete`](obsolete) directory, catalogued in [`obsolete/README.md`](obsolete/README.md).
 
 
 
