@@ -1,3 +1,7 @@
+# >>> zsh startup profiling >>>
+zsh_startup_mark zprofile
+# <<< zsh startup profiling <<<
+
 # ~/.zprofile: read by login zsh shells.
 #
 # zsh has been the default shell on macOS since Catalina,

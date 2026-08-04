@@ -1,0 +1,5 @@
+# >>> zsh startup profiling (new-macbook-2026) >>>
+[[ -r ~/git/new-macbook-2026/scripts/zsh-startup-profile.zsh ]] && source ~/git/new-macbook-2026/scripts/zsh-startup-profile.zsh
+export ZSH_STARTUP_MARKS=1
+zsh_startup_mark zshenv
+# <<< zsh startup profiling <<<
