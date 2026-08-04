@@ -1,5 +1,12 @@
 # >>> zsh startup profiling (new-macbook-2026) >>>
 [[ -r ~/git/new-macbook-2026/scripts/zsh-startup-profile.zsh ]] && source ~/git/new-macbook-2026/scripts/zsh-startup-profile.zsh
 export ZSH_STARTUP_MARKS=1
+# The marks here, in ~/.zprofile and in ~/.zshrc call a function that only the
+# profiler above defines, and that profiler lives in a repository which is only
+# on the machine it was written for. Everywhere else, every zsh start said
+# `command not found: zsh_startup_mark`, once per startup file it read.
+# ~/.zshenv is read first by every zsh there is, so one no-op here covers all
+# three, and the real function still wins wherever it is installed.
+(( $+functions[zsh_startup_mark] )) || zsh_startup_mark() { : }
 zsh_startup_mark zshenv
 # <<< zsh startup profiling <<<

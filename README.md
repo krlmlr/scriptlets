@@ -6,7 +6,7 @@ Licensed under [GPL v3](http://www.gnu.org/copyleft/gpl.html).
 
 To install all scripts to `~/bin` (by creating symbolic links),
 install [rcm](https://github.com/thoughtbot/rcm),
-clone the project and run `make` — or `mise run`,
+clone the project and run `make` — or `mise run install`,
 if you have [mise](https://mise.jdx.dev).
 rcm is the only thing this needs; mise is optional.
 Or run the [`bootstrap`](bootstrap) script:
@@ -29,7 +29,7 @@ reachable through [mise](https://mise.jdx.dev) or through `make`:
 
 | Task | `make` | |
 | --- | --- | --- |
-| `mise run`, `mise run install` | `make` | link every file into the home directory |
+| `mise run install` | `make` | link every file into the home directory |
 | `mise run force` | `make force` | link every file, replacing ones that already exist |
 | `mise run check` | `make check` | list the mapping without touching the filesystem |
 | `mise run uninstall` | `make uninstall` | remove every symbolic link rcm owns |
@@ -52,7 +52,9 @@ construction cannot: that no task was added without a target to reach it by.
 
 What mise adds, if you have it:
 `mise tasks` lists the tasks with their descriptions,
-`mise run` with no task opens a picker on a terminal,
+`mise run` with no task at all opens a picker on a terminal —
+no task is aliased to `default`, so a bare `mise run` asks rather than installs,
+and [`tests/checks/15-tasks.sh`](tests/checks/15-tasks.sh) keeps it that way,
 `mise run import` is the one task `make` cannot offer,
 and the completion described [below](#picking-the-file).
 Its one obligation is trust —
@@ -239,6 +241,11 @@ bash and fish are on their own — `mise completion bash` or `fish`.
   hands `~/.profile` to zsh, which would not read it otherwise.
 - [`rcm/zshrc`](rcm/zshrc): installed as `~/.zshrc`,
   starts the completion system and registers mise's completion lazily.
+- [`rcm/zshenv`](rcm/zshenv): installed as `~/.zshenv`, read by every zsh
+  before anything else.
+  It loads the startup profiler where that exists, and defines a no-op
+  `zsh_startup_mark` where it does not, which is what keeps the marks in the
+  other two files quiet on a machine that has never seen the profiler.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
 - [`mise-tasks/`](mise-tasks): one script per task.
@@ -348,6 +355,7 @@ and they run in name order:
 
 - `10-path`: the scripts are on the `PATH` of a login shell, in every shell an
   account may log in with, and they run.
+- `15-tasks`: a bare `mise run` offers the task list instead of running one.
 - `20-install`: every destination rcm lists exists, configuration files are
   symbolic links, and installing twice changes nothing.
 - `30-preexisting`: an account that came with its own `~/.bash_profile` keeps it,
@@ -358,9 +366,9 @@ and they run in name order:
   It works on a copy, because importing *moves* files into the repository.
 - `50-makefile`: the `Makefile` fallback agrees with the tasks it stands in
   for, and the targets it does not implement say so instead of pretending.
-- `60-zsh-completion`: `~/.zshrc` binds `mise` to the stub, the generated
-  completion is *not* loaded at startup, and the first completion loads it and
-  rebinds to it.
+- `60-zsh-startup`: a zsh startup says nothing at all, and `~/.zshrc` binds
+  `mise` to the stub — the generated completion is *not* loaded at startup, and
+  the first completion loads it and rebinds to it.
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub remotes of a
   throw-away repository and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.
@@ -390,7 +398,7 @@ The previous layout is preserved on the
 | `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
 | `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
 | `home/dot-finicky.js`, `home/dot-toprc` | `rcm/tag-macos/finicky.js`, `rcm/tag-linux/toprc` |
-| `make` | `make` — unchanged, or `mise run`, which runs the same scripts |
+| `make` | `make` — unchanged, or `mise run install`, which runs the same script |
 | `make build` (regenerate the installers) | — nothing to regenerate |
 | `make run-force-install` | `mise run force` |
 | — | `mise run uninstall`, `mise run check`, `mise run import` |
