@@ -13,27 +13,24 @@ curl -s https://raw.githubusercontent.com/krlmlr/scriptlets/main/bootstrap | sh
 
 # Build and install
 
-Installation is handled by [rcm](https://github.com/thoughtbot/rcm).
-rcm creates the symbolic links,
-so there is no generated installer to keep in sync:
-adding a file under `rcm/` and rerunning `make` is enough.
+Installation is handled by [rcm](https://github.com/thoughtbot/rcm),
+which creates the symbolic links.
+Adding a file under `rcm/` and rerunning `make` is enough.
 
 ## Layout
 
 Everything that ends up in the home directory lives in [`rcm/`](rcm).
 A name there gains a leading dot on the way to `$HOME`,
 so `rcm/bashrc` becomes `~/.bashrc` and `rcm/ssh/config` becomes `~/.ssh/config`.
-The `dot-` prefix this repository used to carry is gone;
-the dot is rcm's job now.
 
 The exceptions are listed in `UNDOTTED`:
-`bin`, `git`, `log`, `scriptlets` and `air.toml` keep their names,
+`air.toml`, `bin`, `git`, `log` and `scriptlets` keep their names,
 so `rcm/bin/h` becomes `~/bin/h`.
 Naming a directory covers everything below it.
 
 ## Per-user overrides
 
-The former `personalized/<USER>/` tree becomes rcm *tags*:
+A `tag-<NAME>/` directory holds files for one account:
 [`rcm/tag-kirill/scriptlets/gitconfig`](rcm/tag-kirill) installs to `~/scriptlets/gitconfig`.
 
 [`rcm/rcrc`](rcm/rcrc) is sourced as shell, so it selects the tag itself:
@@ -42,8 +39,7 @@ The former `personalized/<USER>/` tree becomes rcm *tags*:
 TAGS="$(id -un)"
 ```
 
-An account with no matching `tag-` directory installs nothing extra,
-which is what the old `if [ -d personalized/$USER ]` did.
+An account with no matching `tag-` directory installs nothing extra.
 Tags are not limited to user names —
 `rcup -t work` or a `host-<hostname>/` directory work the same way.
 
@@ -51,14 +47,49 @@ Tags are not limited to user names —
 
 - [`rcm/rcrc`](rcm/rcrc): installed as `~/.rcrc`, and read directly by `make install`
   on a machine that does not have it yet.
-- [`rcm/log/dummy`](rcm/log) is a placeholder that exists only to create `~/log`.
-  Git cannot track an empty directory, and rcm skips names starting with a dot,
-  so the placeholder has to be visible to rcm to bring its parent along.
+- [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
+  Keep the name dotless — rcm skips names starting with a dot.
 - [`Makefile`](Makefile): `make` links everything,
   `make force` replaces existing files,
   `make uninstall` runs `rcdn`,
   and `make check` lists the mapping without touching the filesystem.
 - [`bootstrap`](bootstrap): one-shot setup: clones the repo to `~/git/scriptlets` and runs `make`.
+
+# Coming from the previous version
+
+Everything lands where it always did, still as symbolic links,
+so nothing in `$HOME` moves
+and editing a file in the repository still takes effect immediately.
+What changed is where the files sit *inside* the repository,
+and what drives the installation.
+
+The previous layout is preserved on the
+[`home-grown`](https://github.com/krlmlr/scriptlets/tree/home-grown) branch.
+
+| Before | Now |
+| --- | --- |
+| `home/dot-bashrc` | `rcm/bashrc` — rcm supplies the dot |
+| `home/dot-ssh/config` | `rcm/ssh/config` |
+| `home/bin/h` | `rcm/bin/h` — `bin` is in `UNDOTTED`, so the name is kept |
+| `personalized/<USER>/gitconfig` | `rcm/tag-<USER>/scriptlets/gitconfig` |
+| `make build`, then `./install` | `make` |
+| `make run-force-install` | `make force` |
+| — | `make uninstall`, `make check` |
+
+The principal differences:
+
+- **rcm is a new prerequisite** — `apt install rcm`, `brew install rcm`.
+- **`make-install`, `install` and `install-personalized` are gone.**
+  The two installers were generated files that had to be refreshed with `make build`
+  after every change; rcm links straight out of `rcm/`, so there is nothing to regenerate.
+- **Removing a file now removes its link.**
+  `make uninstall` (`rcdn`) unlinks everything, and `make force` replaces existing files;
+  the old installer could only add.
+- **The tag is chosen with `id -un` rather than `$USER`,**
+  so it also works where `$USER` is unset, such as launchd jobs
+  and some non-interactive sessions.
+- **`~/log/dummy` is now a symbolic link.**
+  Previously `home/log/.dummy` was skipped and the directory created directly.
 
 # Actively used tools
 
