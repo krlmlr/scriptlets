@@ -147,9 +147,6 @@ add-zsh-hook precmd __zsh_history_rotate
 #
 # bashcompinit first: ~/.bash_aliases (via ~/.bash_aliases_os on macOS) calls
 # `complete`, which is not a zsh builtin without it.
-#
-# ~/.bash_secrets is sourced unguarded by bash_aliases itself, so it has to
-# exist: `touch ~/.bash_secrets` if it does not.
 # ---------------------------------------------------------------------------
 autoload -Uz bashcompinit && bashcompinit
 [[ -r $HOME/.bash_aliases ]] && source "$HOME/.bash_aliases"

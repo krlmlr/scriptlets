@@ -1,5 +1,8 @@
 # Obsolete tools
 
+*The tools still installed are [`handbook/tools/`](/handbook/tools/README.md)'s;
+this page catalogues the retired ones, kept here out of rcm's reach.*
+
 ## is-unmetered
 
 Exits with 0 if and only if the connection is configured as an unmetered connection.

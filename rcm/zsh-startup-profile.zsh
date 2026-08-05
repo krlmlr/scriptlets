@@ -23,7 +23,7 @@
 # the log -- benchmark noise stays out of the production record by construction.
 #
 # Reading the numbers, and turning any of this off:
-# the "zsh startup profiling" section of the README.
+# handbook/config/zsh-startup/README.md in the scriptlets repository.
 #
 # Knobs, all optional, all read from the environment -- and from
 # ~/scriptlets/zsh-startup, which is sourced first and is the place to set them
