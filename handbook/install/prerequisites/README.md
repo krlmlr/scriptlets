@@ -20,98 +20,60 @@ Putting `~/bin` on the `PATH` is not among the things left to you:
 the shipped profiles do it, on macOS as well as on Ubuntu
 ([`layout/path/`](/handbook/layout/path/README.md)).
 
-## What the scripts want
+## What single scripts assume
 
-The scripts assume a GNU userland, and a handful of tools besides.
-Linux carries nearly all of that in the distribution's own repositories,
-under the plain names;
-macOS ships the older BSD command wherever a name is shared,
-and Homebrew is where both the GNU commands and the rest come from —
-the GNU ones under the `g` names its formulae install them with,
-which is how the scripts spell them.
+A GNU userland,
+under Homebrew's `g` names where macOS ships something older,
+and a handful of tools besides:
 
-| Command | `brew` | `apt` | `dnf` | `pacman` | Wanted by |
-| --- | --- | --- | --- | --- | --- |
-| `ag` | `the_silver_searcher` | `silversearcher-ag` | `the_silver_searcher` | `the_silver_searcher` | `fsed` |
-| `air` | `air` | — | — | — | `air-format` |
-| `compare`, `convert`, `display`, `montage` | `imagemagick` | `imagemagick` | `ImageMagick` | `imagemagick` | `imgdiff` and `imgdiff-bg`, `ogv-to-gif` |
-| `fd` | `fd` | `fd-find`, installed as `fdfind` | `fd-find` | `fd` | `h` and `s` |
-| `gcp`, `grealpath`, `gsort` | `coreutils` | `coreutils` | `coreutils` | `coreutils` | `h` and `s`, `git-backup`, `git-backup-all` |
-| `gh` | `gh` | `gh` | `gh` | `github-cli` | `bootstrap-private` |
-| `gmake` | `make` | `make` | `make` | `make` | `pmake` |
-| `gsed` | `gnu-sed` | `sed` | `sed` | `sed` | `h` and `s`, `fsed`, `git-merge-into`, `git-backup`, `git-backup-all`, `reprex` |
-| `gxargs` | `findutils` | `findutils` | `findutils` | `findutils` | `fsed` |
-| `hyperfine` | `hyperfine` | `hyperfine` | `hyperfine` | `hyperfine` | `zsh-startup-bench`, for its benchmark mode alone; the log and `zprof` views need nothing but zsh |
-| `inotifywait` | — | `inotify-tools` | `inotify-tools` | `inotify-tools` | `rpt` |
-| `jq` | `jq` | `jq` | `jq` | `jq` | `azure-resource-group-get-default` |
-| `kubectl` | `kubernetes-cli` | — | `kubernetes<release>-client` | `kubectl` | `k` |
-| `mmv` | `mmv` | `mmv` | `mmv` | — (AUR) | `git-mmv` |
-| `mplayer` | `mplayer` | `mplayer` | — (RPM Fusion) | `mplayer` | `ogv-to-gif` |
-| `nproc` | `coreutils`, unprefixed — macOS ships nothing it would collide with | `coreutils` | `coreutils` | `coreutils` | `pmake` |
-| `parallel` | `parallel` | `parallel` | `parallel` | `parallel` | `h` and `s`, `each` and `every`, `git-backup-all` |
-| `pdftotext` | `poppler` | `poppler-utils` | `poppler-utils` | `poppler` | `pdfcat` |
-| `R` | `r` | `r-base` | `R` | `r` | `rh` |
-| `rstudio` | `--cask rstudio` | — | — | — (AUR) | `rh` |
-| `soffice` | `--cask libreoffice` | — | — | — | `soffice-macos`, which installs on macOS alone |
-| `terminal-notifier` | `terminal-notifier` | — | — | — | `n` and `bkg`, which install on macOS alone |
-| `unbuffer` | `expect` | `expect` | `expect` | `expect` | `rpt` |
-| `wget` | `wget` | `wget` | `wget2-wget` | `wget` | `gh-mirror` |
-| `wmctrl` | — | `wmctrl` | `wmctrl` | `wmctrl` | `rh`, to raise an RStudio window that is already open — an X11 lookup, so Linux alone |
+* `h` and `s` need `fd`, `gsed`, `gsort` and GNU `parallel`
+* `fsed` needs `ag`, `gsed` and `gxargs`
+* `pmake` needs `gmake` and `nproc`;
+  `git-merge-into` and `reprex` need `gsed`
+* `git-backup` needs `gcp`, `grealpath` and `gsed`,
+  and `git-backup-all` adds GNU `parallel`,
+  which `each` and `every` need as well
+* `n` and `bkg` need `terminal-notifier`,
+  and are installed on macOS only —
+  as is `soffice-macos`, which drives LibreOffice
+* `rpt` needs `inotifywait` and `unbuffer`
+* `git-mmv` needs `mmv`;
+  `imgdiff` needs ImageMagick, and `ogv-to-gif` adds `mplayer`
+* `pdfcat` needs `pdftotext`; `gh-mirror` needs `wget`;
+  `k` needs `kubectl`; `azure-resource-group-get-default` needs `jq`
+* `air-format` needs `air`;
+  `rh` needs R and RStudio,
+  and `wmctrl` where an X11 window manager has a window to raise
+* `zsh-startup-bench` needs `hyperfine` for its benchmark mode alone;
+  reading the log and the `zprof` breakdown needs nothing but zsh
 
-The `brew`, `apt` and `dnf` names were read off homebrew-core,
-Ubuntu 24.04 and Fedora 44,
+Which of them are in use and which are under review,
+and what each one is for,
+is [`tools/`](/handbook/tools/README.md)'s.
+
+## Where they come from
+
+One line for the scripts in use, one for the scripts under review.
+The names were read off homebrew-core, Ubuntu 24.04 and Fedora 44,
 and hold for those releases;
-the `pacman` column comes from Arch's documentation
-rather than from a machine, and is the one nobody here has run.
-Which script is in which state, and what each of them does, is
-[`tools/`](/handbook/tools/README.md)'s.
+the `pacman` lines come from Arch's documentation rather than from a
+machine, and are the ones nobody here has run.
 
-## macOS, with Homebrew
-
-The scripts in use:
+**macOS, with Homebrew.**
 
 ```sh
 brew install air coreutils fd findutils gnu-sed hyperfine \
   kubernetes-cli make mmv parallel poppler the_silver_searcher
+brew install terminal-notifier                    # n and bkg, macOS alone
+brew install expect imagemagick jq mplayer wget   # under review
 ```
-
-`n` and `bkg` install on macOS alone and want one formula more:
-
-```sh
-brew install terminal-notifier
-```
-
-The scripts under review:
-
-```sh
-brew install expect imagemagick jq mplayer wget
-```
-
-**What Homebrew does not cover.**
-`rpt` waits for a change with `inotifywait`,
-and inotify is a Linux kernel interface:
-the `inotify-tools` formula is Linux-only,
-so the watching half of that script has no macOS spelling —
-its `unbuffer` does, from `expect` above.
-ImageMagick is built without X11 on macOS,
-so the `display` that `imgdiff` ends in
-has no window system to open there,
-while `compare` and `montage` are unaffected.
-The Azure scripts drive an `azure` command Homebrew does not carry;
-its `azure-cli` formula installs `az`, which is a different command.
-
-## Linux, with the distribution's own
-
-The GNU commands are the system's own here,
-so what is left to install is short —
-one line for the scripts in use, one for the scripts under review.
 
 **Debian and Ubuntu.**
 
 ```sh
 apt install fd-find hyperfine mmv parallel poppler-utils \
   silversearcher-ag wmctrl
-apt install expect imagemagick inotify-tools jq mplayer wget
+apt install expect imagemagick inotify-tools jq mplayer wget   # under review
 ```
 
 **Fedora.**
@@ -119,28 +81,61 @@ apt install expect imagemagick inotify-tools jq mplayer wget
 ```sh
 dnf install fd-find hyperfine mmv parallel poppler-utils \
   the_silver_searcher wmctrl
-dnf install expect ImageMagick inotify-tools jq wget2-wget
+dnf install expect ImageMagick inotify-tools jq wget2-wget     # under review
 ```
 
 **Arch.**
 
 ```sh
 pacman -S fd hyperfine parallel poppler the_silver_searcher wmctrl
-pacman -S expect imagemagick inotify-tools jq mplayer wget
+pacman -S expect imagemagick inotify-tools jq mplayer wget     # under review
 ```
 
-**The `g` names have to be made.**
-The GNU commands carry no prefix on Linux,
+R, RStudio and LibreOffice are applications rather than packages of
+that kind, and stay out of those lines:
+`brew install r` and the `rstudio` and `libreoffice` casks on macOS,
+`r-base` or `R` from the distribution on Linux.
+
+## Where a package is not named after the command
+
+* `fd` is `fd-find` on Debian, Ubuntu and Fedora —
+  and Debian installs the binary as `fdfind`,
+  which is not what `h` calls
+* `ag` is `silversearcher-ag` on Debian and Ubuntu
+* `pdftotext` is `poppler-utils`, and `poppler` on Arch and Homebrew
+* `unbuffer` is `expect`, and `inotifywait` is `inotify-tools`
+* ImageMagick's `compare`, `convert`, `display` and `montage`
+  are `imagemagick` — `ImageMagick` on Fedora
+* the GNU commands are `coreutils`, `findutils` and `make`,
+  and `sed` is `gnu-sed` on Homebrew alone
+* `kubectl` is `kubernetes-cli` on Homebrew,
+  and `kubernetes<release>-client` on Fedora, a package per release
+* `wget` on Fedora comes from `wget2-wget`
+* `gh` is `github-cli` on Arch
+
+## What the package manager does not have
+
+* `air` — Posit's own installer, or mise
+* RStudio — a `.deb` or `.rpm` from Posit, and the AUR on Arch
+* `kubectl` on Debian and Ubuntu — Kubernetes' own apt repository
+* `mmv` on Arch — the AUR; `mplayer` on Fedora — RPM Fusion
+* `inotify-tools` on macOS — inotify is a Linux kernel interface,
+  and the formula is Linux-only,
+  so the watching half of `rpt` has no macOS spelling at all;
+  its `unbuffer` does, from `expect`
+* `terminal-notifier` anywhere but macOS,
+  which is also the only place the scripts wanting it install
+* a current R on Debian and Ubuntu:
+  `r-base` trails the release, and CRAN's apt repository closes the gap
+
+## What installing does not fix
+
+**The `g` names have to be made on Linux.**
+The GNU commands are the system's own there and carry no prefix,
 while the scripts ask for `gsed`, `gsort`, `gcp` and `grealpath`,
 so an install alone leaves `h` and `s`, `git-merge-into`, `reprex`,
 `git-backup` and `git-backup-all` calling names that do not exist.
-Debian and Fedora install `gmake` themselves, from their `make` package;
-Arch does not, so there that name joins the list.
-Debian's `fd-find` is the same gap under another spelling —
-it installs the binary as `fdfind`,
-where Fedora's package of that name installs `fd`,
-which is what `h` calls.
-`~/.local/bin` is where links for all of them go:
+`~/.local/bin` is where links for them go:
 the shipped profiles put it on the `PATH` beside `~/bin`,
 and it is not rcm's, so an uninstall walks past them.
 
@@ -148,14 +143,17 @@ and it is not rcm's, so an uninstall walks past them.
 ln -s "$(command -v sed)" ~/.local/bin/gsed
 ```
 
-**What no distribution here carries.**
-`air` comes from Posit's own installer, or from mise;
-RStudio as a `.deb` or `.rpm` from Posit, and from the AUR on Arch.
-`kubectl` is Debian and Ubuntu's gap alone,
-and Kubernetes' own apt repository is what fills it.
-Debian's `r-base` trails the current R release —
-CRAN's apt repository closes that gap.
+`gmake` comes with Debian's and Fedora's `make` package;
+Arch's does not install that name, so there it joins the list.
 
-*To deepen: run the `pacman` line on an Arch machine;
+**ImageMagick is built without X11 on macOS**,
+so the `display` that `imgdiff` ends in
+has no window system to open there,
+while `compare` and `montage` are unaffected.
+
+**The Azure scripts drive an `azure` command** no manager here carries;
+Homebrew's `azure-cli` installs `az`, which is a different one.
+
+*To deepen: run the `pacman` lines on an Arch machine;
 collect what the shipped configuration reaches for —
 `delta`, `daff`, `git-lfs`, `tig`, `diffuse`.*
