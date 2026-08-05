@@ -48,6 +48,14 @@ and they run in name order:
   has the rules it enforces).
   It reads the repository, not the home directory,
   so it is first, before the installed checks.
+- `06-timing`: the clock behind the durations answers in milliseconds —
+  measured against a sleep rather than assumed,
+  because a fallback that answered in seconds
+  would fill the block with zeroes that read like measurements —
+  and the block lines up the durations it is given.
+  It calls the helpers directly,
+  reading neither the repository nor the home directory,
+  so it runs before the installed checks too.
 - `10-path`: the scripts are on the `PATH` of a login shell,
   in every shell an account may log in with, and they run.
 - `15-tasks`: a bare `mise run` offers the task list
@@ -140,3 +148,33 @@ and they run in name order:
 Adding a file to `tests/checks` is enough;
 `tests/run 10-path` runs one check by name,
 and `KEEP_TEST_HOME=1` leaves the home directory behind to look at.
+
+## Durations
+
+A run ends with a block of durations —
+the install it opens with, every check it ran, and the run as a whole —
+printed before the verdict,
+so a failing run says where its time went as well as a passing one.
+The whole run is wall clock rather than the sum of the parts,
+because it also covers making the throw-away home directory
+and seeding it.
+
+The block is what makes the numbers attributable in CI:
+a job times its own steps,
+and the entire suite is one step of one job,
+so without it the slow check is invisible inside the fast-looking job.
+
+There is no millisecond clock in POSIX `sh`
+and none that every machine has,
+so [`tests/timing.sh`](/tests/timing.sh) looks for one —
+`date +%N` is GNU's, macOS does not have it,
+and `perl` and `python3` both carry a sub-second clock —
+and the order it tries is that file's.
+A machine with nothing better than whole seconds is timed in them
+and says so above the block,
+rather than reporting a column of zeroes as if they were measurements.
+
+`TEST_TIMING=0`, or an empty value, drops the block;
+anything else, including leaving it unset, keeps it,
+which is the default [`tests/run`](/tests/run) sets.
+A run that will not print the durations does not measure them either.
