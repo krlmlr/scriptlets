@@ -2,4 +2,8 @@
 	email = kirill@cynkra.com
 	name = Kirill Müller
 [alias]
-	phuk = push --set-upstream krlmlr HEAD
+	# The push series from ~/.gitaliases, for the personal remote: k = krlmlr.
+	phk = push krlmlr HEAD
+	puk = push --set-upstream krlmlr HEAD
+	# The old spelling warns, then forwards.
+	phuk = "!echo 'warning: phuk is now puk' >&2; git puk"

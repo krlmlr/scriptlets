@@ -94,12 +94,27 @@
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
 	mf = merge --ff
 	mu = merge-update
+	# Push: the second letter picks the variant,
+	# an optional third letter picks the remote
+	# and pushes the current branch.
+	# Variants: h plain, f --force-with-lease, t --follow-tags, u --set-upstream.
+	# Remotes: c cynkra, o origin, u upstream; k krlmlr, per user.
 	ph = push
-	phf = push --force-with-lease
-	pht = push --follow-tags
-	phu = push --set-upstream
-	phuc = push --set-upstream cynkra HEAD
-	phuo = push --set-upstream origin HEAD
+	pf = push --force-with-lease
+	pt = push --follow-tags
+	pu = push --set-upstream
+	# ---
+	phc = push cynkra HEAD
+	pho = push origin HEAD
+	phu = push upstream HEAD
+	# ---
+	puc = push --set-upstream cynkra HEAD
+	puo = push --set-upstream origin HEAD
+	puu = push --set-upstream upstream HEAD
+	# ---
+	# The old spellings warn, then forward.
+	phuc = "!echo 'warning: phuc is now puc' >&2; git puc"
+	phuo = "!echo 'warning: phuo is now puo' >&2; git puo"
 	pl = pull
 	plf = pull --ff-only
 	plr = pull --rebase
