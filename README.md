@@ -302,6 +302,48 @@ Putting `~/bin` on the `PATH` is not among the things left to you:
 [`rcm/profile`](rcm/profile) and [`rcm/zprofile`](rcm/zprofile) do it,
 on macOS as well as on Ubuntu — see [PATH](#path).
 
+[atuin](https://atuin.sh) is optional in the same way:
+`~/.zshrc` picks it up if it is installed and does nothing at all if it is not
+— see [below](#ctrl-r-with-atuin).
+
+## Ctrl-R with atuin
+
+The history files keep everything;
+[atuin](https://atuin.sh) is what makes everything searchable.
+It keeps a database of its own,
+puts a full-screen search on `Ctrl-R`,
+and — once `atuin login` has been run — carries the same history to every
+machine.
+Where it is not installed, `Ctrl-R` stays zsh's own and nothing is missed.
+
+`atuin init zsh` writes a shell script to standard output,
+and the line the documentation gives — `eval "$(atuin init zsh)"` —
+starts a process to produce that script at every single interactive shell.
+That script changes when atuin is upgraded and at no other time,
+so `~/.zshrc` writes it to
+`${XDG_CACHE_HOME:-~/.cache}/zsh/atuin-init.zsh` once,
+compiles it to wordcode,
+and sources it from there for every shell after that.
+There is nothing to remember after an upgrade:
+the file is rewritten whenever it is older than the `atuin` that would write
+it.
+By hand, if it ever comes to that:
+
+```sh
+atuin init zsh --disable-up-arrow >| ${XDG_CACHE_HOME:-~/.cache}/zsh/atuin-init.zsh
+```
+
+One process is left, and it is atuin's rather than ours:
+the script asks for a session id (`atuin uuid`) the first time a shell reads
+it.
+`$ATUIN_SESSION` is exported, so the shells started below one do not repeat
+it.
+
+`--disable-up-arrow` leaves `Up` and `Down` to zsh.
+The arrows walk the lines this session ran, in order,
+which is a different question from the one `Ctrl-R` asks
+and is the one the shell answers better.
+
 ## Configuration files
 
 Alongside the scripts in `rcm/bin/` and `rcm/tag-macos/bin/`,
@@ -541,6 +583,13 @@ and they run in name order:
   once and broken down by startup file; one that does not — a script, a
   `zsh -c`, a benchmark run — is left alone; and every documented way of
   [turning the profiling off](#turning-it-off) turns it off.
+- `67-zsh-atuin`: the [atuin](#ctrl-r-with-atuin) init script is written to a
+  file and sourced from there rather than generated at every shell,
+  rewritten when the `atuin` binary is newer than the file,
+  and absent without complaint where atuin is not installed.
+  A stand-in `atuin` on the `PATH` counts its own runs,
+  so the check says the same on a machine that has the real one and one that
+  does not.
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub remotes of a
   throw-away repository and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.

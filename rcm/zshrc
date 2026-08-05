@@ -143,6 +143,60 @@ __zsh_history_rotate() {
 add-zsh-hook precmd __zsh_history_rotate
 
 # ---------------------------------------------------------------------------
+# atuin: Ctrl-R over all of it
+#
+# The files above keep everything; atuin is what makes everything searchable,
+# with a database of its own, a full-screen search on Ctrl-R,
+# and -- once `atuin login` has been run -- the same history on every machine.
+# It is optional: where it is not installed, this whole section does nothing
+# and Ctrl-R stays zsh's own.
+#
+# `atuin init zsh` writes a shell script to standard output,
+# and the line the documentation gives -- `eval "$(atuin init zsh)"` --
+# starts a process to produce that script at every single interactive shell.
+# The script changes when atuin is upgraded and at no other time,
+# so it is written to a file once and sourced from there instead.
+#
+# To rewrite it by hand, after an upgrade this file somehow did not notice:
+#
+#     atuin init zsh --disable-up-arrow >| ${XDG_CACHE_HOME:-~/.cache}/zsh/atuin-init.zsh
+#
+# One process is left, and it is atuin's rather than ours:
+# the script asks for a session id (`atuin uuid`) the first time a shell reads
+# it, which is a fork per new shell -- $ATUIN_SESSION is exported, so the
+# shells started below one do not repeat it.
+#
+# --disable-up-arrow leaves Up and Down to zsh:
+# the arrows walk the lines this session ran, in order, which is a different
+# question from the one Ctrl-R asks and is answered better by the shell.
+# ---------------------------------------------------------------------------
+if (( $+commands[atuin] )); then
+  () {
+    local init=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/atuin-init.zsh
+    [[ -d ${init:h} ]] || mkdir -p ${init:h}
+
+    # Rewritten when it is missing, empty, or older than the atuin that would
+    # write it -- an upgrade being the one thing that changes the output.
+    # $commands[atuin] is the path zsh has already resolved, so the test costs
+    # a stat and nothing else.
+    #
+    # Written to a file of this shell's own and renamed into place, because
+    # two shells starting at the same moment after an upgrade would otherwise
+    # both be writing to the one file that both are about to source.
+    if [[ ! -s $init || $commands[atuin] -nt $init ]]; then
+      atuin init zsh --disable-up-arrow >| $init.$$ &&
+        mv -f $init.$$ $init &&
+        zcompile -R -- $init 2>/dev/null
+    fi
+
+    # zsh reads $init.zwc in place of $init whenever it is the newer of the
+    # two, which is what the zcompile above is for: parsing the script is all
+    # that is left of the cost.
+    [[ -s $init ]] && source $init
+  }
+fi
+
+# ---------------------------------------------------------------------------
 # The bash bridge
 #
 # bashcompinit first: ~/.bash_aliases (via ~/.bash_aliases_os on macOS) calls
