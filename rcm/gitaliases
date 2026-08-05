@@ -111,6 +111,10 @@
 	puc = push --set-upstream cynkra HEAD
 	puo = push --set-upstream origin HEAD
 	puu = push --set-upstream upstream HEAD
+	# ---
+	# The old spellings warn, then forward.
+	phuc = "!echo 'warning: phuc is now puc' >&2; git puc"
+	phuo = "!echo 'warning: phuo is now puo' >&2; git puo"
 	pl = pull
 	plf = pull --ff-only
 	plr = pull --rebase
