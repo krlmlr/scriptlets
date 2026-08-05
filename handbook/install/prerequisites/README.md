@@ -37,6 +37,7 @@ which is how the scripts spell them.
 | `compare`, `convert`, `display`, `montage` | `imagemagick` | `imagemagick` | `ImageMagick` | `imagemagick` | `imgdiff` and `imgdiff-bg`, `ogv-to-gif` |
 | `fd` | `fd` | `fd-find`, installed as `fdfind` | `fd-find` | `fd` | `h` and `s` |
 | `gcp`, `grealpath`, `gsort` | `coreutils` | `coreutils` | `coreutils` | `coreutils` | `h` and `s`, `git-backup`, `git-backup-all` |
+| `gh` | `gh` | `gh` | `gh` | `github-cli` | `bootstrap-private` |
 | `gmake` | `make` | `make` | `make` | `make` | `pmake` |
 | `gsed` | `gnu-sed` | `sed` | `sed` | `sed` | `h` and `s`, `fsed`, `git-merge-into`, `git-backup`, `git-backup-all`, `reprex` |
 | `gxargs` | `findutils` | `findutils` | `findutils` | `findutils` | `fsed` |
