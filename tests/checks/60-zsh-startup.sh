@@ -39,6 +39,10 @@ assert_equal "~/.zshrc is installed" \
 # Interactive *and* login, so that all three files are read. Only complaints
 # that name a file in this home directory count: a system-wide zshrc with
 # opinions of its own is not ours to fix.
+#
+# The startup profiler is deliberately not silent, and does not show up here
+# either way: `-c` never reaches a prompt, which is where it reports.
+# tests/checks/65-zsh-startup-profile.sh covers what it says and when.
 noise=$(zsh -ilc true </dev/null 2>&1 >/dev/null | grep -F "$HOME" || true)
 
 if [ -z "$noise" ]; then

@@ -1,12 +1,26 @@
-# >>> zsh startup profiling (new-macbook-2026) >>>
-[[ -r ~/git/new-macbook-2026/scripts/zsh-startup-profile.zsh ]] && source ~/git/new-macbook-2026/scripts/zsh-startup-profile.zsh
-export ZSH_STARTUP_MARKS=1
+# ~/.zshenv: read by every zsh there is, before anything else.
+#
+# Little else belongs here -- a script, a `zsh -c` from an editor and a cron job
+# all pay for whatever this file does. The startup profiler has to be here
+# precisely because this file is read first: sourced any later, it could not see
+# the time the earlier files took.
+
+# >>> zsh startup profiling >>>
+[[ -r ~/.zsh-startup-profile.zsh ]] && source ~/.zsh-startup-profile.zsh
+# The timeline is on by default here, and `=` rather than `:=` or a plain
+# assignment is what makes that a default rather than a decree: a value from the
+# environment, or from ~/scriptlets/zsh-startup which the profiler reads a
+# moment earlier, survives -- including an empty one, which is how the timeline
+# is switched off without touching the dotfiles every machine shares.
+: ${ZSH_STARTUP_MARKS=1}
+export ZSH_STARTUP_MARKS
 # The marks here, in ~/.zprofile and in ~/.zshrc call a function that only the
-# profiler above defines, and that profiler lives in a repository which is only
-# on the machine it was written for. Everywhere else, every zsh start said
+# profiler above defines -- and it defines nothing when profiling is switched
+# off, or when the file is not installed at all, as on an account whose
+# ~/.zshenv came from somewhere else. Without a fallback, such a zsh start said
 # `command not found: zsh_startup_mark`, once per startup file it read.
 # ~/.zshenv is read first by every zsh there is, so one no-op here covers all
-# three, and the real function still wins wherever it is installed.
+# three, and the real function still wins wherever it is loaded.
 (( $+functions[zsh_startup_mark] )) || zsh_startup_mark() { : }
 zsh_startup_mark zshenv
 # <<< zsh startup profiling <<<

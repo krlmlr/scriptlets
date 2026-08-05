@@ -3,10 +3,6 @@
 # The PATH is set up in ~/.profile, which ~/.zprofile hands to zsh at login;
 # this file is only for what an interactive shell needs.
 
-# >>> zsh startup profiling (new-macbook-2026) >>>
-zsh_startup_mark zshrc
-# <<< zsh startup profiling <<<
-
 # The completion system, unless something has already started it.
 #
 # -i skips insecure directories rather than stopping to ask about them: with no
@@ -127,3 +123,10 @@ if [[ $TERM_PROGRAM == vscode ]]; then
 fi
 
 compdef g=git
+
+# Last line on purpose: the mark records when this file was *done*, and the gap
+# between it and the first prompt is everything the terminal does after the
+# configuration has finished.
+# >>> zsh startup profiling >>>
+zsh_startup_mark zshrc
+# <<< zsh startup profiling <<<

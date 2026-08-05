@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+#
+# Measure zsh startup: benchmark it, break it down, or read the production log.
+#
+#   zsh-startup-bench           # hyperfine: this config vs. the bare floor
+#   zsh-startup-bench --zprof   # per-function breakdown of one startup
+#   zsh-startup-bench --log     # summarise the continuous log
+#
+# Three views of the same question, and they answer different halves of it:
+#
+#   --log    what startup actually costs on this machine, from real shells.
+#            The number to trust, and the only one that reflects a cold cache,
+#            a busy laptop, or a terminal that spawns a login shell.
+#            Fed by ~/.zsh-startup-profile.zsh; nothing to run first.
+#   (bench)  a controlled A/B of three shells: login (what a new terminal tab
+#            starts), plain interactive (a `zsh` launched inside an existing
+#            tab), and `zsh -f` -- the same binary with no rc files at all.
+#            The floor is what makes the numbers legible: 40 ms of zsh plus
+#            600 ms of our own config is a very different verdict from 640 ms
+#            of zsh. The login/interactive gap is its own finding: only login
+#            shells read /etc/zprofile and ~/.zprofile, which on macOS fork
+#            path_helper and `brew shellenv`. A tab paying far more than a
+#            nested shell means the cost is in those two files.
+#   --zprof  where the time goes, per function, for one startup. Loading zprof
+#            instruments every function call, so its absolute numbers run high
+#            -- read the ranking, not the total.
+#
+# Benchmarks use `zsh -i -c 'exit 0'`, which loads the full rc chain but never
+# reaches a prompt, so these runs are absent from the production log.
+#
+# The `0` is not decoration. A bare `exit` exits with the status of the last
+# command the shell ran, which here is the last statement of the rc chain --
+# and on stock macOS that is /etc/zshrc's
+#
+#   [ -r "/etc/zshrc_$TERM_PROGRAM" ] && . "/etc/zshrc_$TERM_PROGRAM"
+#
+# false in any terminal Apple does not ship a file for. A healthy shell then
+# reports 1 and hyperfine aborts the run. `exit 0` measures the same startup
+# and says so unambiguously.
+#
+# Requires hyperfine for the benchmark mode:
+#   brew install hyperfine   /   apt install hyperfine
+# (--zprof and --log need nothing beyond zsh.)
+#
+# Reading the output, and turning the profiling off:
+# the "zsh startup profiling" section of the scriptlets README.
+
+set -euo pipefail
+
+MODE=bench
+RUNS=20
+TOP=25
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --zprof)   MODE=zprof; shift ;;
+    --log)     MODE=log; shift ;;
+    --runs)    RUNS="${2:?--runs needs a number}"; shift 2 ;;
+    --top)     TOP="${2:?--top needs a number}"; shift 2 ;;
+    -h|--help) awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "$0"; exit 0 ;;
+    *)         echo "unknown option: $1" >&2; exit 2 ;;
+  esac
+done
+
+command -v zsh >/dev/null || { echo "zsh not found on PATH" >&2; exit 1; }
+
+LOG="${ZSH_STARTUP_LOG:-${XDG_STATE_HOME:-$HOME/.local/state}/zsh-startup.log}"
+
+case "$MODE" in
+
+bench)
+  command -v hyperfine >/dev/null || {
+    echo "hyperfine not found on PATH -- brew install hyperfine / apt install hyperfine" >&2
+    exit 1
+  }
+  # -N runs each command directly instead of through an intermediate /bin/sh.
+  # These shells start in single-digit milliseconds, which is the range where
+  # hyperfine warns it cannot calibrate its own wrapper away; without it the
+  # wrapper is a sizeable fraction of what gets reported.
+  hyperfine \
+    -N \
+    --warmup 3 \
+    --runs "$RUNS" \
+    --command-name "login        (new tab)" "zsh -l -i -c 'exit 0'" \
+    --command-name "interactive  (nested zsh)" "zsh -i -c 'exit 0'" \
+    --command-name "bare floor   (no rc files)" "zsh -f -i -c 'exit 0'"
+  ;;
+
+zprof)
+  # The module has to be loaded before the rc files run, which is what the env
+  # var does inside the fragment; `zprof` then reports without needing a prompt.
+  ZSH_STARTUP_ZPROF=1 zsh -i -c zprof | head -n "$((TOP + 3))"
+  echo
+  echo "Ranking, not absolute times: zprof's own instrumentation inflates the total."
+  echo
+  echo "zprof sees FUNCTION CALLS only. Top-level code in the rc files -- a"
+  echo "\`brew shellenv\` eval, a bare \`source\`, any fork -- never appears here, so"
+  echo "a short table means few functions ran, not that startup is cheap. --log"
+  echo "and the floor benchmark hold the wall-clock truth."
+  echo
+  echo "If this prints nothing at all, ~/.zshenv is not sourcing"
+  echo "~/.zsh-startup-profile.zsh -- run \`mise run install\` in the scriptlets"
+  echo "checkout, and check that ZSH_STARTUP_PROFILE is not switched off."
+  ;;
+
+log)
+  [ -s "$LOG" ] || {
+    echo "no startup log at $LOG" >&2
+    echo "Interactive shells write it once ~/.zshenv sources" >&2
+    echo "~/.zsh-startup-profile.zsh -- open a new terminal, then re-run." >&2
+    exit 1
+  }
+
+  echo "log: $LOG"
+  echo
+
+  cut -f2 "$LOG" | sort -n | awk '
+    { ms[NR] = $1; total += $1 }
+    END {
+      mid = int((NR + 1) / 2)
+      p90 = int(NR * 0.9); if (p90 < 1) p90 = 1
+      printf "shells   %d\n", NR
+      printf "min      %d ms\n", ms[1]
+      printf "median   %d ms\n", ms[mid]
+      printf "p90      %d ms\n", ms[p90]
+      printf "max      %d ms\n", ms[NR]
+      printf "mean     %d ms\n", total / NR
+    }'
+
+  echo
+  echo "by terminal:"
+  awk -F'\t' '
+    { n[$3 " " $4]++; sum[$3 " " $4] += $2 }
+    END { for (k in n) printf "  %-28s %5d ms mean over %d\n", k, sum[k] / n[k], n[k] }' \
+    "$LOG" | sort
+
+  echo
+  echo "last 5:"
+  tail -n 5 "$LOG" | awk -F'\t' '{ printf "  %s  %5d ms  %s %s\n", $1, $2, $3, $4 }'
+
+  echo
+  echo "The log is append-only and never rotated; trim it when it gets long:"
+  echo "  tail -n 5000 \"$LOG\" > \"$LOG.tmp\" && mv \"$LOG.tmp\" \"$LOG\""
+  ;;
+
+esac
