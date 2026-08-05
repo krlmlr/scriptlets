@@ -1,0 +1,11 @@
+#!/bin/sh
+# "sleep forbid" -- `nosleep on`, at three letters.
+
+[ $# -eq 0 ] || {
+  echo "Usage: $0" >&2
+  exit 1
+}
+
+# By path rather than by name: this works from a checkout, where ~/bin is not
+# what found it.
+exec "$(dirname -- "$0")/nosleep" on

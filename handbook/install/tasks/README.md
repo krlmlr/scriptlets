@@ -14,6 +14,7 @@ reachable through [mise](https://mise.jdx.dev) or through `make`:
 | `mise run force` | `make force` | link every file, replacing ones that already exist |
 | `mise run check` | `make check` | list the mapping without touching the filesystem |
 | `mise run uninstall` | `make uninstall` | remove every symbolic link rcm owns |
+| `mise run nosleep-grant` | `make nosleep-grant` | let `nosleep` flip the sleep flag without a password, on macOS ([`tools/`](/handbook/tools/README.md)) |
 | `mise run import <file>` | — | move a file in from the home directory ([`install/import/`](/handbook/install/import/README.md)) |
 | `mise run test` | — | run the checks against a throw-away home directory ([`testing/`](/handbook/testing/README.md)) |
 | `mise run test-container` | — | the same on Linux, from a machine that is not |
