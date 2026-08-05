@@ -159,6 +159,7 @@ Windows is out of scope.
 | `finicky.js` — browser picker, macOS-only app | `toprc` — `top`'s Linux configuration format |
 | `bin/n`, `bin/bkg` — notify via `terminal-notifier` | `screenrc-xpra` — starts an xpra X11 session |
 | `bin/soffice-macos` — drives `/Applications/LibreOffice.app` | |
+| `tmux-clipboard.conf` — pipes a copy through `pbcopy` | |
 | `bash_aliases_os` — `csv`/`csv2`/`tsv`, `bit` completion | `bash_aliases_os` — `pxc`, `xo`, the `xclip` key bindings, `/usr/lib/ccache` |
 
 The shared [`rcm/bash_aliases`](rcm/bash_aliases) sources `~/.bash_aliases_os`
@@ -253,6 +254,13 @@ bash and fish are on their own — `mise completion bash` or `fish`.
   `~/.zsh-startup-profile.zsh` and sourced from the first line of `~/.zshenv`,
   which is what lets it time the whole rc chain.
   Described [below](#zsh-startup-profiling).
+- [`rcm/tmux.conf`](rcm/tmux.conf): installed as `~/.tmux.conf`,
+  binds the copy-mode keys that navigate by the prompt marks,
+  see [below](#copy-mode-and-the-prompts).
+  Needs tmux 3.4 or newer.
+- [`rcm/tag-macos/tmux-clipboard.conf`](rcm/tag-macos/tmux-clipboard.conf):
+  installed as `~/.tmux-clipboard.conf`, on macOS alone;
+  one line naming `pbcopy` as the command a copy is piped through.
 - [`rcm/log/dummy`](rcm/log): placeholder that brings `~/log` into existence.
   Keep the name dotless — rcm skips names starting with a dot.
 - [`mise-tasks/`](mise-tasks): one script per task.
@@ -324,6 +332,7 @@ these land in the home directory:
 | [`vimrc`](rcm/vimrc), [`tigrc`](rcm/tigrc) | `~/.vimrc`, `~/.tigrc` | vim and tig |
 | [`tag-linux/toprc`](rcm/tag-linux/toprc) | `~/.toprc` | top; the format is the Linux one, so it installs there only |
 | [`screenrc`](rcm/screenrc), [`tag-linux/screenrc-xpra`](rcm/tag-linux/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window on Linux, and is a placeholder on macOS |
+| [`tmux.conf`](rcm/tmux.conf), [`tag-macos/tmux-clipboard.conf`](rcm/tag-macos/tmux-clipboard.conf) | `~/.tmux.conf`, `~/.tmux-clipboard.conf` | tmux: [copy mode that knows where the prompts are](#copy-mode-and-the-prompts); the second names `pbcopy`, and ships on macOS alone |
 | [`config/diffuse/diffuserc`](rcm/config/diffuse/diffuserc) | `~/.config/diffuse/diffuserc` | dark colour scheme for the Diffuse merge tool |
 | [`tag-macos/finicky.js`](rcm/tag-macos/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky; macOS only |
 | [`git/R/`](rcm/git/R) | `~/git/R/` | CMake and build helpers for working on the R sources in CLion |
@@ -483,6 +492,58 @@ all need `compdef` to exist at startup,
 so it takes a queueing `compdef` stub and a Tab widget that replays the queue.
 More to go wrong than the five lines above, for a smaller win.
 
+## Copy mode, and the prompts
+
+[`rcm/tmux.conf`](rcm/tmux.conf) binds three keys,
+all of them built on the OSC 133 marks the shell sends —
+a prompt starts on this line, the output of a command starts on that one:
+
+| Key | |
+| --- | --- |
+| `[` in copy mode | jump to the previous prompt |
+| `]` in copy mode | jump to the next prompt |
+| `prefix o` | copy the output of the last command, and leave copy mode |
+
+`previous-prompt` and `next-prompt` arrived in tmux 3.4, so that is the floor.
+An older tmux reads the file without complaining
+and fails only when one of the keys is pressed:
+the name of a copy-mode command is not resolved until it runs.
+A shell that sends no marks is the other way to get nothing —
+the keys work, and find nothing to move to.
+
+`[` and `]` are bound in both copy-mode key tables.
+tmux picks the table from the `mode-keys` option,
+whose default follows `$EDITOR` and `$VISUAL`
+and is `emacs` unless one of them contains `vi`;
+nothing here sets either,
+so binding `copy-mode-vi` alone — as most of the recipes on the internet do —
+would leave the keys inert on most of these machines.
+
+`prefix o` walks the marks:
+back to where the last command's output began,
+forward to the prompt that followed it,
+one line back up, and copy.
+It replaces the default `prefix o` (rotate through the panes),
+which `prefix ;` and `prefix <arrow>` already cover.
+Two edges are worth knowing about:
+after a command that printed nothing,
+what you get is the output of the command before it,
+and at the very first prompt of a session, with nothing marked yet,
+the keys hand back the prompt line itself.
+
+A copy is piped through the `copy-command` option,
+which the default mouse-drag bindings use as well,
+so naming it once covers both.
+`pbcopy` is macOS-only and `~/.tmux.conf` is installed everywhere,
+so the name lives in `~/.tmux-clipboard.conf`,
+which [only `tag-macos/` ships](#per-platform-overrides);
+`source-file -q` is what makes it optional.
+Where there is none, a copy still lands in the tmux paste buffer,
+and `prefix ]` pastes it.
+On a machine reached over ssh, `set -g set-clipboard on` is the other half of
+the answer — tmux then offers the selection to the terminal it is displayed on,
+which is the clipboard actually in front of you.
+
 ## Tests
 
 `mise run test` installs everything into a throw-away home directory
@@ -544,6 +605,13 @@ and they run in name order:
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub remotes of a
   throw-away repository and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.
+- `80-tmux-prompt-keys`: `~/.tmux.conf` binds `[` and `]` in both copy-mode
+  tables and `prefix o` in the prefix table,
+  and the sequence `prefix o` runs copies the output of the last command
+  out of a pane whose prompts are marked.
+  The prompts are synthetic — a script printing what a shell would print —
+  so it checks tmux's half on any machine, whatever its login shell is.
+  It is skipped where tmux is missing or older than 3.4.
 - `90-force`: `mise run force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check that rewrites what the others read.
