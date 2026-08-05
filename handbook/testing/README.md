@@ -83,8 +83,9 @@ and they run in name order:
 - `27-bootstrap-private`: `bootstrap-private` creates a sidecar
   and converges on a re-run:
   a dry run changes nothing and names every file it would write,
-  the first run commits the skeleton on `main` as `Initial commit`
-  with the fragment at the root and the hook executable,
+  the first run leaves two commits on `main` —
+  an empty `Initial commit` and the skeleton on top of it —
+  with the fragment at the repository root and the hook executable,
   and a settled run creates nothing,
   invents no commit,
   and leaves a file edited by hand exactly as it was.

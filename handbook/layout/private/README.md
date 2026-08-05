@@ -53,6 +53,15 @@ and the skeleton written into it; `-n` lists the files.
 The skeleton is empty of secrets and installs cleanly as it stands:
 every file in it is comments, saying what belongs there.
 
+**The history starts from an empty commit.**
+A new sidecar has two: `Initial commit`, holding nothing,
+and `Add the sidecar skeleton` on top of it.
+The skeleton then arrives as a diff like every change after it,
+rather than as the state the repository began in —
+which gives `git rebase --onto` a root to stand on,
+lets the first real commit be reverted or rewritten like any other,
+and makes `git diff <root>` the whole history of the tree.
+
 **Every step is idempotent, and says which of two things it found.**
 A step brings one thing to the state it should be in and reports it as
 created, already so, or updated,
@@ -73,6 +82,35 @@ which is also why a half-finished first attempt can simply be rerun.
 a remote pointing somewhere else is a decision,
 and pushing to it would be the script guessing which.
 It stops and says so instead.
+
+## Giving an older sidecar the empty root
+
+A sidecar created before the empty root existed
+begins at the commit that carries the skeleton,
+and rerunning the script will not change that:
+the history is already there,
+and rewriting one is not something a step does behind your back.
+Three commands do it, from the clone:
+
+```sh
+old_root=$(git rev-list --max-parents=0 HEAD)
+empty=$(git commit-tree -m "Initial commit" "$(git hash-object -w -t tree /dev/null)")
+skeleton=$(git commit-tree -p "$empty" -m "Add the sidecar skeleton" "$old_root^{tree}")
+git rebase --onto "$skeleton" "$old_root"
+```
+
+The first builds a commit with no parent and an empty tree.
+The second rebuilds the old root's tree on top of it
+under the name the script now gives that commit.
+The third replays whatever came after —
+nothing, on a sidecar that has only ever been created,
+and every commit of your own on one that has been used.
+
+Every commit gets a new hash, so the branch has to be published with
+`git push --force-with-lease`,
+and any other clone of it re-cloned rather than pulled.
+The working tree is untouched throughout:
+the files, and the secrets in them, come out byte for byte the same.
 
 ## What goes in it
 

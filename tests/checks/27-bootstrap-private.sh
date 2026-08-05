@@ -138,8 +138,24 @@ else
     fail "the hook is executable" "$(ls -l "$dest/rcm/hooks/post-up" 2>&1)"
 fi
 
-assert_equal "the first commit is named Initial commit" \
-    "Initial commit" "$(git -C "$dest" log -1 --format=%s 2>&1)"
+assert_equal "a fresh sidecar has two commits" \
+    "2" "$(git -C "$dest" rev-list --count HEAD 2>&1)"
+
+root=$(git -C "$dest" rev-list --max-parents=0 HEAD 2>/dev/null)
+
+assert_equal "the root commit is named Initial commit" \
+    "Initial commit" "$(git -C "$dest" show -s --format=%s "$root" 2>&1)"
+
+# The point of the root: the skeleton arrives as a diff like everything after
+# it, rather than as the state the repository began in.
+if [ -z "$(git -C "$dest" ls-tree "$root" 2>&1)" ]; then
+    pass "the root commit is empty"
+else
+    fail "the root commit is empty" "$(git -C "$dest" ls-tree "$root" 2>&1)"
+fi
+
+assert_equal "the skeleton is a commit of its own on top of it" \
+    "Add the sidecar skeleton" "$(git -C "$dest" log -1 --format=%s 2>&1)"
 
 assert_equal "it commits on main" \
     "main" "$(git -C "$dest" rev-parse --abbrev-ref HEAD 2>&1)"
@@ -175,7 +191,7 @@ assert_equal "no second commit is invented" \
     "$head_before" "$(git -C "$dest" rev-parse HEAD 2>&1)"
 
 assert_equal "the skeleton is committed once, not again" \
-    "2" "$(git -C "$dest" rev-list --count HEAD 2>&1)"
+    "3" "$(git -C "$dest" rev-list --count HEAD 2>&1)"
 
 # --- the description follows -d --------------------------------------------
 
