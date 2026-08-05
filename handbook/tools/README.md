@@ -24,6 +24,11 @@ the script's help owns the detail and the entry stays a summary.
 **`h`** finds every Git repository below the current directory
 and executes a command in each of them.
 Linked worktrees are included, since they carry a `.git` file.
+Bare repositories are not:
+they have no `.git` entry to be found by —
+HEAD, config, objects and refs sit at the top of the directory instead —
+so a bare clone stays out of the sweep,
+and needs something other than a sweep to keep it up to date.
 **`s`** prepends `git` — it is a wrapper around `h git`.
 The switches:
 
