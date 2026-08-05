@@ -1,17 +1,27 @@
 #! /bin/bash
 alias gf="git flow"
 
+# Completion for the `g` and `s` git wrappers, in bash.
+#
+# zsh reads this file too, and gets its own, native completion for the same two
+# wrappers from ~/.zshrc instead. The guard is what keeps the two apart: under
+# zsh this block used to source a large bash script through `bashcompinit`, to
+# emulate what zsh already does better, and to register a `g` completion that
+# ~/.zshrc replaced a few lines later anyway.
+#
 # https://askubuntu.com/a/642778
 # https://github.com/jonas/tig/pull/1055/files
-# Make sure __git_complete is defined
-if ! declare -f __git_complete &>/dev/null; then
-  if [ -d /usr/share/bash-completion/completions ]; then
-    source /usr/share/bash-completion/completions/git
+if [ -n "$BASH_VERSION" ]; then
+  # Make sure __git_complete is defined
+  if ! declare -f __git_complete &>/dev/null; then
+    if [ -d /usr/share/bash-completion/completions ]; then
+      source /usr/share/bash-completion/completions/git
+    fi
   fi
-fi
-if declare -f __git_complete &>/dev/null; then
-  __git_complete g __git_main
-  __git_complete s __git_main
+  if declare -f __git_complete &>/dev/null; then
+    __git_complete g __git_main
+    __git_complete s __git_main
+  fi
 fi
 
 export HUB_PROTOCOL=ssh

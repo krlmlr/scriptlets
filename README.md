@@ -228,6 +228,62 @@ so a stub stands in until the first Tab on a `mise` command line
 and hands over to the real completion from then on.
 bash and fish are on their own — `mise completion bash` or `fish`.
 
+## Completion
+
+`git` completes itself in either shell.
+What needs help is the two wrappers around it:
+[`bin/g`](rcm/bin/g), which passes everything through to git,
+and [`bin/s`](rcm/bin/s), which runs a git command line
+in every repository below the current directory,
+behind flags of its own.
+Neither is git, so neither gets git's completion for free.
+
+- **bash** takes both from [`rcm/bash_aliases`](rcm/bash_aliases):
+  it sources the distribution's git completion
+  if `__git_complete` is not defined already,
+  and registers the two wrappers with it.
+  That block is guarded by `$BASH_VERSION`,
+  because zsh reads the same file.
+- **zsh** takes both from [`rcm/zshrc`](rcm/zshrc), natively.
+  `compdef g=git` is the whole of `g`.
+  `s` gets a function: `_arguments` for its own flags,
+  and everything from the git command onwards handed back
+  to whatever completes `git` —
+  so `s -n commit --am<Tab>` reaches `--amend`,
+  and `s checkout <Tab>` lists the branches of the repository you are in.
+
+The zsh half used to come through `bashcompinit` as well,
+which meant sourcing a large bash script to emulate what zsh already does
+better, and — on Linux — registering a `g` completion
+that `compdef g=git` replaced a few lines later.
+`bashcompinit` stays for the one thing that still needs it:
+the `complete -C` for `bit` in
+[`tag-macos/bash_aliases_os`](rcm/tag-macos/bash_aliases_os).
+
+### Warp
+
+Warp does not use the shell's completion system at all.
+It completes from built-in specs of its own,
+and the request to fall back to the shell's completions
+is [closed as not planned](https://github.com/warpdotdev/warp/issues/1979),
+so `compdef` does nothing there — nor does the mise stub above.
+
+What Warp does read is aliases:
+a command it has a spec for completes the same way under an alias of it.
+`~/.zshrc` uses that for `g`, in Warp and nowhere else:
+
+```zsh
+if [[ $TERM_PROGRAM == WarpTerminal ]]; then
+    alias g=git
+fi
+```
+
+`~/bin/g` stays where it is —
+an alias only shadows it on an interactive command line,
+and expands to the same git.
+`s` has no equivalent:
+it is not git, and there is nothing to teach Warp what it is.
+
 ## Files
 
 - [`rcm/rcrc`](rcm/rcrc): sets `DOTFILES_DIRS`, `UNDOTTED` and `TAGS`,
@@ -240,7 +296,8 @@ bash and fish are on their own — `mise completion bash` or `fish`.
 - [`rcm/zprofile`](rcm/zprofile): installed as `~/.zprofile`,
   hands `~/.profile` to zsh, which would not read it otherwise.
 - [`rcm/zshrc`](rcm/zshrc): installed as `~/.zshrc`,
-  starts the completion system and registers mise's completion lazily.
+  starts the completion system, registers mise's completion lazily,
+  and completes the git wrappers — see [Completion](#completion).
 - [`rcm/zshenv`](rcm/zshenv): installed as `~/.zshenv`, read by every zsh
   before anything else.
   It loads the startup profiler where that exists, and defines a no-op
@@ -317,9 +374,13 @@ these land in the home directory:
 | [`git/R/`](rcm/git/R) | `~/git/R/` | CMake and build helpers for working on the R sources in CLion |
 
 Several of these source files that this repository does *not* ship —
-`~/.bash_secrets`, `~/git/bash-git-prompt`, `~/git/complete-alias` —
+`~/git/bash-git-prompt`, `~/git/complete-alias` —
 without guarding for their absence,
 so a fresh shell reports errors until they exist or the lines are removed.
+`~/.bash_secrets` used to be one of them,
+and is now optional:
+a machine without one is not misconfigured,
+and both shells read `~/.bash_aliases`, so the error came twice.
 
 ## Tests
 
@@ -369,6 +430,9 @@ and they run in name order:
 - `60-zsh-startup`: a zsh startup says nothing at all, and `~/.zshrc` binds
   `mise` to the stub — the generated completion is *not* loaded at startup, and
   the first completion loads it and rebinds to it.
+- `65-zsh-completion`: `g` and `s` complete under zsh — `g` like git, `s`
+  through its own function — and bash's git completion is not dragged in
+  alongside them.
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub remotes of a
   throw-away repository and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.

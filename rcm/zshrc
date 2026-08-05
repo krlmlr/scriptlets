@@ -107,11 +107,15 @@ add-zsh-hook precmd __zsh_history_rotate
 # ---------------------------------------------------------------------------
 # The bash bridge
 #
-# bashcompinit first: ~/.bash_aliases (via ~/.bash_aliases_os on macOS) calls
-# `complete`, which is not a zsh builtin without it.
+# ~/.bash_aliases holds what both shells want -- aliases, exports, the secrets
+# file -- and keeps what is bash's alone behind a `$BASH_VERSION` guard. The
+# git completions there are one of those: bash's are in that file, zsh's are
+# at the bottom of this one, and neither shell reads the other's any more.
 #
-# ~/.bash_secrets is sourced unguarded by bash_aliases itself, so it has to
-# exist: `touch ~/.bash_secrets` if it does not.
+# What still crosses over is the `complete -C` for `bit` in
+# ~/.bash_aliases_os on macOS, and `bashcompinit` is what makes `complete` a
+# command zsh knows. It is one autoload, so it costs nothing on Linux, where
+# nothing has needed it since.
 # ---------------------------------------------------------------------------
 autoload -Uz bashcompinit && bashcompinit
 [[ -r $HOME/.bash_aliases ]] && source "$HOME/.bash_aliases"
@@ -126,4 +130,66 @@ if [[ $TERM_PROGRAM == vscode ]]; then
   esac
 fi
 
-compdef g=git
+# ---------------------------------------------------------------------------
+# Completion for the git wrappers
+#
+# `g` hands its arguments straight to git, so git's own completion is exactly
+# right for it, whichever one is installed.
+#
+# `s` is `h` and git in one -- the flags of `h` first, a git command line after
+# -- so it gets a function: `_arguments` for the flags, and everything from the
+# git command onwards handed back to whatever completes `git`. The git half is
+# two actions rather than one because a `*::` rest argument is offered even for
+# a word starting with `-`; with a single action, `s -<Tab>` would also list
+# git's global options, which `s` forwards to `h`, which rejects them.
+# ---------------------------------------------------------------------------
+
+# `s -n comm<Tab>` -- the git command itself.
+_s_git_command() {
+    words=(git "$words[CURRENT]")
+    CURRENT=2
+    _normal -p $service
+}
+
+# `s -n commit --am<Tab>` -- everything after the git command.
+_s_git_args() {
+    words=(git "${words[@]}")
+    (( CURRENT++ ))
+    _normal -p $service
+}
+
+_s() {
+    _arguments -s -S : \
+        '(-i --interactive)'{-i,--interactive}'[run the commands one repository at a time, on the terminal]' \
+        '(-n --dry-run)'{-n,--dry-run}'[print the generated script instead of running it]' \
+        '(-p --paged)'{-p,--paged}'[page the output through less]' \
+        '(-x --log-commands)'{-x,--log-commands}'[trace the commands as they run]' \
+        '(-u --unsorted)'{-u,--unsorted}'[leave the repositories unsorted, which is faster]' \
+        '(--color --no-color)--color=[when to colorize the output]:when:(auto always never)' \
+        '(--color --no-color)--no-color[never colorize the output]' \
+        '(-)1: :_s_git_command' \
+        '*:: :_s_git_args'
+}
+
+if (( $+functions[compdef] )); then
+    compdef g=git
+    compdef _s s
+fi
+
+# ---------------------------------------------------------------------------
+# Warp
+#
+# Warp completes from built-in specs of its own and never asks the shell, so
+# every `compdef` above is invisible there -- the request to read the shell's
+# completions is closed as not planned (warpdotdev/warp#1979). What Warp does
+# read is aliases: a command it has a spec for completes the same way under an
+# alias of that command. So `g` becomes one, in Warp and nowhere else. ~/bin/g
+# stays the wrapper that scripts and other programs use; an alias only shadows
+# it on an interactive command line, and expands to the same git.
+#
+# `s` has no way out. It is not git, it is a git command line behind flags of
+# its own, and Warp has nothing to be taught that with.
+# ---------------------------------------------------------------------------
+if [[ $TERM_PROGRAM == WarpTerminal ]]; then
+    alias g=git
+fi
