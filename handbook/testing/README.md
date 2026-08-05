@@ -72,6 +72,17 @@ and they run in name order:
   that none of them reaches rcm on its own
   and so decides for itself which trees to act on
   ([`install/tasks/`](/handbook/install/tasks/README.md)).
+- `27-bootstrap-private`: `bootstrap-private` creates a sidecar
+  and converges on a re-run:
+  a dry run changes nothing and names every file it would write,
+  the first run commits the skeleton on `main` as `Initial commit`
+  with the fragment at the root and the hook executable,
+  and a settled run creates nothing,
+  invents no commit,
+  and leaves a file edited by hand exactly as it was.
+  GitHub is a stub answering the few `gh` calls the script makes,
+  so a step that reaches for `gh` in a new way fails here
+  rather than silently going untested.
 - `30-preexisting`: an account that came with its own
   `~/.bash_profile` keeps it,
   and `make force` is what makes the scripts reachable there.
