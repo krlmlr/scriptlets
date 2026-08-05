@@ -31,12 +31,13 @@ nothing touches yours.
 
 ## Prerequisites
 
-The scripts reach past what a stock macOS ships —
-a GNU userland under Homebrew's `g` names, and a few tools of their own.
-One `brew install` line covers the ones in use,
-and [`install/prerequisites/`](handbook/install/prerequisites/README.md)
-has it, with what wants what
-and what Homebrew does not cover.
+The scripts want a GNU userland and a handful of tools besides.
+Debian and Ubuntu carry nearly all of that already;
+macOS gets it from Homebrew, the GNU commands under their `g` names.
+[`install/prerequisites/`](handbook/install/prerequisites/README.md)
+has the `apt` and the `brew` line, with what wants what,
+the names each side spells differently,
+and what neither package manager carries.
 
 ## Inside
 
