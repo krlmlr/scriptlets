@@ -166,6 +166,90 @@ fi
 
 compdef g=git
 
+# ---------------------------------------------------------------------------
+# Semantic prompt marks (OSC 133)
+#
+# Three escape sequences that tell the terminal where a prompt begins,
+# where the command it accepted started running,
+# and where that command ended with which exit status.
+# A terminal that reads them can jump from prompt to prompt,
+# select or copy the output of a single command,
+# and tell a command that failed from one that did not;
+# tmux 3.4 and later reads them as well,
+# and its `previous-prompt` and `next-prompt` navigate by nothing else.
+# A terminal that does not read them ignores them --
+# they take up no columns, and none of this is tied to one terminal.
+#
+# Nothing here starts a process:
+# `print` is a builtin, the strings are constants,
+# and the prompt mark is expanded by zsh's own prompt machinery.
+#
+# A (a prompt starts here), C (output starts here) and D (the command ended,
+# with this status) are sent.
+# B, which marks the end of the prompt and the start of what is typed after
+# it, is the one nothing here reads.
+#
+# The section is this late in the file on purpose:
+# the A mark is prepended to $PS1,
+# so whatever sets a prompt -- ~/.bash_aliases, by way of the bridge above --
+# has to have done so already.
+# ---------------------------------------------------------------------------
+
+# Ghostty injects a shell integration of its own that sends these very
+# sequences, and two of everything is worse than one of it:
+# two prompt starts and two command ends per command line.
+# That injection happens once, in the shell Ghostty starts itself,
+# and does not reach a shell that tmux starts later --
+# which is why $TMUX is half of the condition.
+#
+# The other way round would be to send these unconditionally and turn
+# Ghostty's half off with `shell-integration-features = no-prompt-mark` in
+# ~/.config/ghostty/config.
+# The guard is here instead because the terminal is still being chosen:
+# a shell knows which terminal it is talking to and whether tmux is in
+# between, a terminal's configuration file knows neither,
+# and that file is one more thing to keep in step on every machine --
+# one this repository does not ship.
+# $TERM_PROGRAM stands in here for "something else is already marking these
+# prompts", so if Ghostty's integration is ever switched off altogether
+# (`shell-integration = none`), this condition has to go with it.
+if [[ ${TERM_PROGRAM:l} != ghostty || -n $TMUX ]]; then
+  autoload -Uz add-zsh-hook
+
+  # D and C are events -- a command ended, a command started producing output
+  # -- and a hook is where an event belongs.
+  #
+  # $? is the status of the command line even though another precmd hook (the
+  # history rotation above) ran first: zsh restores it around each hook
+  # function, so the order of the hooks in this file does not matter.
+  _osc133_precmd() { print -n "\e]133;D;$?\a" }
+  _osc133_preexec() { print -n "\e]133;C\a" }
+
+  add-zsh-hook precmd _osc133_precmd
+  add-zsh-hook preexec _osc133_preexec
+
+  # A is not an event but a place -- *this line* is where a prompt starts --
+  # and that is why it goes into the prompt rather than into precmd with the
+  # other two.
+  # The line editor redraws a prompt from scratch every time: carriage return,
+  # `\e[J` to erase from the cursor to the end of the screen, then the prompt.
+  # tmux forgets what it knew about the lines that erase clears, and precmd
+  # runs before all of it, so a mark sent from there is wiped a moment after
+  # it arrives: only the first prompt of a session stays marked, and
+  # `previous-prompt` jumps from where you are to the top of the session and
+  # nowhere in between.
+  # Sent from inside the prompt it arrives after the erase, and is sent again
+  # at every redraw, which costs nothing -- flagging a line twice is flagging
+  # it once.
+  #
+  # %{...%} is how zsh is told that what it encloses occupies no columns;
+  # without it the prompt believes it is that many characters wider than it is.
+  #
+  # The test is what keeps a second `source ~/.zshrc` from prepending a second
+  # copy of the mark.
+  [[ $PS1 == *$'\e]133;A\a'* ]] || PS1=$'%{\e]133;A\a%}'$PS1
+fi
+
 # Last line on purpose: the mark records when this file was *done*, and the gap
 # between it and the first prompt is everything the terminal does after the
 # configuration has finished.

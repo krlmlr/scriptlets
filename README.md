@@ -242,7 +242,9 @@ bash and fish are on their own — `mise completion bash` or `fish`.
 - [`rcm/zshrc`](rcm/zshrc): installed as `~/.zshrc`,
   starts the completion system — audited once a day, trusted in between,
   see [below](#the-first-thing-the-profiling-found) —
-  and registers mise's completion lazily.
+  registers mise's completion lazily,
+  and marks where the prompts and the command output are
+  for the terminal to find, see [below](#prompt-marks).
 - [`rcm/zshenv`](rcm/zshenv): installed as `~/.zshenv`, read by every zsh
   before anything else.
   It loads the [startup profiler](#zsh-startup-profiling), and defines a no-op
@@ -312,7 +314,7 @@ these land in the home directory:
 | [`profile`](rcm/profile), [`zprofile`](rcm/zprofile) | `~/.profile`, `~/.zprofile` | login shells of any kind: `~/bin` and `~/.local/bin` on the `PATH` |
 | [`bashrc`](rcm/bashrc), [`bash_profile`](rcm/bash_profile), [`bash_aliases`](rcm/bash_aliases) | `~/.bashrc`, `~/.bash_profile`, `~/.bash_aliases` | interactive bash: prompt, history, aliases |
 | [`tag-macos/bash_aliases_os`](rcm/tag-macos/bash_aliases_os), [`tag-linux/bash_aliases_os`](rcm/tag-linux/bash_aliases_os) | `~/.bash_aliases_os` | the aliases, completions and bindings of one platform, sourced from `~/.bash_aliases` |
-| [`zshenv`](rcm/zshenv), [`zshrc`](rcm/zshrc) | `~/.zshenv`, `~/.zshrc` | zsh: the profiler for every shell, completion and history for the interactive ones |
+| [`zshenv`](rcm/zshenv), [`zshrc`](rcm/zshrc) | `~/.zshenv`, `~/.zshrc` | zsh: the profiler for every shell, completion, history and [prompt marks](#prompt-marks) for the interactive ones |
 | [`zsh-startup-profile.zsh`](rcm/zsh-startup-profile.zsh) | `~/.zsh-startup-profile.zsh` | times every interactive zsh startup — [below](#zsh-startup-profiling) |
 | [`autoscreen`](rcm/autoscreen) | `~/.autoscreen` | drop into `screen` automatically on an interactive SSH login |
 | [`gitconfig`](rcm/gitconfig), [`gitaliases`](rcm/gitaliases) | `~/.gitconfig`, `~/.gitaliases` | Git settings and aliases; pulls in several optional `~/.gitconfig.*` includes |
@@ -337,6 +339,50 @@ and is now sourced only if it is there:
 it is the one of the three that a machine may legitimately never need,
 and the error was reaching zsh as well,
 which reads `~/.bash_aliases` through `~/.zshrc`.
+
+## Prompt marks
+
+Every interactive zsh tells the terminal where each prompt begins,
+where the command it accepted started running,
+and where that command ended with which exit status —
+the `A`, `C` and `D` marks of
+[OSC 133](https://gitlab.freedesktop.org/Per_Bothner/specifications/-/blob/master/proposals/semantic-prompts.md),
+the semantic-prompt sequences.
+
+A terminal that reads them can jump from prompt to prompt,
+select or copy the output of a single command,
+and tell a command that failed from one that did not.
+tmux 3.4 and later reads them as well —
+its `previous-prompt` and `next-prompt` navigate by nothing else.
+A terminal that reads none of them ignores them,
+so nothing here is tied to one terminal.
+
+`A` is prepended to `$PS1`,
+rather than sent from the `precmd` hook where the other two live
+and where it looks like it belongs.
+The line editor redraws a prompt from scratch every time —
+carriage return, erase from the cursor to the end of the screen, then the prompt —
+and tmux forgets what it knew about the lines that erase clears.
+A mark sent from `precmd` arrives just before the erase and does not survive it:
+only the first prompt of a session stays marked,
+and jumping between prompts then goes from wherever you are to the top,
+and nowhere in between.
+Sent from inside the prompt it arrives after the erase,
+and is renewed at every redraw.
+
+Under Ghostty the marks are left to Ghostty,
+which injects a shell integration of its own that sends the same sequences;
+inside tmux they are not,
+because that injection reaches only the shell Ghostty starts itself.
+The other way round —
+sending them always and turning Ghostty's half off with
+`shell-integration-features = no-prompt-mark` —
+would put the switch in a file this repository does not ship,
+on every machine that has one.
+
+Nothing here costs a process:
+`print` is a builtin, the strings are constants,
+and the prompt mark is expanded by zsh's own prompt machinery.
 
 ## zsh startup profiling
 
@@ -537,6 +583,13 @@ and they run in name order:
   The audit is observed through a sentinel written into the stamp, which the
   audit truncates — mtimes cannot tell a re-audit within the same second from
   no audit at all.
+- `62-zsh-prompt-marks`: the [prompt marks](#prompt-marks) are the bytes they
+  should be, the command-end mark carries the status of the command line,
+  and the prompt-start mark is in `$PS1` rather than in a hook — where it
+  would be erased again before anyone saw it.
+  Reading `~/.zshrc` twice does not mark the prompt twice,
+  and a shell that says it is Ghostty's leaves the marking to Ghostty
+  unless tmux is in between.
 - `65-zsh-startup-profile`: a shell that reaches a prompt is timed, recorded
   once and broken down by startup file; one that does not — a script, a
   `zsh -c`, a benchmark run — is left alone; and every documented way of
