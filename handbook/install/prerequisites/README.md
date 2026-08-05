@@ -11,6 +11,11 @@ and what individual scripts assume beyond that.
 and only `import` and the tests need it
 ([`install/tasks/`](/handbook/install/tasks/README.md) has the split).
 
+The [GitHub CLI](https://cli.github.com) is needed by one script alone:
+[`bootstrap-private`](/bootstrap-private) creates a repository with it,
+and says what to do by hand where it is missing
+([`layout/private/`](/handbook/layout/private/README.md)).
+
 Putting `~/bin` on the `PATH` is not among the things left to you:
 the shipped profiles do it, on macOS as well as on Ubuntu
 ([`layout/path/`](/handbook/layout/path/README.md)).

@@ -55,6 +55,23 @@ and they run in name order:
 - `20-install`: every destination rcm lists exists,
   configuration files are symbolic links,
   and installing twice changes nothing.
+- `25-private`: a private sidecar repository
+  ([`layout/private/`](/handbook/layout/private/README.md))
+  is merged into the same home directory:
+  its own files install, its `rcrc` fragment extends `UNDOTTED`
+  instead of replacing it,
+  it wins a name both trees have,
+  its hooks run while the directory holding them is not installed,
+  uninstalling reaches its links too,
+  and an `rcrc` under its `rcm/` — which would install over `~/.rcrc` —
+  is refused.
+  It brings its own home directory and its own sidecar,
+  because the machine running it may have a real one.
+  It also reads the tasks rather than running them,
+  for the one thing running them cannot show:
+  that none of them reaches rcm on its own
+  and so decides for itself which trees to act on
+  ([`install/tasks/`](/handbook/install/tasks/README.md)).
 - `30-preexisting`: an account that came with its own
   `~/.bash_profile` keeps it,
   and `make force` is what makes the scripts reachable there.

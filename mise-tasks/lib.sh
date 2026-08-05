@@ -2,7 +2,7 @@
 # executable file in this directory for a task, and this one is not.
 #
 # The scripts run under `mise run`, under `make`, and on their own, so they
-# cannot lean on mise's [env] -- the two variables are worked out here instead.
+# cannot lean on mise's [env] -- the variables are worked out here instead.
 # $0 is the task script that sourced this file, not this file.
 
 REPO=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
@@ -13,4 +13,41 @@ REPO=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 RCRC="$REPO/rcm/rcrc"
 DOTFILES="$REPO/rcm"
 
-export REPO RCRC DOTFILES
+# The private sidecar repository, if this machine has one
+# (handbook/layout/private/README.md). Exported because rcm/rcrc reads it too:
+# the tasks are what tell rcm where the sidecar is when it is not at the
+# default path.
+SCRIPTLETS_PRIVATE="${SCRIPTLETS_PRIVATE:-$HOME/git/scriptlets-private}"
+
+export REPO RCRC DOTFILES SCRIPTLETS_PRIVATE
+
+# A sidecar extends rcm's configuration through a fragment at its root, and an
+# `rcrc` under its rcm/ is a different thing entirely: it would be installed
+# like any other file, from the tree that is walked first, so ~/.rcrc would
+# become the fragment that only appends to variables nothing had set. Every
+# later run would be configured by half a file, and nothing would say so.
+if [ -f "$SCRIPTLETS_PRIVATE/rcm/rcrc" ]; then
+    echo "$SCRIPTLETS_PRIVATE/rcm/rcrc would be installed as ~/.rcrc," >&2
+    echo "replacing the file that configures rcm with the fragment that only" >&2
+    echo "extends it. Move it to $SCRIPTLETS_PRIVATE/rcrc, which rcm/rcrc" >&2
+    echo "sources: handbook/layout/private/README.md." >&2
+    exit 1
+fi
+
+# Run an rcm command over the trees this machine has. rcm's -d replaces
+# DOTFILES_DIRS from rcrc rather than adding to it, so a task that passes one
+# has to pass them all; the sidecar comes first, in the order rcrc sets.
+#
+# Every task that reaches rcm goes through here, so none of them can act on a
+# different set of trees than the others -- an install that saw the sidecar and
+# an uninstall that did not would strand every link the sidecar owns.
+rcm_run() {
+    _rcm_cmd=$1
+    shift
+
+    if [ -d "$SCRIPTLETS_PRIVATE/rcm" ]; then
+        "$_rcm_cmd" -d "$SCRIPTLETS_PRIVATE/rcm" -d "$DOTFILES" "$@"
+    else
+        "$_rcm_cmd" -d "$DOTFILES" "$@"
+    fi
+}
