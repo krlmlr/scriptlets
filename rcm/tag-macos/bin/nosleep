@@ -1,0 +1,60 @@
+#!/bin/sh
+# Stop the machine from sleeping, or let it sleep again.
+#
+# `pmset -a disablesleep` and not `caffeinate`: this one survives a closed lid,
+# which is the case the tool exists for.
+
+case "$#:${1:-}" in
+  0:) want= ;;
+  1:on) want=1 ;;
+  1:off) want=0 ;;
+  *)
+    echo "Usage: $0 [on|off]" >&2
+    exit 1
+    ;;
+esac
+
+command -v pmset >/dev/null || {
+  echo "$0: no pmset -- this is a macOS tool" >&2
+  exit 1
+}
+
+label() {
+  if [ "$1" = 1 ]; then echo disabled; else echo enabled; fi
+}
+
+# `pmset -a disablesleep` writes the system-wide flag that `pmset -g` prints as
+# SleepDisabled; both spellings are read because the name has moved between
+# releases. A machine where it was never set prints neither, and is awake.
+state() {
+  case "$(pmset -g |
+    awk 'tolower($1) ~ /^(sleepdisabled|disablesleep)$/ { print $2; exit }')" in
+    1 | [Yy]es | [Tt]rue) echo 1 ;;
+    *) echo 0 ;;
+  esac
+}
+
+current=$(state)
+[ -n "$want" ] || want=$((1 - current))
+
+if [ "$want" = "$current" ]; then
+  echo "sleep is already $(label "$current")"
+  exit 0
+fi
+
+# Only root writes this, so name sudo rather than hope for a cached credential.
+# The no-op above returns before we get here, so asking for nothing costs no
+# password prompt.
+if [ "$(id -u)" = 0 ]; then
+  sudo=
+elif command -v sudo >/dev/null; then
+  sudo=sudo
+else
+  echo "$0: changing this needs root, and sudo is not installed" >&2
+  exit 1
+fi
+
+# Unquoted on purpose: one word when sudo is needed, no word at all when not.
+$sudo pmset -a disablesleep "$want" || exit
+
+echo "sleep $(label "$want")"

@@ -130,6 +130,21 @@ so it is installed on macOS only.
 and show a desktop notification *in case of error*.
 Installed on macOS only, for the same reason as `n`.
 
+### Sleep (macOS only)
+
+**`nosleep`** — stop the machine from sleeping, or let it sleep again.
+`nosleep on` and `nosleep off` say which,
+and a bare `nosleep` flips whichever way the machine currently sits,
+reading the current state from `pmset -g`.
+This is `pmset -a disablesleep` and deliberately not `caffeinate`:
+the flag survives a closed lid,
+which is the case the tool exists for.
+Writing it needs root,
+so the script names `sudo` rather than hope for a cached credential —
+and a request for the state the machine is already in
+changes nothing and asks for no password.
+Installed on macOS only, since `pmset` is macOS's.
+
 ### The rest
 
 **`fsed`** — run `gsed` over the whole tree below the current
