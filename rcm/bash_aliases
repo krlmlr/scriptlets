@@ -32,4 +32,9 @@ if [ -f ~/.bash_aliases_os ]; then
   . ~/.bash_aliases_os
 fi
 
-. ~/.bash_secrets
+# Whatever must not be in a public repository. A machine without one is not
+# misconfigured, and an unguarded `.` here is an error message at every single
+# shell start until someone touches the file.
+if [ -r ~/.bash_secrets ]; then
+  . ~/.bash_secrets
+fi
