@@ -198,6 +198,42 @@ fi
 
 compdef g=git
 
+# ---------------------------------------------------------------------------
+# Semantic prompt marks (OSC 133): where a prompt begins and ends, where a
+# command started producing output, where it ended and with what status.
+#
+# Why A and B go in the prompt rather than in a hook, why D waits for a
+# command to have run, and what the condition below is really asking:
+# handbook/config/prompt-marks/README.md in the scriptlets repository.
+# ---------------------------------------------------------------------------
+if [[ -z ${precmd_functions[(r)_ghostty_deferred_init]} ]]; then
+  autoload -Uz add-zsh-hook
+
+  typeset -g _osc133_command_ran=0
+
+  _osc133_preexec() {
+    _osc133_command_ran=1
+    print -n "\e]133;C\a"
+  }
+
+  _osc133_precmd() {
+    local ret=$?
+    (( _osc133_command_ran )) || return 0
+    _osc133_command_ran=0
+    print -n "\e]133;D;$ret\a"
+  }
+
+  add-zsh-hook precmd _osc133_precmd
+  add-zsh-hook preexec _osc133_preexec
+
+  if [[ -o prompt_percent && $PS1 != *$'\e]133;A\a'* ]]; then
+    # A prompt ending in a lone % would take the { after it for a %{ escape.
+    [[ $PS1 == *[^%]% || $PS1 == % ]] && PS1=$PS1%
+
+    PS1=$'%{\e]133;A\a%}'$PS1$'%{\e]133;B\a%}'
+  fi
+fi
+
 # Last line on purpose: the mark records when this file was *done*, and the gap
 # between it and the first prompt is everything the terminal does after the
 # configuration has finished.
