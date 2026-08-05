@@ -319,30 +319,50 @@ Where it is not installed, `Ctrl-R` stays zsh's own and nothing is missed.
 `atuin init zsh` writes a shell script to standard output,
 and the line the documentation gives — `eval "$(atuin init zsh)"` —
 starts a process to produce that script at every single interactive shell.
-That script changes when atuin is upgraded and at no other time,
+What it writes changes when atuin is upgraded or reconfigured,
+and not from one shell to the next,
 so `~/.zshrc` writes it to
-`${XDG_CACHE_HOME:-~/.cache}/zsh/atuin-init.zsh` once,
+`${XDG_CACHE_HOME:-~/.cache}/zsh/atuin-init.zsh`,
 compiles it to wordcode,
 and sources it from there for every shell after that.
-There is nothing to remember after an upgrade:
-the file is rewritten whenever it is older than the `atuin` that would write
-it.
-By hand, if it ever comes to that:
+The file is rewritten whenever it is older than the `atuin` binary
+or than `~/.config/atuin/config.toml`,
+so an upgrade and a change of settings are both picked up on their own.
+
+An mtime is a proxy for a version rather than a promise of one,
+and there are two shapes it misses:
+a tool behind a shim (mise, asdf) is upgraded without the shim being touched,
+and a binary unpacked from an archive can arrive
+with an mtime older than the file it ought to replace.
+The answer to both, and to anything else this gets wrong:
 
 ```sh
-atuin init zsh --disable-up-arrow >| ${XDG_CACHE_HOME:-~/.cache}/zsh/atuin-init.zsh
+rm -f ${XDG_CACHE_HOME:-~/.cache}/zsh/atuin-init.zsh*
 ```
 
-One process is left, and it is atuin's rather than ours:
-the script asks for a session id (`atuin uuid`) the first time a shell reads
-it.
-`$ATUIN_SESSION` is exported, so the shells started below one do not repeat
-it.
+and the next shell builds it again.
+Not `atuin init zsh > <that file>`:
+that leaves the wordcode beside it older than the script it was compiled
+from, so zsh goes back to parsing the script —
+and nothing notices, because the script is now newer than atuin as well.
 
-`--disable-up-arrow` leaves `Up` and `Down` to zsh.
-The arrows walk the lines this session ran, in order,
+A rewrite that goes wrong leaves the working file alone.
+Everything happens to a file named for the shell doing the work,
+which is renamed into place only once it is not empty and compiles;
+`atuin init` prints nothing and exits 0 when it finds its own paths broken,
+and that would otherwise replace a working cache with an empty one.
+
+One process is left, and it is atuin's rather than ours:
+the generated script asks for a session id (`atuin uuid`) as it is read,
+once per interactive shell — nested ones included,
+since it takes a new session id whenever `$SHLVL` has changed.
+
+`--disable-up-arrow` leaves the `Up` arrow to zsh.
+It walks the lines this session ran, in order,
 which is a different question from the one `Ctrl-R` asks
 and is the one the shell answers better.
+(`Down` is never atuin's to take;
+the flag also leaves `k` alone in vi command mode.)
 
 ## Configuration files
 
@@ -553,6 +573,16 @@ because `/etc/skel` is also where an image builder drops extras —
 the CI runner's `/etc/skel` carries a `~/.bash_profile` no stock Ubuntu account has,
 and seeding it would test the CI image instead of the platform.
 
+`$XDG_CACHE_HOME` is pointed at that home directory too.
+`$HOME` alone is not enough:
+what a shell caches — the completion dump, atuin's generated init script —
+goes to `$XDG_CACHE_HOME` wherever that is set,
+so on a machine that sets it the checks would delete and rewrite the real
+user's cache while believing they were working in a directory of their own.
+The other XDG directories are deliberately left alone,
+because mise reads its own configuration and state from them
+and these checks run mise.
+
 Each file in `tests/checks` is a separate script
 that sources [`tests/lib.sh`](tests/lib.sh) for `pass`, `fail` and the assertions,
 and they run in name order:
@@ -585,11 +615,14 @@ and they run in name order:
   [turning the profiling off](#turning-it-off) turns it off.
 - `67-zsh-atuin`: the [atuin](#ctrl-r-with-atuin) init script is written to a
   file and sourced from there rather than generated at every shell,
-  rewritten when the `atuin` binary is newer than the file,
+  rewritten when the `atuin` binary or its configuration file is newer than
+  the file, never replaced by an empty or half-written one,
   and absent without complaint where atuin is not installed.
-  A stand-in `atuin` on the `PATH` counts its own runs,
-  so the check says the same on a machine that has the real one and one that
-  does not.
+  A stand-in `atuin` on the `PATH` counts its own runs and fails the ways the
+  real one fails, so the checks do not need it — or want it, since a real
+  atuin would make them say something different.
+  The one case that does need the machine's own answer, no atuin at all,
+  is skipped where there is one.
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub remotes of a
   throw-away repository and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.
