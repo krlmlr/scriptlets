@@ -29,29 +29,50 @@ and [`mise-tasks/lib.sh`](/mise-tasks/lib.sh), for the tasks
 
 ## Creating one
 
-[`bootstrap-private`](/bootstrap-private) does it in one run:
-it writes the skeleton, commits it as `Initial commit`,
-creates a private GitHub repository from that commit and pushes it,
-and leaves the working copy behind as the clone.
+[`bootstrap-private`](/bootstrap-private) writes the skeleton,
+commits it, creates the repository private on GitHub with a description,
+adds `origin` and pushes,
+leaving the working copy behind as the clone:
 
 ```sh
-./bootstrap-private -n     # print the skeleton, create nothing
-./bootstrap-private        # create it
+./bootstrap-private -n     # report what each step would do, change nothing
+./bootstrap-private        # do it
 ```
 
 It needs the [GitHub CLI](https://cli.github.com) logged in
-([`install/prerequisites/`](/handbook/install/prerequisites/README.md)),
-and `-r` names the repository where `scriptlets-private` is taken.
-It refuses rather than merge into something that already exists:
-a destination directory that is there,
-or a repository of that name already on GitHub,
-each stop it with the command that would have been right instead.
+([`install/prerequisites/`](/handbook/install/prerequisites/README.md)).
+`-r` names the repository where `scriptlets-private` is taken,
+and `-d` gives it a description —
+the one property the script keeps in step on a repository it did not
+create, so a later run with a different `-d` changes it on GitHub
+and a run without one leaves it alone.
 Without `gh` the same end state is a private repository created by
 hand, cloned to the path above,
-and the skeleton written into it — `-n` prints the file list.
+and the skeleton written into it; `-n` lists the files.
 
 The skeleton is empty of secrets and installs cleanly as it stands:
 every file in it is comments, saying what belongs there.
+
+**Every step is idempotent, and says which of two things it found.**
+A step brings one thing to the state it should be in and reports it as
+created, already so, or updated,
+so a run reads as what changed rather than as what ran.
+Running the script again therefore converges —
+after an interruption, on a machine where half of it is already done,
+or once it has grown another step —
+and this is the property to preserve when adding one:
+inspect first, act only where the state differs.
+
+**No file that exists is ever rewritten.**
+By the second run a file may hold the secrets it was created to hold,
+and nothing in the script can tell what it wrote
+from what was put there afterwards.
+The same run reports such a file as already present and moves on,
+which is also why a half-finished first attempt can simply be rerun.
+`origin` is the one thing a rerun will not adjust:
+a remote pointing somewhere else is a decision,
+and pushing to it would be the script guessing which.
+It stops and says so instead.
 
 ## What goes in it
 

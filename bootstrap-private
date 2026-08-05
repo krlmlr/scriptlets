@@ -1,28 +1,43 @@
 #!/bin/sh
 #
-# Create a private sidecar repository and leave it ready for `mise run install`.
-# See handbook/layout/private/README.md.
+# Create or update the private sidecar repository, and leave it ready for
+# `mise run install`. See handbook/layout/private/README.md.
 #
-# It builds the skeleton of a second dotfiles tree, commits it, creates a
-# private repository on GitHub from that commit, and pushes. The working copy
-# it leaves behind is the clone: no separate checkout step, and `origin` is
-# already set. -n does everything but the parts that touch GitHub and $HOME.
+# Every step is idempotent: it looks at one thing, brings it to the state it
+# should be in, and reports which of the two it found. Running this again --
+# after an interruption, or after it has grown another step -- converges
+# instead of refusing or duplicating, so the script stays a description of the
+# finished state rather than a one-shot.
+#
+# A file that already exists is never rewritten. By the second run it may hold
+# secrets, and nothing here can tell the skeleton it wrote from what you put
+# there afterwards.
+#
+# Adding a step: write one function that inspects, acts only where it must, and
+# reports through `same`, `made` or `changed`. Anything that writes returns
+# early when $dry_run is 1, after reporting what it would have done. Then name
+# the function in the run of steps at the bottom.
 
 set -eu
 
 repo_name=scriptlets-private
+repo_desc="Private sidecar for krlmlr/scriptlets -- the dotfiles that must not be public"
 dry_run=0
 
 REPO=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 
 usage() {
     cat <<EOF
-Usage: bootstrap-private [-n] [-r NAME]
+Usage: bootstrap-private [-n] [-r NAME] [-d DESCRIPTION]
 
-  -r NAME  name of the repository to create (default: $repo_name)
-  -n       dry run: build the skeleton in a temporary directory and print it,
-           touching neither GitHub nor the destination
-  -h       this message
+Creates the private sidecar repository, or brings an existing one up to date.
+Safe to run repeatedly: nothing is duplicated, and no file that already exists
+is rewritten.
+
+  -r NAME         repository name (default: $repo_name)
+  -d DESCRIPTION  its description on GitHub
+  -n              dry run: report what each step would do, change nothing
+  -h              this message
 
 The clone goes to \$SCRIPTLETS_PRIVATE if that is set, and to ~/git/NAME
 otherwise -- the path rcm/rcrc looks in.
@@ -34,10 +49,17 @@ die() {
     exit 1
 }
 
-while getopts 'nr:h' opt; do
+# The three outcomes a step reports. Every step reaches exactly one of them,
+# so the run reads as what changed rather than as what ran.
+same() { printf '  =  %s\n' "$1"; }
+made() { printf '  +  %s\n' "$1"; }
+changed() { printf '  ~  %s\n' "$1"; }
+
+while getopts 'nr:d:h' opt; do
     case $opt in
     n) dry_run=1 ;;
     r) repo_name=$OPTARG ;;
+    d) repo_desc=$OPTARG ;;
     h)
         usage
         exit 0
@@ -56,35 +78,53 @@ dest=${SCRIPTLETS_PRIVATE:-$HOME/git/$repo_name}
 
 command -v git >/dev/null || die "git is required"
 
-if [ "$dry_run" -eq 1 ]; then
-    work=$(mktemp -d "${TMPDIR:-/tmp}/scriptlets-private.XXXXXX")
-    trap 'rm -rf "$work"' EXIT
-else
-    [ ! -e "$dest" ] || die "'$dest' already exists -- remove it, or set \$SCRIPTLETS_PRIVATE elsewhere"
-
+if [ "$dry_run" -eq 0 ]; then
     command -v gh >/dev/null || die "the GitHub CLI is required to create the repository:
        https://cli.github.com -- or create '$repo_name' as a private
        repository by hand and see handbook/layout/private/README.md"
 
     gh auth status >/dev/null 2>&1 || die "gh is not logged in -- run \`gh auth login\`"
-
-    if gh repo view "$repo_name" >/dev/null 2>&1; then
-        die "'$repo_name' already exists on GitHub -- clone it instead:
-       git clone git@github.com:\$(gh api user -q .login)/$repo_name.git '$dest'"
-    fi
-
-    work=$dest
-    mkdir -p "$work"
 fi
 
-# The repository is private in the ordinary sense as well: nothing in it is
-# anyone else's to read, and the permissions here are the ones the installed
-# files have, because rcm links rather than copies.
-chmod 700 "$work"
+# --- the directory ---------------------------------------------------------
 
-mkdir -p "$work/rcm/ssh" "$work/rcm/hooks"
+ensure_dir() {
+    if [ -d "$dest" ]; then
+        same "$dest"
+    else
+        made "$dest"
+        [ "$dry_run" -eq 1 ] && return 0
+        mkdir -p "$dest"
+    fi
 
-cat >"$work/README.md" <<'EOF'
+    # Nothing in a sidecar is anyone else's to read, and rcm links rather than
+    # copies, so these are the permissions the installed files have. Setting
+    # them on every run is what keeps that true after a file is added by hand.
+    [ "$dry_run" -eq 1 ] && return 0
+    chmod 700 "$dest"
+    chmod -R go-rwx "$dest"
+}
+
+# --- the files -------------------------------------------------------------
+
+# Reports, and answers whether the caller should write the file: no for one
+# that is already there, and no in a dry run, where the report is the point.
+seed() {
+    if [ -e "$dest/$1" ]; then
+        same "$1"
+        return 1
+    fi
+
+    made "$1"
+    [ "$dry_run" -eq 1 ] && return 1
+
+    mkdir -p "$dest/$(dirname -- "$1")"
+    return 0
+}
+
+ensure_files() {
+    if seed README.md; then
+        cat >"$dest/README.md" <<'EOF'
 # scriptlets-private
 
 The private sidecar of
@@ -103,12 +143,13 @@ How the two trees merge, what wins a name they both have,
 and what this repository may and may not contain
 is `handbook/layout/private/README.md` in the public repository.
 EOF
+    fi
 
-# The fragment. At the root on purpose: everything under rcm/ is installed, and
-# this tree is walked first, so an `rcm/rcrc` here would land as ~/.rcrc in
-# place of the file that sources this one. The tasks refuse to run if one
-# appears there.
-cat >"$work/rcrc" <<'EOF'
+    # At the root on purpose: everything under rcm/ is installed, and this tree
+    # is walked first, so an `rcm/rcrc` would land as ~/.rcrc in place of the
+    # file that sources this one. The tasks refuse to run if one appears there.
+    if seed rcrc; then
+        cat >"$dest/rcrc" <<'EOF'
 # The sidecar's say in rcm's configuration, sourced by the public repository's
 # rcm/rcrc once it has set DOTFILES_DIRS, UNDOTTED, TAGS and OS_TAG.
 #
@@ -130,8 +171,10 @@ cat >"$work/rcrc" <<'EOF'
 #
 # TAGS="$TAGS work"
 EOF
+    fi
 
-cat >"$work/rcm/bash_secrets" <<'EOF'
+    if seed rcm/bash_secrets; then
+        cat >"$dest/rcm/bash_secrets" <<'EOF'
 # Installed as ~/.bash_secrets, sourced by ~/.bash_aliases -- and so by zsh
 # too, which reads that file through ~/.zshrc.
 #
@@ -140,24 +183,30 @@ cat >"$work/rcm/bash_secrets" <<'EOF'
 #
 # export SOME_API_TOKEN=...
 EOF
+    fi
 
-cat >"$work/rcm/gitconfig.user" <<'EOF'
+    if seed rcm/gitconfig.user; then
+        cat >"$dest/rcm/gitconfig.user" <<'EOF'
 # Installed as ~/.gitconfig.user, pulled in by the [include] section of
 # ~/.gitconfig.
 #
 # [user]
 # 	email = you@example.com
 EOF
+    fi
 
-cat >"$work/rcm/Rprofile.private" <<'EOF'
+    if seed rcm/Rprofile.private; then
+        cat >"$dest/rcm/Rprofile.private" <<'EOF'
 # Installed as ~/.Rprofile.private, sourced by ~/.Rprofile if it is there.
 #
 # options(
 #   some.private.option = "..."
 # )
 EOF
+    fi
 
-cat >"$work/rcm/ssh/config-private" <<'EOF'
+    if seed rcm/ssh/config-private; then
+        cat >"$dest/rcm/ssh/config-private" <<'EOF'
 # Installed as ~/.ssh/config-private, pulled in by the `Include config-private`
 # in ~/.ssh/config.
 #
@@ -165,9 +214,11 @@ cat >"$work/rcm/ssh/config-private" <<'EOF'
 #   HostName internal.example.com
 #   User you
 EOF
+    fi
 
-# rcm runs a tree's own hooks, and never installs the directory they are in.
-cat >"$work/rcm/hooks/post-up" <<'EOF'
+    # rcm runs a tree's own hooks, and never installs the directory they sit in.
+    if seed rcm/hooks/post-up; then
+        cat >"$dest/rcm/hooks/post-up" <<'EOF'
 #!/bin/sh
 # Run by rcm after it has linked this tree, from the directory it sits in.
 #
@@ -181,45 +232,190 @@ set -eu
 cd -- "$(dirname -- "$0")/../.."
 chmod -R go-rwx .
 EOF
-chmod +x "$work/rcm/hooks/post-up"
+        chmod +x "$dest/rcm/hooks/post-up"
+    fi
+}
 
-# `git init -b` needs git 2.28; setting HEAD by hand works on every version,
-# and is not at the mercy of init.defaultBranch either.
-git -C "$work" init -q
-git -C "$work" symbolic-ref HEAD refs/heads/main
-git -C "$work" add -A
-git -C "$work" commit -q -m "Initial commit"
+# --- the git repository ----------------------------------------------------
+
+ensure_git() {
+    if [ -d "$dest/.git" ]; then
+        same "git repository"
+        return 0
+    fi
+
+    made "git repository, on main"
+    [ "$dry_run" -eq 1 ] && return 0
+
+    # `git init -b` needs git 2.28; setting HEAD by hand works on every version,
+    # and is not at the mercy of init.defaultBranch either.
+    git -C "$dest" init -q
+    git -C "$dest" symbolic-ref HEAD refs/heads/main
+}
+
+ensure_commit() {
+    if [ "$dry_run" -eq 1 ]; then
+        [ -d "$dest/.git" ] || made "commit \"Initial commit\""
+        return 0
+    fi
+
+    git -C "$dest" add -A
+
+    if git -C "$dest" diff --cached --quiet; then
+        same "commit (nothing staged)"
+        return 0
+    fi
+
+    git -C "$dest" var GIT_AUTHOR_IDENT >/dev/null 2>&1 ||
+        die "git has no identity here -- set user.name and user.email first"
+
+    if git -C "$dest" rev-parse --verify -q HEAD >/dev/null; then
+        message="Update the sidecar skeleton"
+    else
+        message="Initial commit"
+    fi
+
+    git -C "$dest" commit -q -m "$message"
+    made "commit \"$message\""
+}
+
+# --- the repository on GitHub ----------------------------------------------
+
+ensure_github() {
+    if [ "$dry_run" -eq 1 ]; then
+        if ! command -v gh >/dev/null; then
+            same "GitHub repository (not checked: no gh)"
+        elif gh repo view "$repo_name" >/dev/null 2>&1; then
+            same "GitHub repository $repo_name"
+        else
+            made "GitHub repository $repo_name, private"
+        fi
+        return 0
+    fi
+
+    if gh repo view "$repo_name" >/dev/null 2>&1; then
+        same "GitHub repository $(gh repo view "$repo_name" --json nameWithOwner -q .nameWithOwner)"
+        return 0
+    fi
+
+    gh repo create "$repo_name" --private --description "$repo_desc" >/dev/null
+    made "GitHub repository $(gh repo view "$repo_name" --json nameWithOwner -q .nameWithOwner), private"
+}
+
+# Separate from creating it, because the description is the one property this
+# script owns on a repository it did not create: a run that changes -d changes
+# it on GitHub, and a run that does not leaves it alone.
+ensure_description() {
+    if [ "$dry_run" -eq 1 ]; then
+        command -v gh >/dev/null || return 0
+
+        # A repository that is not there yet is created with the description
+        # already on it, and the step above is what reports that.
+        gh repo view "$repo_name" >/dev/null 2>&1 || return 0
+
+        current=$(gh repo view "$repo_name" --json description -q .description)
+        if [ "$current" = "$repo_desc" ]; then
+            same "description"
+        else
+            changed "description: $repo_desc"
+        fi
+        return 0
+    fi
+
+    current=$(gh repo view "$repo_name" --json description -q .description)
+
+    if [ "$current" = "$repo_desc" ]; then
+        same "description"
+        return 0
+    fi
+
+    gh repo edit "$repo_name" --description "$repo_desc" >/dev/null
+    changed "description: $repo_desc"
+}
+
+# --- the remote, and the push ----------------------------------------------
+
+ensure_remote() {
+    if [ "$dry_run" -eq 1 ]; then
+        if [ -d "$dest/.git" ] && git -C "$dest" remote get-url origin >/dev/null 2>&1; then
+            same "remote origin"
+        else
+            made "remote origin"
+        fi
+        return 0
+    fi
+
+    url=$(gh repo view "$repo_name" --json sshUrl -q .sshUrl)
+
+    if existing=$(git -C "$dest" remote get-url origin 2>/dev/null); then
+        # Not rewritten: a remote pointing somewhere else is a decision, and
+        # pushing to it would be this script acting on a guess about which.
+        if [ "$existing" = "$url" ]; then
+            same "remote origin"
+        else
+            die "origin is '$existing', not '$url' --
+       point it where you mean it to go, or drop it and run this again"
+        fi
+        return 0
+    fi
+
+    # SSH, matching what `git ssh-remote` converts every other remote to.
+    git -C "$dest" remote add origin "$url"
+    made "remote origin -> $url"
+}
+
+ensure_push() {
+    if [ "$dry_run" -eq 1 ]; then
+        made "push of main to origin"
+        return 0
+    fi
+
+    local_sha=$(git -C "$dest" rev-parse main)
+    remote_sha=$(git -C "$dest" ls-remote origin refs/heads/main 2>/dev/null | cut -f1)
+
+    # -u regardless: an already-pushed branch may still have no upstream, and
+    # setting one twice costs nothing.
+    git -C "$dest" push -q -u origin main
+
+    if [ "$local_sha" = "$remote_sha" ]; then
+        same "push (origin already has main)"
+    else
+        made "push of main to origin"
+    fi
+}
+
+# --- the run ---------------------------------------------------------------
 
 if [ "$dry_run" -eq 1 ]; then
-    echo "# dry run -- nothing was created on GitHub, and $dest was not touched"
-    echo
-    echo "# the skeleton, committed as \"Initial commit\":"
-    git -C "$work" ls-files | sed 's/^/  /'
-    echo
-    echo "# it would be pushed with:"
-    echo "  gh repo create $repo_name --private --source=$dest --remote=origin --push"
+    echo "# dry run: nothing below is carried out"
+fi
+
+echo "# $dest"
+echo "#   + created   = already so   ~ updated"
+echo
+
+ensure_dir
+ensure_files
+ensure_git
+ensure_commit
+ensure_github
+ensure_description
+ensure_remote
+ensure_push
+
+if [ "$dry_run" -eq 1 ]; then
     exit 0
 fi
 
-gh repo create "$repo_name" --private --source="$work" --remote=origin --push
-
-# --push leaves the branch pushed; this is what makes it tracked, so that a
-# later bare `git push` from the clone knows where to go.
-git -C "$work" push -q -u origin main
-
-url=$(gh repo view "$repo_name" --json url -q .url 2>/dev/null || true)
-
 echo
-echo "# created:  ${url:-$(git -C "$work" remote get-url origin)}"
-echo "# cloned:   $work"
+echo "# $(gh repo view "$repo_name" --json url -q .url)"
 
-# What the sidecar will actually install, resolved the way an install resolves
-# it: the destinations below come from the sidecar rather than the public tree.
+# What the sidecar adds, resolved the way an install resolves it.
 if command -v lsrc >/dev/null; then
-    echo "# it adds:"
-    RCRC="$REPO/rcm/rcrc" SCRIPTLETS_PRIVATE="$work" \
-        lsrc -d "$work/rcm" -d "$REPO/rcm" 2>/dev/null |
-        grep -F ":$work/" | cut -d: -f1 | sed 's/^/  /'
+    echo "# it installs:"
+    RCRC="$REPO/rcm/rcrc" SCRIPTLETS_PRIVATE="$dest" \
+        lsrc -d "$dest/rcm" -d "$REPO/rcm" 2>/dev/null |
+        grep -F ":$dest/" | cut -d: -f1 | sed 's/^/  /'
 fi
 
 cat <<EOF
@@ -230,5 +426,5 @@ Next:
   mise run install    # link both trees into the home directory
 
 Put a secret in it by editing the file it belongs in, then commit and push
-from $work as usual.
+from $dest. Running this script again is safe: it will leave that file alone.
 EOF
