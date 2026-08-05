@@ -43,7 +43,7 @@
 # (--zprof and --log need nothing beyond zsh.)
 #
 # Reading the output, and turning the profiling off:
-# the "zsh startup profiling" section of the scriptlets README.
+# handbook/config/zsh-startup/README.md in the scriptlets repository.
 
 set -euo pipefail
 

@@ -145,6 +145,8 @@ add-zsh-hook precmd __zsh_history_rotate
 # ---------------------------------------------------------------------------
 # atuin: Ctrl-R over all of it
 #
+# handbook/config/atuin/README.md in the scriptlets repository.
+#
 # The files above keep everything; atuin is what makes everything searchable,
 # with a database of its own, a full-screen search on Ctrl-R,
 # and -- once `atuin login` has been run -- the same history on every machine.
@@ -239,9 +241,6 @@ fi
 #
 # bashcompinit first: ~/.bash_aliases (via ~/.bash_aliases_os on macOS) calls
 # `complete`, which is not a zsh builtin without it.
-#
-# ~/.bash_secrets is sourced unguarded by bash_aliases itself, so it has to
-# exist: `touch ~/.bash_secrets` if it does not.
 # ---------------------------------------------------------------------------
 autoload -Uz bashcompinit && bashcompinit
 [[ -r $HOME/.bash_aliases ]] && source "$HOME/.bash_aliases"
