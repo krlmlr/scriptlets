@@ -32,12 +32,12 @@ nothing touches yours.
 ## Prerequisites
 
 The scripts want a GNU userland and a handful of tools besides.
-Debian and Ubuntu carry nearly all of that already;
+Linux carries nearly all of that already;
 macOS gets it from Homebrew, the GNU commands under their `g` names.
 [`install/prerequisites/`](handbook/install/prerequisites/README.md)
-has the `apt` and the `brew` line, with what wants what,
-the names each side spells differently,
-and what neither package manager carries.
+has a line per package manager — `apt`, `dnf`, `pacman`, `brew` —
+with what wants what, the names each one spells differently,
+and what none of them carries.
 
 ## Inside
 
