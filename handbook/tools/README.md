@@ -42,6 +42,15 @@ The switches:
   The [`NO_COLOR`](https://no-color.org/) environment variable also
   disables color unless `--color=always` is given.
 
+The exit status is the parallel run's, not the repositories'.
+Every generated command ends in the `sed` that names its output,
+so a repository whose command failed says so in the output
+and leaves `$?` at zero.
+`-i` is the mode that stops at the first failure
+and passes that status on,
+so a script that needs to know reaches for it
+rather than for the parallel default.
+
 [`gita`](https://github.com/nosarthur/gita) both does too much and not
 enough; these stay home-grown.
 Not yet integrated with `inside` and `every`, which cover the

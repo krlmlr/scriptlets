@@ -146,6 +146,10 @@ and they run in name order:
   a run that ends on the first repository prints nothing at all,
   which is also what an empty directory looks like,
   so the check names the repositories it expects to hear back from.
+  The repository it is *standing in* is not among them,
+  which is the other half of "below";
+  `-n` emits the commands instead of running them;
+  and `s` reaches the same repositories with `git` in front.
   It links the `fd`, `gsed` and `gsort` names Linux does not ship
   ([`install/prerequisites/`](/handbook/install/prerequisites/README.md))
   and skips where the commands behind them are missing too.

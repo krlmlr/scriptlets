@@ -58,6 +58,9 @@ fi
 PATH="$work/shims:$PATH"
 export PATH
 
+# A repository holding the two, so "below the current directory" has the case
+# that says *below*: the one the command runs in is not one of them.
+git init -q "$work"
 git init -q "$work/one"
 git init -q "$work/two"
 
@@ -76,3 +79,20 @@ for repo in one two; do
         ;;
     esac
 done
+
+assert_equal "the repository h runs in is not one it runs the command in" \
+    "one two" "$(printf '%s\n' "$output" | sed 's/:.*//' | sort -u | tr '\n' ' ' | sed 's/ $//')"
+
+# `-n` is the half that needs no parallel: it emits the commands, and that is
+# all it does.
+dry=$(cd "$work" && h -n touch dry-run-marker 2>&1)
+assert_equal "--dry-run emits a command per repository" \
+    "2" "$(printf '%s\n' "$dry" | grep -c '^bash -c ')"
+assert_equal "--dry-run does not run them" \
+    "" "$(find "$work" -name dry-run-marker)"
+
+# `s` is `h git`, and its own argument parsing sits in front of that.
+# `rev-parse --git-dir` answers in a repository that has no commit yet.
+answered=$(cd "$work" && s --no-color rev-parse --git-dir 2>&1 |
+    sed 's/:.*//' | sort -u | tr '\n' ' ' | sed 's/ $//')
+assert_equal "s prepends git and reaches every repository" "one two" "$answered"

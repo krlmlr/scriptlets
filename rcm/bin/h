@@ -198,7 +198,9 @@ process_cmd() {
       cat
     fi
   elif $interactive; then
-    local cmds
+    # Not `local`: the EXIT trap runs after this function has returned, so a
+    # local would be out of scope by then -- `set -u` would abort on it and the
+    # file would outlive the run it belongs to.
     cmds=$(mktemp -u "${TMPDIR:-/tmp}/h-cmds-XXXXXX")
     trap 'rm -f "$cmds"' EXIT
 
