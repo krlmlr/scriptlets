@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+#
+# Rebuild zsh's completion dump now, audit and all.
+#
+#   zsh-compinit-refresh
+#
+# ~/.zshrc runs the compaudit security check only when the dump is more than a
+# day old, and every shell in between trusts the dump (`compinit -C`). That is
+# what makes a shell start cheap, and it is also why a tool installed five
+# minutes ago does not complete yet: its completion function was not in $fpath
+# when the dump was written.
+#
+# This throws the dump away and lets a fresh interactive zsh build a new one,
+# through ~/.zshrc, so there is one implementation of the rebuild and this
+# script only decides when it happens.
+#
+# The shell you run it from keeps the completions it started with -- they are
+# loaded, not looked up. `exec zsh` picks the new ones up, and so does the next
+# terminal tab.
+#
+# ~/.zcompdump is removed too: it is where compinit wrote before the dump moved
+# under ~/.cache, and nothing reads it any more.
+
+set -euo pipefail
+
+case "${1:-}" in
+  -h|--help) awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "$0"; exit 0 ;;
+  "") ;;
+  *) echo "unknown option: $1" >&2; exit 2 ;;
+esac
+
+command -v zsh >/dev/null || { echo "zsh not found on PATH" >&2; exit 1; }
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+
+tilde() { printf '%s\n' "${1/#$HOME/\~}"; }
+
+# The wildcard covers the dump, its .zwc and the .audited stamp that dates the
+# last audit -- taking the stamp with it is what makes the next shell audit
+# rather than trust what it finds.
+removed=0
+for file in "$CACHE"/zcompdump-* "$HOME"/.zcompdump "$HOME"/.zcompdump.zwc; do
+  if [ -e "$file" ]; then
+    rm -f "$file"
+    removed=$((removed + 1))
+  fi
+done
+
+echo "removed $removed file(s)"
+
+# An interactive shell, because ~/.zshrc is where the rebuild lives. `-c` never
+# reaches a prompt, so this costs one compinit and not a whole session.
+zsh -ic true
+
+built=0
+for file in "$CACHE"/zcompdump-*; do
+  case "$file" in
+    *.zwc | *.audited | *'zcompdump-*') continue ;;
+  esac
+  [ -e "$file" ] || continue
+  echo "wrote $(tilde "$file")"
+  built=$((built + 1))
+done
+
+if [ "$built" -eq 0 ]; then
+  echo "no dump was written -- is ~/.zshrc the one from scriptlets?" >&2
+  exit 1
+fi
+
+echo "run \`exec zsh\` to pick the new completions up in this shell"

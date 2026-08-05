@@ -8,9 +8,51 @@
 # -i skips insecure directories rather than stopping to ask about them: with no
 # terminal to ask on -- a script, a container, `zsh -c` -- plain compinit aborts
 # and leaves no compdef behind at all.
+#
+# The audit is what costs. `-i` does not skip it, it only stops it from asking:
+# compaudit still stats every directory in $fpath, which on macOS is Homebrew's
+# site-functions and a good part of /usr/share, and it was half of what the
+# whole rc chain spent (`zsh-startup-bench --zprof`). It is worth doing, and it
+# is not worth doing at every single shell start -- so the audit runs when the
+# dump is more than a day old, and every other shell trusts the dump.
+#
+# `zsh-compinit-refresh` forces the refresh, for the day a newly installed tool
+# should complete right now rather than tomorrow.
 if ! (( $+functions[compdef] )); then
     autoload -Uz compinit
-    compinit -i
+
+    () {
+        local dump=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION
+        [[ -d ${dump:h} ]] || mkdir -p ${dump:h}
+
+        # When the audit last ran, kept apart from the dump on purpose: compinit
+        # rewrites the dump only when the number of completion functions has
+        # changed, so the dump's own mtime stands still on a machine that
+        # installs nothing -- and using it as the clock would mean auditing at
+        # every start from the second day on, which is the bug this file is
+        # trying to fix.
+        local stamp=$dump.audited
+
+        # Nmh-24: the stamp exists and is less than 24 hours old. The glob has
+        # to happen in an array assignment -- [[ ]] never globs, so the
+        # `[[ -n $stamp(#qNmh-24) ]]` spelling that circulates is always true,
+        # and silently means "never audit again".
+        local -a fresh=( $stamp(Nmh-24) )
+
+        if (( $#fresh )) && [[ -s $dump ]]; then
+            # -C: trust the dump. No compaudit, and no check for completion
+            # functions that appeared since it was written.
+            compinit -C -d $dump
+        else
+            compinit -i -d $dump
+            : >| $stamp
+
+            # zsh reads $dump.zwc in place of $dump whenever it is the newer of
+            # the two, and parsing the dump is most of what -C leaves behind.
+            [[ -f $dump.zwc && ! $dump -nt $dump.zwc ]] ||
+                zcompile -R -- $dump 2>/dev/null
+        fi
+    }
 fi
 
 # mise's completions are generated on demand -- `mise completion zsh` shells out
