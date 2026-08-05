@@ -32,4 +32,10 @@ if [ -f ~/.bash_aliases_os ]; then
   . ~/.bash_aliases_os
 fi
 
-. ~/.bash_secrets
+# Machine-local secrets, never in this repository. Guarded, because the file is
+# absent on any machine that has not needed one yet, and an unguarded `.` made
+# every interactive shell there open with a `no such file or directory` --
+# including the zsh ones, which read this file through ~/.zshrc.
+if [ -f ~/.bash_secrets ]; then
+  . ~/.bash_secrets
+fi

@@ -1,7 +1,3 @@
-# >>> zsh startup profiling >>>
-zsh_startup_mark zprofile
-# <<< zsh startup profiling <<<
-
 # ~/.zprofile: read by login zsh shells.
 #
 # zsh has been the default shell on macOS since Catalina,
@@ -22,3 +18,9 @@ emulate sh -c '. "$HOME/.profile"'
 if false; then
 . "$HOME/.local/bin/rigenv"
 fi
+
+# Last line on purpose: the mark records when this file was *done*, so the
+# timeline printed at the first prompt attributes the time to the right file.
+# >>> zsh startup profiling >>>
+zsh_startup_mark zprofile
+# <<< zsh startup profiling <<<
