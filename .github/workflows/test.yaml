@@ -30,16 +30,19 @@ jobs:
       - uses: actions/checkout@v5
 
       # zsh comes with macOS; on Ubuntu it is installed so that the checks
-      # cover it there too, rather than skipping it.
-      - name: Install rcm
+      # cover it there too, rather than skipping it. The rest is what `h`
+      # drives: its check skips when they are missing, and a job that skips
+      # catches nothing. Which package carries what is
+      # handbook/install/prerequisites/README.md.
+      - name: Install rcm, and what the checks drive
         run: |
           case "$RUNNER_OS" in
           Linux)
             sudo apt-get update
-            sudo apt-get install -y rcm zsh
+            sudo apt-get install -y rcm zsh fd-find parallel
             ;;
           macOS)
-            brew install rcm
+            brew install rcm coreutils fd gnu-sed parallel
             ;;
           esac
 

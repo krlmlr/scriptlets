@@ -159,7 +159,10 @@ process_git_dirs() {
     local command
 
     local color="${colors[i % ${#colors[@]}]}"
-    ((i++))
+    # An assignment, not `((i++))`: an arithmetic command that evaluates to 0
+    # returns 1, so the very first repository -- where i is still 0 -- ended
+    # the run under the `set -e` above, silently and with no output at all.
+    i=$((i + 1))
 
     command="$(
       printf "cd %q &&" "$line"

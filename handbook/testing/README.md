@@ -121,6 +121,15 @@ and they run in name order:
   remotes of a throw-away repository
   and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.
+- `75-h`: `h` runs the command in every repository below the current
+  directory, and each line of output says which one it came from.
+  Both halves matter:
+  a run that ends on the first repository prints nothing at all,
+  which is also what an empty directory looks like,
+  so the check names the repositories it expects to hear back from.
+  It links the `fd`, `gsed` and `gsort` names Linux does not ship
+  ([`install/prerequisites/`](/handbook/install/prerequisites/README.md))
+  and skips where the commands behind them are missing too.
 - `90-force`: `mise run force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check
