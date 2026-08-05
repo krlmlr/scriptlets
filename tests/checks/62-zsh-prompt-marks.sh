@@ -88,37 +88,33 @@ assert_equal "reading ~/.zshrc twice does not mark the prompt twice" \
     "$(probe 'source ~/.zshrc; print "probe=$(print -rn -- $PS1 | grep -o "133;A" | wc -l | tr -d " ")"' \
         TERM_PROGRAM= TMUX=)"
 
-# %{...%} is a prompt escape, so a shell with prompt escapes switched off
-# would print the braces rather than hide the marks. Nothing at all is the
-# right answer there.
+# ---------------------------------------------------------------------------
+# Two shells that get no marks, each imitated by a $ZDOTDIR of its own.
+#
+# Ghostty injects an integration that sends the same sequences, so ours stay
+# out of its way -- but the condition asks whether that integration is in
+# *this* shell, not whether this is a Ghostty window. Ghostty exports
+# $TERM_PROGRAM to every process it starts and injects the integration once,
+# in the first shell, by pointing $ZDOTDIR at a directory of its own whose
+# .zshenv registers a deferred-init precmd hook and hands $ZDOTDIR back.
+# Both halves are then checkable: the shell Ghostty integrated, and any shell
+# started inside it.
+#
+# The other is a shell with prompt escapes switched off, where the %{...%}
+# that hides a mark would print as braces instead.
+# ---------------------------------------------------------------------------
+ghostty=$HOME/.ghostty-stand-in
 nopercent=$HOME/.zsh-prompt-marks-check
-mkdir -p "$nopercent"
-cat >"$nopercent/.zshenv" <<'EOF'
-unsetopt prompt_percent
+mkdir -p "$ghostty" "$nopercent"
+
+cat >"$ghostty/.zshenv" <<'EOF'
+precmd_functions+=(_ghostty_deferred_init)
 ZDOTDIR=$HOME
 [[ -r $HOME/.zshenv ]] && source $HOME/.zshenv
 EOF
 
-assert_equal "a prompt without escapes is left alone rather than filled with braces" \
-    '%m%# ' \
-    "$(probe 'print "probe=$(print -rn -- $PS1 | cat -v)"' \
-        TERM_PROGRAM= TMUX= "ZDOTDIR=$nopercent")"
-
-# ---------------------------------------------------------------------------
-# Ghostty injects an integration of its own that sends the same sequences, so
-# ours stay out of its way -- but the condition asks whether that integration
-# is in *this* shell, not whether this is a Ghostty window. Ghostty exports
-# $TERM_PROGRAM to every process it starts and injects the integration once,
-# in the first shell, by pointing $ZDOTDIR at a directory of its own whose
-# .zshenv registers a deferred-init precmd hook and hands $ZDOTDIR back.
-#
-# That is what the directory below imitates, so both halves can be checked:
-# the shell Ghostty integrated, and any shell started inside it.
-# ---------------------------------------------------------------------------
-ghostty=$HOME/.ghostty-stand-in
-mkdir -p "$ghostty"
-cat >"$ghostty/.zshenv" <<'EOF'
-precmd_functions+=(_ghostty_deferred_init)
+cat >"$nopercent/.zshenv" <<'EOF'
+unsetopt prompt_percent
 ZDOTDIR=$HOME
 [[ -r $HOME/.zshenv ]] && source $HOME/.zshenv
 EOF
@@ -132,5 +128,18 @@ assert_equal "a shell started inside that one marks for itself" \
     "1 marked" \
     "$(probe 'print "probe=${+functions[_osc133_precmd]} ${${(M)PS1:#*133;A*}:+marked}"' \
         TERM_PROGRAM=ghostty TMUX=)"
+
+# What an untouched prompt looks like is the machine's business, not this
+# check's: zsh's own default is `%m%# `, macOS sets `%n@%m %1~ %# ` in
+# /etc/zshrc, and a system that sets a third is not wrong. So the prompt of a
+# shell that skipped the marks is what the prompt of a shell that left them
+# out is compared against.
+untouched=$(probe 'print "probe=$(print -rn -- $PS1 | cat -v)"' \
+    TERM_PROGRAM=ghostty TMUX= "ZDOTDIR=$ghostty")
+
+assert_equal "a prompt without escapes is left alone rather than filled with braces" \
+    "$untouched" \
+    "$(probe 'print "probe=$(print -rn -- $PS1 | cat -v)"' \
+        TERM_PROGRAM= TMUX= "ZDOTDIR=$nopercent")"
 
 rm -rf "$ghostty" "$nopercent"
