@@ -25,6 +25,9 @@ The file is rewritten whenever it is older than the `atuin` binary
 or than `~/.config/atuin/config.toml`.
 Both matter: the `tmux`, `ai`, `pty_proxy` and `dotfiles` settings
 all change what `atuin init` prints.
+Neither test costs a process:
+the path to the binary is one zsh has already resolved,
+so an ordinary shell start is two stats and a `source`.
 
 **An mtime is a proxy for a version rather than a promise of one.**
 A tool behind a shim (mise, asdf) is upgraded
@@ -55,6 +58,10 @@ Both tests earn their place:
 when it finds its own paths broken,
 and a write cut short leaves a script that does not parse,
 so `zcompile` is the validation as much as the optimisation.
+Sourcing is guarded on the same test rather than on the file's existence,
+so a machine where the file could never be written in the first place —
+a read-only cache directory, an atuin that has never worked —
+gets a shell without `Ctrl-R` rather than an error before every prompt.
 
 **One process is left, and it is atuin's rather than ours.**
 The generated script asks for a session id (`atuin uuid`) as it is read,

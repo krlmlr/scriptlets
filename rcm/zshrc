@@ -143,44 +143,12 @@ __zsh_history_rotate() {
 add-zsh-hook precmd __zsh_history_rotate
 
 # ---------------------------------------------------------------------------
-# atuin: Ctrl-R over all of it
+# atuin: Ctrl-R over every command ever run, searched from a generated script
+# kept on disk rather than produced by a process at every shell.
 #
+# What makes the file stale, why the rewrite is staged through a file of its
+# own, and how to force one by hand:
 # handbook/config/atuin/README.md in the scriptlets repository.
-#
-# The files above keep everything; atuin is what makes everything searchable,
-# with a database of its own, a full-screen search on Ctrl-R,
-# and -- once `atuin login` has been run -- the same history on every machine.
-# It is optional: where it is not installed, this whole section does nothing
-# and Ctrl-R stays zsh's own.
-#
-# `atuin init zsh` writes a shell script to standard output,
-# and the line the documentation gives -- `eval "$(atuin init zsh)"` --
-# starts a process to produce that script at every single interactive shell.
-# What it writes changes when atuin is upgraded or reconfigured,
-# and not from one shell to the next,
-# so it is written to a file and sourced from there instead.
-#
-# To rewrite it by hand -- the answer to anything below that this misses:
-#
-#     rm -f ${XDG_CACHE_HOME:-~/.cache}/zsh/atuin-init.zsh*
-#
-# and the next shell builds it again.
-# Not `atuin init zsh > <that file>`, which leaves the wordcode beside it
-# older than the script it was compiled from:
-# zsh then goes back to parsing the script, and nothing here would ever
-# notice, since the script is now newer than atuin as well.
-#
-# One process is left, and it is atuin's rather than ours:
-# the generated script asks for a session id (`atuin uuid`) as it is read,
-# once per interactive shell -- nested ones included, since it takes a new
-# session id whenever $SHLVL has changed.
-#
-# --disable-up-arrow leaves the Up arrow to zsh:
-# it walks the lines this session ran, in order,
-# which is a different question from the one Ctrl-R asks
-# and is answered better by the shell.
-# (Down is never atuin's to take; the flag also leaves `k` alone in vi
-# command mode.)
 # ---------------------------------------------------------------------------
 if (( $+commands[atuin] )); then
   () {
@@ -188,36 +156,12 @@ if (( $+commands[atuin] )); then
     local config=${XDG_CONFIG_HOME:-$HOME/.config}/atuin/config.toml
     [[ -d ${init:h} ]] || mkdir -p ${init:h}
 
-    # Rewritten when it is missing, empty, or older than the atuin or the
-    # configuration that would write it. Both matter: the tmux, ai, pty-proxy
-    # and dotfiles settings all change what `atuin init` prints.
-    # $commands[atuin] is the path zsh has already resolved, so this is two
-    # stats and nothing else.
-    #
-    # An mtime is a proxy for a version, not a promise of one. A tool behind
-    # a shim (mise, asdf) is upgraded without the shim being touched, and a
-    # binary unpacked from an archive can arrive with an mtime older than the
-    # file it should replace. Neither is noticed here, and both are what the
-    # `rm` above is for.
     if [[ ! -s $init || $commands[atuin] -nt $init || $config -nt $init ]]; then
       local new=$init.$$
 
-      # Everything happens to a file of this shell's own, which is renamed
-      # into place only once it is known to be good: two shells starting at
-      # the same moment after an upgrade would otherwise be writing the one
-      # file they are both about to source.
-      #
-      # -s and zcompile are what "known to be good" means. `atuin init` says
-      # its piece on stderr and exits 0 when it finds its own paths broken,
-      # leaving nothing on stdout, and a write cut short leaves a script that
-      # does not parse; the first would replace a working cache with an empty
-      # one, the second with a syntax error at every shell start.
-      # zcompile refuses to compile what does not parse, so it is the check
-      # as much as the optimisation.
-      #
-      # The wordcode is renamed first, so that no shell ever finds the new
-      # script beside the old wordcode -- and it is the newer of the two,
-      # which is what makes zsh read it in place of the script.
+      # -s and zcompile are what "good enough to publish" means: `atuin init`
+      # exits 0 with an empty stdout when its own paths are broken, and a
+      # write cut short leaves a script that does not parse.
       if ! {
         atuin init zsh --disable-up-arrow >| $new &&
           [[ -s $new ]] &&
@@ -229,9 +173,6 @@ if (( $+commands[atuin] )); then
       fi
     fi
 
-    # Not `source $init` unguarded: a first shell that could not write the
-    # file at all -- no atuin yet configured, a read-only cache directory --
-    # would otherwise be an error at every prompt-to-be.
     [[ -s $init ]] && source $init
   }
 fi
