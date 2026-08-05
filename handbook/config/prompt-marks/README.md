@@ -23,7 +23,14 @@ so the last two are for the terminal alone.
 `preexec` and `precmd` hooks.
 `A` and `B` are places — this line is where a prompt starts,
 this column is where what I typed begins —
-and go in `$PS1`, inside the `%{...%}` that tells zsh they occupy no columns.
+and go in `$PS1`, inside the `%{...%}` that tells zsh they occupy no columns;
+without it the prompt would believe it is that many characters wider
+than it is.
+
+`$?` in the `precmd` hook is the status of the command line
+even though the history rotation's hook has already run:
+zsh restores it around each hook function,
+so the order of the hooks in the file does not matter.
 
 A place cannot be sent from a hook.
 The line editor redraws a prompt from scratch every time:
@@ -74,6 +81,14 @@ A prompt with escapes switched off (`unsetopt prompt_percent`)
 would print the braces rather than hide the marks, so it is left alone;
 and anything that replaces `$PS1` after `~/.zshrc` has read
 takes the marks with it, since they are added once, as the file is read.
+That is also why they are added at the end of the file,
+after the bash bridge and everything else that could set a prompt,
+and why reading the file a second time does not add a second copy of them.
+
+A prompt that ends in a lone `%` has it doubled first.
+It would otherwise take the `{` of the mark that follows
+for the start of a `%{` escape,
+swallow the mark, and print a stray brace.
 
 **Nothing here costs a process.**
 `print` is a builtin, the strings are constants,

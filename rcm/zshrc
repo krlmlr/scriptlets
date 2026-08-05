@@ -164,83 +164,16 @@ fi
 compdef g=git
 
 # ---------------------------------------------------------------------------
-# Semantic prompt marks (OSC 133)
+# Semantic prompt marks (OSC 133): where a prompt begins and ends, where a
+# command started producing output, where it ended and with what status.
 #
+# Why A and B go in the prompt rather than in a hook, why D waits for a
+# command to have run, and what the condition below is really asking:
 # handbook/config/prompt-marks/README.md in the scriptlets repository.
-#
-# Escape sequences that tell the terminal where a prompt begins and ends,
-# where the command it accepted started running,
-# and where that command ended with which exit status.
-# A terminal that reads them can jump from prompt to prompt,
-# select or copy the output of a single command,
-# and tell a command that failed from one that did not;
-# tmux 3.4 and later reads the first two as well,
-# and its `previous-prompt` and `next-prompt` navigate by nothing else.
-# A terminal that does not read them ignores them --
-# they take up no columns, and none of this is tied to one terminal.
-#
-# Nothing here starts a process:
-# `print` is a builtin, the strings are constants,
-# and the prompt mark is expanded by zsh's own prompt machinery.
-#
-# All four marks are sent: A where a prompt starts, B where it ends and what
-# was typed begins, C where the command's output starts, D where the command
-# ended and with what status.
-# tmux 3.4 records A and C and drops the other two on the floor
-# (`input_osc_133` in its source knows those two cases and no more),
-# so B and D are for the terminal alone --
-# B is how iTerm2 tells the prompt from the command that was typed after it,
-# and D is what colours a failed command anywhere.
-#
-# The section is this late in the file on purpose:
-# A and B go into $PS1,
-# so whatever sets a prompt -- ~/.bash_aliases, by way of the bridge above --
-# has to have done so already.
-# Anything that replaces $PS1 *after* this point takes the marks with it;
-# nothing here does, and a prompt framework that did would have to add its own.
 # ---------------------------------------------------------------------------
-
-# Ghostty injects a shell integration of its own that sends these very
-# sequences, and two of everything is worse than one of it:
-# two prompt starts and two command ends per command line.
-#
-# The condition asks whether that integration is loaded *in this shell*,
-# rather than whether this is a Ghostty window.
-# Ghostty exports $TERM_PROGRAM to every process it starts, but injects the
-# integration exactly once, through $ZDOTDIR, in the first shell:
-# a `zsh` started inside that one, or by tmux, or by vim's :terminal,
-# has the variable and none of the marks,
-# and would have been left silently unmarked by a test on $TERM_PROGRAM.
-# What the injection does leave in this shell is a precmd hook of its own,
-# added in Ghostty's ~/.zshenv before this file is read.
-#
-# There is no Ghostty-side switch to prefer instead:
-# `shell-integration-features` takes cursor, sudo, title, ssh-env,
-# ssh-terminfo and path -- there is no prompt-mark among them,
-# and `shell-integration = none` would turn off the other four features
-# to be rid of the marking.
-#
-# Leaning on the name of another project's function is the price.
-# It is the safe direction to be wrong in:
-# if Ghostty renames it, both integrations mark, which is untidy --
-# tmux flags a line the same whether it is told once or twice --
-# where a missed guard would mean no marks at all.
 if [[ -z ${precmd_functions[(r)_ghostty_deferred_init]} ]]; then
   autoload -Uz add-zsh-hook
 
-  # C and D are events -- output started, a command ended -- and a hook is
-  # where an event belongs.
-  #
-  # The flag is what keeps D honest. precmd runs before every prompt, not
-  # after every command, so sending D unconditionally would report a
-  # command-end before the first prompt of a session, and another for every
-  # bare Enter -- each one carrying the status of the last real command, which
-  # is how one failed command comes to paint three prompts red.
-  # Ghostty's own integration keeps the same state for the same reason.
-  #
-  # $? is the status of the command line even though another precmd hook (the
-  # history rotation above) ran first: zsh restores it around each hook
-  # function, so the order of the hooks in this file does not matter.
   typeset -g _osc133_command_ran=0
 
   _osc133_preexec() {
@@ -258,32 +191,8 @@ if [[ -z ${precmd_functions[(r)_ghostty_deferred_init]} ]]; then
   add-zsh-hook precmd _osc133_precmd
   add-zsh-hook preexec _osc133_preexec
 
-  # A and B are not events but places -- *this line* is where a prompt starts,
-  # *this column* is where what I typed begins -- and that is why they go into
-  # the prompt rather than into precmd with the other two.
-  # The line editor redraws a prompt from scratch every time: carriage return,
-  # `\e[J` to erase from the cursor to the end of the screen, then the prompt.
-  # tmux forgets what it knew about the lines that erase clears, and precmd
-  # runs before all of it, so a mark sent from there is wiped a moment after
-  # it arrives: only the first prompt of a session stays marked, and
-  # `previous-prompt` jumps from where you are to the top of the session and
-  # nowhere in between.
-  # Sent from inside the prompt they arrive after the erase, and are sent again
-  # at every redraw, which costs nothing -- flagging a line twice is flagging
-  # it once.
-  #
-  # %{...%} is how zsh is told that what it encloses occupies no columns;
-  # without it the prompt believes it is that many characters wider than it is.
-  # It is a prompt escape, so a prompt that has escapes switched off
-  # (`unsetopt prompt_percent`) would print the braces instead: then no marks.
-  #
-  # The second test is what keeps a `source ~/.zshrc` from adding a second
-  # copy of them.
   if [[ -o prompt_percent && $PS1 != *$'\e]133;A\a'* ]]; then
-    # A prompt ending in a lone % would take the { of the mark that follows it
-    # for the start of a %{ escape, swallow the mark and print a stray brace.
-    # Doubling it makes it the literal percent it was meant to be.
-    # (Ghostty's integration carries the same two lines, for the same reason.)
+    # A prompt ending in a lone % would take the { after it for a %{ escape.
     [[ $PS1 == *[^%]% || $PS1 == % ]] && PS1=$PS1%
 
     PS1=$'%{\e]133;A\a%}'$PS1$'%{\e]133;B\a%}'
