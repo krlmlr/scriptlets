@@ -96,3 +96,14 @@ assert_equal "--dry-run does not run them" \
 answered=$(cd "$work" && s --no-color rev-parse --git-dir 2>&1 |
     sed 's/:.*//' | sort -u | tr '\n' ' ' | sed 's/ $//')
 assert_equal "s prepends git and reaches every repository" "one two" "$answered"
+
+# A bare repository is not one of them. The search is for a `.git` entry, and
+# a bare repository has none: its HEAD, config, objects and refs sit at the top
+# of the directory instead. That is what lets a bare clone sit beside a tree of
+# checkouts and stay out of every sweep over it -- and what makes a sweep the
+# wrong tool for keeping one up to date.
+git init -q --bare "$work/three.git"
+
+assert_equal "a bare repository is not one h finds" "one two" \
+    "$(cd "$work" && h --no-color echo scriptlets 2>&1 |
+        sed 's/:.*//' | sort -u | tr '\n' ' ' | sed 's/ $//')"
