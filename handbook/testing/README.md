@@ -80,6 +80,19 @@ and they run in name order:
   which the audit truncates —
   mtimes cannot tell a re-audit within the same second
   from no audit at all.
+- `62-zsh-prompt-marks`: the prompt marks
+  ([`config/prompt-marks/`](/handbook/config/prompt-marks/README.md))
+  are the bytes they should be, in the order they should be in;
+  the command-end mark carries the status of the command line
+  and is not sent for a prompt no command preceded;
+  and the prompt marks are in `$PS1` rather than in a hook,
+  where they would be erased again before anyone saw them.
+  An interactive zsh reading a pipe runs the hooks and prints no prompt,
+  which is what lets the chain be checked without a terminal.
+  Reading `~/.zshrc` twice does not mark the prompt twice,
+  a prompt with escapes switched off is left alone,
+  and a shell with Ghostty's integration loaded leaves the marking to it
+  while a shell started inside that one marks for itself.
 - `65-zsh-startup-profile`: a shell that reaches a prompt is timed,
   recorded once and broken down by startup file;
   one that does not — a script, a `zsh -c`, a benchmark run —

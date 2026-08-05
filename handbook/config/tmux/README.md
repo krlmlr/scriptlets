@@ -11,7 +11,9 @@ which is where `previous-prompt`, `next-prompt` and their `-o` flag arrived.
 * `prefix o` — copy the output of the last command, and leave copy mode
 
 **What marks the prompts is the shell, not tmux.**
-tmux records two of the OSC 133 sequences against the lines they arrive on —
+tmux records two of the sequences the shell sends
+([`config/prompt-marks/`](/handbook/config/prompt-marks/README.md))
+against the lines they arrive on —
 `A`, a prompt starts here, and `C`, output starts here —
 and a pane whose shell sends neither leaves all three keys
 with nothing to find.

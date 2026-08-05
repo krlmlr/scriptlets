@@ -9,4 +9,5 @@ and how anything gets there at all is
 * [`files/`](files/) — the inventory: what installs as what, and what for
 * [`zsh-startup/`](zsh-startup/) — every interactive zsh times its own startup
 * [`completion/`](completion/) — zsh completion, audited daily instead of per shell
+* [`prompt-marks/`](prompt-marks/) — every prompt, command and exit status marked for the terminal
 * [`tmux/`](tmux/) — copy mode that knows where the prompts are
