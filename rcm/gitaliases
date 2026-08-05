@@ -94,22 +94,23 @@
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
 	mf = merge --ff
 	mu = merge-update
-	# The ph series: ph, then switches, then an optional remote.
-	# A switch is one letter;
-	# a remote is the first two letters of its name, comes last,
+	# Push: the second letter picks the variant,
+	# an optional third letter picks the remote
 	# and pushes the current branch.
+	# Variants: h plain, f --force-with-lease, t --follow-tags, u --set-upstream.
+	# Remotes: c cynkra, o origin, u upstream; k krlmlr, per user.
 	ph = push
-	phf = push --force-with-lease
-	pht = push --follow-tags
-	phu = push --set-upstream
+	pf = push --force-with-lease
+	pt = push --follow-tags
+	pu = push --set-upstream
 	# ---
-	phcy = push cynkra HEAD
-	phor = push origin HEAD
-	phup = push upstream HEAD
+	phc = push cynkra HEAD
+	pho = push origin HEAD
+	phu = push upstream HEAD
 	# ---
-	phucy = push --set-upstream cynkra HEAD
-	phuor = push --set-upstream origin HEAD
-	phuup = push --set-upstream upstream HEAD
+	puc = push --set-upstream cynkra HEAD
+	puo = push --set-upstream origin HEAD
+	puu = push --set-upstream upstream HEAD
 	pl = pull
 	plf = pull --ff-only
 	plr = pull --rebase

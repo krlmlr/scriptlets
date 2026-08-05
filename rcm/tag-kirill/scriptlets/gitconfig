@@ -2,6 +2,6 @@
 	email = kirill@cynkra.com
 	name = Kirill Müller
 [alias]
-	# The ph series from ~/.gitaliases, for the personal remote: kr = krlmlr.
-	phkr = push krlmlr HEAD
-	phukr = push --set-upstream krlmlr HEAD
+	# The push series from ~/.gitaliases, for the personal remote: k = krlmlr.
+	phk = push krlmlr HEAD
+	puk = push --set-upstream krlmlr HEAD
