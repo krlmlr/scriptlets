@@ -29,6 +29,15 @@ against a throw-away home directory first
 ([`testing/`](handbook/testing/README.md)) —
 nothing touches yours.
 
+## Prerequisites
+
+The scripts reach past what a stock macOS ships —
+a GNU userland under Homebrew's `g` names, and a few tools of their own.
+One `brew install` line covers the ones in use,
+and [`install/prerequisites/`](handbook/install/prerequisites/README.md)
+has it, with what wants what
+and what Homebrew does not cover.
+
 ## Inside
 
 * [Tools](handbook/tools/README.md) that earn their keep:
