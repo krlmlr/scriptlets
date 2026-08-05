@@ -1,0 +1,84 @@
+#!/bin/sh
+#MISE description="Let nosleep flip the sleep flag without asking for a password"
+#
+# `nosleep` needs root to write the flag, and this is what stops it asking for a
+# password every time. The rule is two commands wide -- `pmset -a disablesleep`
+# with a 1 and with a 0, both spelled out in full -- and sudo compares the
+# arguments it is given literally, so nothing else passes: not `disablesleep 2`,
+# not another pmset setting, not a third argument. No new code runs as root;
+# there is nothing here to audit but the one line.
+#
+# A task rather than a file under rcm/, because rcm links into the home
+# directory and this file belongs to root.
+#
+#   mise run nosleep-grant            write the rule
+#   mise run nosleep-grant --print    show it, write nothing
+#   mise run nosleep-grant --remove   take it away again
+#
+# `make nosleep-grant` reaches the first of those; the options need the task to
+# be named, through mise or by running this file.
+
+set -eu
+
+# No dot in the name: sudo ignores the files that carry one.
+file=/etc/sudoers.d/nosleep
+
+# Whoever asked, rather than root, on the chance this is reached through sudo.
+user=${SUDO_USER:-$(id -un)}
+rule="$user ALL=(root) NOPASSWD: /usr/bin/pmset -a disablesleep 1, /usr/bin/pmset -a disablesleep 0"
+
+usage() {
+    echo "Usage: $0 [--print|--remove]" >&2
+    exit 1
+}
+
+case "$#:${1:-}" in
+0:) action=write ;;
+1:--print) action=print ;;
+1:--remove) action=remove ;;
+*) usage ;;
+esac
+
+# Before the platform check, so the rule can be read on any machine -- reviewing
+# a grant is the one thing worth doing away from the machine it is granted on.
+if [ "$action" = print ]; then
+    printf '%s\n' "$rule"
+    exit 0
+fi
+
+[ "$(uname -s)" = Darwin ] || {
+    echo "nosleep-grant: pmset is macOS's, and so is this rule" >&2
+    exit 1
+}
+
+if [ "$action" = remove ]; then
+    if [ -e "$file" ]; then
+        echo "removing $file"
+        sudo rm -f "$file"
+    else
+        echo "$file is not there; nothing to remove"
+    fi
+    exit 0
+fi
+
+echo "This writes $file, granting:"
+echo
+printf '  %s\n' "$rule"
+echo
+echo "sudo asks for your password once, to write a file that belongs to root."
+echo
+
+tmp=$(mktemp "${TMPDIR:-/tmp}/nosleep-grant.XXXXXX")
+trap 'rm -f "$tmp"' EXIT
+printf '%s\n' "$rule" >"$tmp"
+
+# Syntax first: sudo refuses to run at all while a file in sudoers.d fails to
+# parse, and that is a bad way to find out.
+visudo -c -q -f "$tmp"
+
+[ ! -e "$file" ] || echo "replacing the $file already there"
+
+# 0440 and root:wheel, or sudo passes the file over in silence.
+sudo install -m 0440 -o root -g wheel "$tmp" "$file"
+
+echo "done -- nosleep no longer asks for a password"

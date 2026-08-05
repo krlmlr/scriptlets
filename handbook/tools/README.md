@@ -143,7 +143,22 @@ Writing it needs root,
 so the script names `sudo` rather than hope for a cached credential —
 and a request for the state the machine is already in
 changes nothing and asks for no password.
+**`slf`** ("sleep forbid") and **`sla`** ("sleep allow")
+are the two spellings at three letters,
+for the times both are typed often.
 Installed on macOS only, since `pmset` is macOS's.
+
+`mise run nosleep-grant` retires the password prompt
+([`install/tasks/`](/handbook/install/tasks/README.md)):
+it writes a rule to `/etc/sudoers.d/nosleep`
+that lets this account run `pmset -a disablesleep` with a 1 and with a 0,
+and nothing else.
+sudo compares the arguments it is given literally,
+so a rule that spells them out grants those two lines alone —
+not `disablesleep 2`, not another `pmset` setting.
+`--print` shows the rule without writing it, `--remove` takes it back,
+and `nosleep` needs none of it:
+without the rule it asks for a password, as it always has.
 
 ### The rest
 

@@ -54,11 +54,17 @@ chmod +x "$work/bin/pmset" "$work/bin/sudo"
 PATH=$work/bin:$PATH
 export PATH
 
-# run ARGUMENT... -- leaves what nosleep printed in $output, its status in
-# $status, and both streams together because the usage line goes to stderr.
-run() {
-    output=$("$script" "$@" 2>&1)
+# run_as SCRIPT ARGUMENT... -- leaves what SCRIPT printed in $output, its status
+# in $status, and both streams together because the usage line goes to stderr.
+run_as() {
+    _script=$1
+    shift
+    output=$("$_script" "$@" 2>&1)
     status=$?
+}
+
+run() {
+    run_as "$script" "$@"
 }
 
 state() {
@@ -137,23 +143,47 @@ assert_match "two arguments print the usage" "Usage:*" "$output"
 
 assert_equal "a refused argument changes nothing" "$before" "$(state)"
 
+# --- the three-letter spellings --------------------------------------------
+
+# slf and sla find nosleep by path rather than by name, so they work from a
+# checkout as well as from ~/bin -- which is also what lets them be run here,
+# against the same stub.
+printf '0\n' >"$STATE"
+
+run_as "${script%/*}/slf"
+assert_equal "slf forbids sleep" "1" "$(state)"
+assert_equal "slf says what it did" "sleep disabled" "$output"
+
+run_as "${script%/*}/sla"
+assert_equal "sla allows it again" "0" "$(state)"
+assert_equal "sla says what it did" "sleep enabled" "$output"
+
+# They are one spelling each, not a second way to pass an argument: `slf off`
+# would read as the opposite of what it does.
+run_as "${script%/*}/slf" off
+assert_equal "slf takes no argument" "1" "$status"
+assert_match "slf prints the usage instead" "Usage:*" "$output"
+assert_equal "a refused shortcut changes nothing" "0" "$(state)"
+
 # --- where it installs -----------------------------------------------------
 
-# pmset is macOS's, so the script is, and rcm has to keep it off everything
-# else -- the property the platform tags exist for.
-if [ "$(uname -s)" = Darwin ]; then
-    if [ -x "$HOME/bin/nosleep" ]; then
-        pass "nosleep is installed and executable on macOS"
+# pmset is macOS's, so these are, and rcm has to keep them off everything else
+# -- the property the platform tags exist for.
+for name in nosleep slf sla; do
+    if [ "$(uname -s)" = Darwin ]; then
+        if [ -x "$HOME/bin/$name" ]; then
+            pass "$name is installed and executable on macOS"
+        else
+            fail "$name is installed and executable on macOS" \
+                "$(ls -l "$HOME/bin/$name" 2>&1)"
+        fi
     else
-        fail "nosleep is installed and executable on macOS" \
-            "$(ls -l "$HOME/bin/nosleep" 2>&1)"
+        if [ -e "$HOME/bin/$name" ]; then
+            fail "$name is not installed off macOS" "$HOME/bin/$name exists"
+        else
+            pass "$name is not installed off macOS"
+        fi
     fi
-else
-    if [ -e "$HOME/bin/nosleep" ]; then
-        fail "nosleep is not installed off macOS" "$HOME/bin/nosleep exists"
-    else
-        pass "nosleep is not installed off macOS"
-    fi
-fi
+done
 
 rm -rf "$work"
