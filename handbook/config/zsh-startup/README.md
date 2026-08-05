@@ -60,13 +60,14 @@ That file is not shipped here — it is yours, per machine
 Anything exported before zsh starts works too,
 which is what makes `ZSH_STARTUP_PROFILE=0 zsh` a one-shot escape.
 
-| Set | Effect |
-| --- | --- |
-| `ZSH_STARTUP_BUDGET_MS=500` | say nothing unless a startup exceeds the budget; keep recording |
-| `ZSH_STARTUP_BUDGET_MS=` | say nothing, ever; keep recording |
-| `ZSH_STARTUP_MARKS=` | keep the one-line notice, drop the timeline below it |
-| `ZSH_STARTUP_LOG=` | stop recording; keep the notice |
-| `ZSH_STARTUP_PROFILE=0` | off entirely: nothing is loaded, nothing is timed, nothing is written |
+* `ZSH_STARTUP_BUDGET_MS=500` — say nothing unless a startup
+  exceeds the budget; keep recording.
+* `ZSH_STARTUP_BUDGET_MS=` — say nothing, ever; keep recording.
+* `ZSH_STARTUP_MARKS=` — keep the one-line notice,
+  drop the timeline below it.
+* `ZSH_STARTUP_LOG=` — stop recording; keep the notice.
+* `ZSH_STARTUP_PROFILE=0` — off entirely:
+  nothing is loaded, nothing is timed, nothing is written.
 
 So the usual progression is
 `ZSH_STARTUP_BUDGET_MS=500` once the number is boring —

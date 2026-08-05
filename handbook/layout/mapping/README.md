@@ -24,7 +24,8 @@ so a bare `rcup` or `lsrc` finds nothing
 unless the clone lives at `~/git/scriptlets`,
 where the bootstrap script puts it
 ([`install/bootstrap/`](/handbook/install/bootstrap/README.md));
-the tasks pass `-d` and work from any location.
+the tasks work from any location
+([`install/tasks/`](/handbook/install/tasks/README.md) says how).
 
 **What an install touches.**
 `rcup` asks before replacing a file that already exists and differs

@@ -1,5 +1,8 @@
 # Prerequisites
 
+What must be installed before anything here works,
+and what individual scripts assume beyond that.
+
 [rcm](https://github.com/thoughtbot/rcm) is the one hard prerequisite —
 `apt install rcm`, `brew install rcm`.
 [mise](https://mise.jdx.dev)

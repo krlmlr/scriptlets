@@ -7,11 +7,12 @@ it audits once a day and trusts in between.
 it only stops it from asking:
 compaudit still stats every directory in `$fpath`,
 which on macOS means Homebrew's `site-functions`
-and a good part of `/usr/share` —
-measured with `zsh-startup-bench --zprof`
+and a good part of `/usr/share`.
+`zsh-startup-bench --zprof`
 ([`config/zsh-startup/`](/handbook/config/zsh-startup/README.md))
-at 95% of the rc chain's function time, half of that compaudit.
-That is worth doing.
+put `compinit` at 95% of the rc chain's function time,
+and half of *that* was compaudit.
+The audit is worth doing.
 It is not worth doing at every single shell start.
 
 So [`rcm/zshrc`](/rcm/zshrc) audits

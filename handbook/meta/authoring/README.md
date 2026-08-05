@@ -140,10 +140,10 @@ in one place, cited from everywhere that depends on it.
 
 ## Linking between leaves
 
-A link from one leaf to another is how the tree stays free of
-repetition,
-and it is also the tree's only maintenance cost that grows with its
-size.
+A link from one leaf to another
+is how the tree stays free of repetition,
+and it is also the tree's only maintenance cost
+that grows with its size.
 Both halves of that matter.
 
 **Link a boundary once per page, and link the owner.**
@@ -155,8 +155,8 @@ and costs another edit when the target moves;
 if a reader can enter mid-page and need it again, the page is too long,
 and splitting it is the fix.
 Never link an internal node where one of its leaves owns the fact:
-the node will look like an owner and collect citations its children
-deserve.
+the node will look like an owner
+and collect citations its children deserve.
 
 **A fact that moves takes its inbound links with it.**
 Before changing where a fact lives — renaming a leaf, splitting one in
@@ -165,6 +165,7 @@ those pages in the same change.
 The links are one-directional, so nothing else will catch a stale one;
 a leaf that has quietly become the wrong destination still resolves, and
 reads as if it were right, which is worse than a broken link.
-The same search settles the cheaper question: if nothing points at a
-leaf, its scope sentence is probably claiming a boundary no other page
-recognises.
+The same search settles the cheaper question:
+if nothing points at a leaf,
+its scope sentence is probably claiming a boundary
+no other page recognises.

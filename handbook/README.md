@@ -3,7 +3,7 @@
 The single source of truth
 for every documentable aspect of this repository;
 internal pages like this one navigate and state their area's principles,
-leaves explain ([`meta/handbook/`](/handbook/meta/handbook/README.md)).
+leaves explain ([`meta/handbook/`](meta/handbook/README.md)).
 
 The areas divide by what a question is about,
 not by who is asking it:

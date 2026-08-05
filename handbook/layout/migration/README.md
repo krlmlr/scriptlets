@@ -1,9 +1,9 @@
 # Coming from the home-grown layout
 
-The layout before rcm — generated installer scripts over a `home/`
-directory — is preserved on the
-[`home-grown`](https://github.com/krlmlr/scriptlets/tree/home-grown)
-branch.
+The layout before rcm —
+generated installer scripts over a `home/` directory —
+is preserved on the
+[`home-grown`](https://github.com/krlmlr/scriptlets/tree/home-grown) branch.
 Everything lands where it always did, still as symbolic links,
 so nothing in `$HOME` moves;
 what changed is where the files sit *inside* the repository,

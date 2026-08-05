@@ -189,7 +189,7 @@ what it must not become is a one-line redirect.
 A file with nothing left to keep is deleted, and its place is taken
 by the **in-place `README.md`** —
 the index GitHub renders when someone browses to that directory,
-one line per file, written by hand
+an entry per file, written by hand
 ([`obsolete/README.md`](/obsolete/README.md) is the worked example).
 A file only partly absorbed keeps its remaining sections,
 and each absorbed heading becomes a one-line pointer to the leaf.
@@ -228,3 +228,6 @@ whether a fact sits in the leaf that owns it,
 whether a scope sentence still holds,
 whether a rewrite lost a fact —
 is review work, against this page and `meta/authoring/`.
+
+*To deepen: script backreferences cover the zsh startup pair alone;
+the rest of `rcm/` is unannotated.*

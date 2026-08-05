@@ -23,10 +23,8 @@ it sources.
 [`rcm/zprofile`](/rcm/zprofile) does the same for zsh,
 the default shell on macOS since Catalina,
 which never reads `~/.profile` on its own.
-A machine that came with its own `~/.profile` keeps it
-until `mise run force`
-(the prompt rules are
-[`layout/mapping/`](/handbook/layout/mapping/README.md)'s).
+Whether a pre-existing `~/.profile` survives an install is
+[`layout/mapping/`](/handbook/layout/mapping/README.md)'s.
 
 **`~/bin` stays the install target rather than `~/.local/bin`.**
 Moving would gain nothing on macOS,

@@ -38,10 +38,9 @@ and [`rcm/Rprofile`](/rcm/Rprofile) sources `~/scriptlets/Rprofile`
 if it exists.
 Each tolerates the file being absent,
 which is why an unknown account needs no tag directory.
-`~/scriptlets/zsh-startup`, read the same way by the startup profiler
-([`config/zsh-startup/`](/handbook/config/zsh-startup/README.md)),
-is not shipped for any account —
-it is per machine, like `~/.bash_secrets`.
+`~/scriptlets/zsh-startup` is read the same way
+by the startup profiler
+([`config/zsh-startup/`](/handbook/config/zsh-startup/README.md)).
 
 ## Per platform
 

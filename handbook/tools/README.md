@@ -91,9 +91,9 @@ are left as they are.
 `-n` / `--dry-run` previews;
 `-a` / `--all-hosts` converts any HTTPS host,
 which is what GitHub Enterprise or a GitLab remote needs;
-the finer rules — credentials, ports, the `.git` suffix — are `-h`'s,
-spelled `--help` only in the manner of git,
-which looks for a man page instead.
+the finer rules — credentials, ports, the `.git` suffix —
+are `-h`'s, not `--help`'s,
+which git intercepts to look for a man page.
 
 ### zsh startup
 
@@ -209,7 +209,8 @@ as soon as the contents of the current working directory change.
 
 **`reprex`** — reproducible shell examples:
 it reads commands, runs them,
-and echoes each followed by its output as `#` comments,
+and echoes the commands as typed
+and their output as `#` comments,
 until end of input —
 so both piping a script through it and typing at it work:
 

@@ -43,7 +43,7 @@ keeps it that way.
 and completion comes along with it.
 Its one obligation is trust —
 `mise trust` once per clone,
-or `mise run` refuses to read [`mise.toml`](/mise.toml).
+or `mise run` refuses to read `mise.toml`.
 The bootstrap script does that for you
 ([`install/bootstrap/`](/handbook/install/bootstrap/README.md));
 so does the test harness,
@@ -60,8 +60,10 @@ the tasks are files, so it holds nothing else.
 The [`Makefile`](/Makefile) runs those same scripts
 for a machine without mise,
 and points at mise for the three that need it.
-Every task points `RCRC` at the repository's own copy of `rcrc`
-and passes `-d`,
+[`mise-tasks/import`](/mise-tasks/import) is the one task
+too long for a one-liner.
+Every task points `RCRC` at the repository's own copy of `rcrc`,
+and the ones that invoke rcm pass `-d`,
 so the tasks work from any clone location
 and take effect even before — or instead of — an existing `~/.rcrc`
 (the mapping that file drives is
