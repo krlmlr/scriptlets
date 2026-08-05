@@ -240,7 +240,9 @@ bash and fish are on their own — `mise completion bash` or `fish`.
 - [`rcm/zprofile`](rcm/zprofile): installed as `~/.zprofile`,
   hands `~/.profile` to zsh, which would not read it otherwise.
 - [`rcm/zshrc`](rcm/zshrc): installed as `~/.zshrc`,
-  starts the completion system and registers mise's completion lazily.
+  starts the completion system — audited once a day, trusted in between,
+  see [below](#the-first-thing-the-profiling-found) —
+  and registers mise's completion lazily.
 - [`rcm/zshenv`](rcm/zshenv): installed as `~/.zshenv`, read by every zsh
   before anything else.
   It loads the [startup profiler](#zsh-startup-profiling), and defines a no-op
@@ -430,6 +432,57 @@ tail -n 5000 ~/.local/state/zsh-startup.log > ~/.local/state/zsh-startup.log.tmp
 and it answers three different questions —
 see [below](#zsh-startup-bench).
 
+### The first thing the profiling found
+
+`zsh-startup-bench --zprof` put `compinit` at 95% of the rc chain's function
+time, and half of *that* was `compaudit`.
+
+`compinit -i` does not skip the security audit,
+it only stops it from asking:
+compaudit still stats every directory in `$fpath`,
+which on macOS means Homebrew's `site-functions` and a good part of `/usr/share`.
+That is worth doing.
+It is not worth doing at every single shell start.
+
+So [`rcm/zshrc`](rcm/zshrc) audits when the dump is more than a day old,
+and every shell in between takes `compinit -C`,
+which trusts the dump and calls no compaudit at all.
+The dump is compiled to wordcode as well —
+zsh reads `zcompdump-<version>.zwc` in place of the dump whenever it is newer,
+and parsing the dump is most of what `-C` leaves behind.
+Both live under `~/.cache/zsh/`,
+next to a `.audited` stamp that dates the last audit.
+
+The stamp is a separate file rather than the dump's own mtime for a reason:
+compinit rewrites the dump only when the number of completion functions has
+changed,
+so on a machine that installs nothing the dump's mtime stands still —
+and using it as the clock would mean auditing at every start
+from the second day on.
+
+The tradeoff is that a tool installed today does not complete until tomorrow.
+That is what [`zsh-compinit-refresh`](rcm/bin/zsh-compinit-refresh) is for:
+
+```sh
+zsh-compinit-refresh    # then `exec zsh`, or just open a new tab
+```
+
+It removes the dump, its wordcode and the stamp,
+and lets a fresh interactive zsh build a new one through `~/.zshrc`,
+so the rebuild has one implementation and the script only decides when it runs.
+The shell you run it from keeps the completions it started with —
+they are loaded, not looked up — hence the `exec zsh`.
+A leftover `~/.zcompdump` from before the dump moved into `~/.cache` is
+removed too.
+
+Going further would mean not running `compinit` at all until the first Tab.
+It is worth about another 10 ms and it is awkward here:
+`bashcompinit`, the `complete` calls `~/.bash_aliases` makes,
+`compdef _mise_lazy mise` and `compdef g=git`
+all need `compdef` to exist at startup,
+so it takes a queueing `compdef` stub and a Tab widget that replays the queue.
+More to go wrong than the five lines above, for a smaller win.
+
 ## Tests
 
 `mise run test` installs everything into a throw-away home directory
@@ -478,6 +531,12 @@ and they run in name order:
 - `60-zsh-startup`: a zsh startup complains about nothing, and `~/.zshrc` binds
   `mise` to the stub — the generated completion is *not* loaded at startup, and
   the first completion loads it and rebinds to it.
+  It also covers the completion dump: written and compiled by the first shell,
+  trusted by the next, re-audited once the stamp is a day old, and rebuilt on
+  demand by `zsh-compinit-refresh`.
+  The audit is observed through a sentinel written into the stamp, which the
+  audit truncates — mtimes cannot tell a re-audit within the same second from
+  no audit at all.
 - `65-zsh-startup-profile`: a shell that reaches a prompt is timed, recorded
   once and broken down by startup file; one that does not — a script, a
   `zsh -c`, a benchmark run — is left alone; and every documented way of
@@ -591,6 +650,17 @@ Files are discovered with `ag`.
 
 Run `air format` on a single file if the containing Git repository has an `air.toml` file.
 Useful as a formatter in the RStudio IDE.
+
+## zsh-compinit-refresh
+
+Rebuild zsh's completion dump now, audit and all.
+
+`~/.zshrc` audits `$fpath` only when the dump is more than a day old
+and trusts the dump in between,
+which is why a tool installed five minutes ago does not complete yet.
+This is the way to say "now" —
+described with the rest of the mechanism
+[above](#the-first-thing-the-profiling-found).
 
 ## zsh-startup-bench
 
