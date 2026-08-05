@@ -40,12 +40,13 @@ flag() {
 case "${1:-} ${2:-}" in
 "auth status") exit 0 ;;
 "repo view")
+    # Takes a bare name and resolves it against the account, as gh does.
     [ -f "$GH_STATE/exists" ] || exit 1
     case "$(flag -q "$@")" in
-    .nameWithOwner) echo "stub/$3" ;;
+    .nameWithOwner) echo "stub/${3##*/}" ;;
     .description) cat "$GH_STATE/description" 2>/dev/null || true; echo ;;
     .sshUrl) echo "$GH_STATE/remote.git" ;;
-    .url) echo "https://github.example/stub/$3" ;;
+    .url) echo "https://github.example/stub/${3##*/}" ;;
     esac
     exit 0
     ;;
@@ -57,6 +58,16 @@ case "${1:-} ${2:-}" in
     exit 0
     ;;
 "repo edit")
+    # gh insists on OWNER/REPO here where `repo view` is happy with a bare
+    # name, and says so in exactly these words. Refusing it here too is the
+    # whole value of the stub: the asymmetry is real, and easy to write past.
+    case "${3:-}" in
+    */*) ;;
+    *)
+        echo "expected the \"[HOST/]OWNER/REPO\" format, got \"${3:-}\"" >&2
+        exit 1
+        ;;
+    esac
     printf '%s' "$(flag --description "$@")" >"$GH_STATE/description"
     exit 0
     ;;
@@ -134,7 +145,7 @@ assert_equal "it commits on main" \
     "main" "$(git -C "$dest" rev-parse --abbrev-ref HEAD 2>&1)"
 
 assert_equal "the repository is created with a description" \
-    "Private sidecar for krlmlr/scriptlets -- the dotfiles that must not be public" \
+    "Private counterpart of https://github.com/krlmlr/scriptlets" \
     "$(cat "$work/state/description" 2>&1)"
 
 # --- a second run converges ------------------------------------------------

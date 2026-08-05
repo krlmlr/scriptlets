@@ -21,8 +21,14 @@
 set -eu
 
 repo_name=scriptlets-private
-repo_desc="Private sidecar for krlmlr/scriptlets -- the dotfiles that must not be public"
+repo_desc="Private counterpart of https://github.com/krlmlr/scriptlets"
 dry_run=0
+
+# The repository as OWNER/REPO, worked out once it is known to exist.
+# `gh repo view` and `gh repo create` take the bare name and resolve it against
+# the account; `gh repo edit` refuses it and wants the owner spelled out. Every
+# call after ensure_github uses this rather than $repo_name for that reason.
+repo_slug=
 
 REPO=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 
@@ -294,12 +300,14 @@ ensure_github() {
     fi
 
     if gh repo view "$repo_name" >/dev/null 2>&1; then
-        same "GitHub repository $(gh repo view "$repo_name" --json nameWithOwner -q .nameWithOwner)"
+        repo_slug=$(gh repo view "$repo_name" --json nameWithOwner -q .nameWithOwner)
+        same "GitHub repository $repo_slug"
         return 0
     fi
 
     gh repo create "$repo_name" --private --description "$repo_desc" >/dev/null
-    made "GitHub repository $(gh repo view "$repo_name" --json nameWithOwner -q .nameWithOwner), private"
+    repo_slug=$(gh repo view "$repo_name" --json nameWithOwner -q .nameWithOwner)
+    made "GitHub repository $repo_slug, private"
 }
 
 # Separate from creating it, because the description is the one property this
@@ -322,14 +330,14 @@ ensure_description() {
         return 0
     fi
 
-    current=$(gh repo view "$repo_name" --json description -q .description)
+    current=$(gh repo view "$repo_slug" --json description -q .description)
 
     if [ "$current" = "$repo_desc" ]; then
         same "description"
         return 0
     fi
 
-    gh repo edit "$repo_name" --description "$repo_desc" >/dev/null
+    gh repo edit "$repo_slug" --description "$repo_desc" >/dev/null
     changed "description: $repo_desc"
 }
 
@@ -345,7 +353,7 @@ ensure_remote() {
         return 0
     fi
 
-    url=$(gh repo view "$repo_name" --json sshUrl -q .sshUrl)
+    url=$(gh repo view "$repo_slug" --json sshUrl -q .sshUrl)
 
     if existing=$(git -C "$dest" remote get-url origin 2>/dev/null); then
         # Not rewritten: a remote pointing somewhere else is a decision, and
@@ -408,7 +416,7 @@ if [ "$dry_run" -eq 1 ]; then
 fi
 
 echo
-echo "# $(gh repo view "$repo_name" --json url -q .url)"
+echo "# $(gh repo view "$repo_slug" --json url -q .url)"
 
 # What the sidecar adds, resolved the way an install resolves it.
 if command -v lsrc >/dev/null; then
