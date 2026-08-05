@@ -342,47 +342,62 @@ which reads `~/.bash_aliases` through `~/.zshrc`.
 
 ## Prompt marks
 
-Every interactive zsh tells the terminal where each prompt begins,
+Every interactive zsh tells the terminal where each prompt begins and ends,
 where the command it accepted started running,
 and where that command ended with which exit status —
-the `A`, `C` and `D` marks of
+the `A`, `B`, `C` and `D` marks of
 [OSC 133](https://gitlab.freedesktop.org/Per_Bothner/specifications/-/blob/master/proposals/semantic-prompts.md),
 the semantic-prompt sequences.
 
 A terminal that reads them can jump from prompt to prompt,
 select or copy the output of a single command,
+tell the prompt from the command typed after it,
 and tell a command that failed from one that did not.
-tmux 3.4 and later reads them as well —
-its `previous-prompt` and `next-prompt` navigate by nothing else.
+tmux 3.4 and later reads `A` and `C`, and drops `B` and `D` on the floor,
+so the last two are for the terminal alone.
 A terminal that reads none of them ignores them,
 so nothing here is tied to one terminal.
 
-`A` is prepended to `$PS1`,
-rather than sent from the `precmd` hook where the other two live
-and where it looks like it belongs.
+`A` and `B` go into `$PS1`,
+rather than into the `precmd` hook where the other two live
+and where they look like they belong.
 The line editor redraws a prompt from scratch every time —
-carriage return, erase from the cursor to the end of the screen, then the prompt —
+carriage return,
+erase from the cursor to the end of the screen,
+then the prompt —
 and tmux forgets what it knew about the lines that erase clears.
 A mark sent from `precmd` arrives just before the erase and does not survive it:
 only the first prompt of a session stays marked,
 and jumping between prompts then goes from wherever you are to the top,
 and nowhere in between.
-Sent from inside the prompt it arrives after the erase,
-and is renewed at every redraw.
+Sent from inside the prompt they arrive after the erase,
+and are renewed at every redraw.
 
-Under Ghostty the marks are left to Ghostty,
-which injects a shell integration of its own that sends the same sequences;
-inside tmux they are not,
-because that injection reaches only the shell Ghostty starts itself.
-The other way round —
-sending them always and turning Ghostty's half off with
-`shell-integration-features = no-prompt-mark` —
-would put the switch in a file this repository does not ship,
-on every machine that has one.
+`D` is sent only for a prompt that follows a command that actually ran.
+`precmd` runs before every prompt,
+so sending it unconditionally would report a command-end before the first
+prompt of a session and another for every bare Enter,
+each carrying the status of the last real command —
+which is how one failed command comes to paint three prompts red.
+
+Where Ghostty's own integration is loaded, the marks are left to it.
+The condition asks whether that integration is in *this* shell,
+not whether this is a Ghostty window:
+Ghostty exports `$TERM_PROGRAM` to everything it starts
+but injects the integration once, in the first shell,
+so a `zsh` started inside that one — or by tmux, or by vim's `:terminal` —
+has the variable and none of the marks,
+and a test on `$TERM_PROGRAM` would leave it silently unmarked.
+What the injection does leave behind is a `precmd` hook of its own,
+and that is what is looked for.
+There is no Ghostty-side switch to prefer instead:
+`shell-integration-features` has no `prompt-mark` among its features,
+and `shell-integration = none` would turn off the cursor, title and `PATH`
+features to be rid of the marking.
 
 Nothing here costs a process:
 `print` is a builtin, the strings are constants,
-and the prompt mark is expanded by zsh's own prompt machinery.
+and the prompt marks are expanded by zsh's own prompt machinery.
 
 ## zsh startup profiling
 
@@ -584,12 +599,17 @@ and they run in name order:
   audit truncates — mtimes cannot tell a re-audit within the same second from
   no audit at all.
 - `62-zsh-prompt-marks`: the [prompt marks](#prompt-marks) are the bytes they
-  should be, the command-end mark carries the status of the command line,
-  and the prompt-start mark is in `$PS1` rather than in a hook — where it
-  would be erased again before anyone saw it.
+  should be, in the order they should be in,
+  the command-end mark carries the status of the command line
+  and is not sent for a prompt no command preceded,
+  and the prompt marks are in `$PS1` rather than in a hook — where they
+  would be erased again before anyone saw them.
+  An interactive zsh reading a pipe runs the hooks and prints no prompt,
+  which is what lets the chain be checked without a terminal.
   Reading `~/.zshrc` twice does not mark the prompt twice,
-  and a shell that says it is Ghostty's leaves the marking to Ghostty
-  unless tmux is in between.
+  a prompt with escapes switched off is left alone,
+  and a shell with Ghostty's integration loaded leaves the marking to Ghostty
+  while a shell started inside that one marks for itself.
 - `65-zsh-startup-profile`: a shell that reaches a prompt is timed, recorded
   once and broken down by startup file; one that does not — a script, a
   `zsh -c`, a benchmark run — is left alone; and every documented way of
