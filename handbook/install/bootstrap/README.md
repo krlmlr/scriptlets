@@ -23,3 +23,7 @@ and the script prints a legend before they start.
 Where no terminal can be opened — containers, CI, cron —
 the prompts hit end of file
 and every conflicting file is kept as it is.
+
+`bootstrap-private` is a different script for a different job —
+creating the private repository that installs alongside this one —
+and is [`layout/private/`](/handbook/layout/private/README.md)'s.

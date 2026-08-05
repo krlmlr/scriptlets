@@ -60,5 +60,10 @@ and what none of them carries.
 * [`mise run import`](handbook/install/import/README.md)
   moves a dotfile you already have into the repository
   and links it back where it was.
+* Secrets stay out of it:
+  [`./bootstrap-private`](handbook/layout/private/README.md)
+  creates a private repository shaped the same way,
+  and both trees are then installed as one
+  — tokens, internal hosts and the like live there.
 
 Copyright 2015-2025 Kirill Müller.

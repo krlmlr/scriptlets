@@ -1,0 +1,234 @@
+#!/bin/sh
+#
+# Create a private sidecar repository and leave it ready for `mise run install`.
+# See handbook/layout/private/README.md.
+#
+# It builds the skeleton of a second dotfiles tree, commits it, creates a
+# private repository on GitHub from that commit, and pushes. The working copy
+# it leaves behind is the clone: no separate checkout step, and `origin` is
+# already set. -n does everything but the parts that touch GitHub and $HOME.
+
+set -eu
+
+repo_name=scriptlets-private
+dry_run=0
+
+REPO=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+
+usage() {
+    cat <<EOF
+Usage: bootstrap-private [-n] [-r NAME]
+
+  -r NAME  name of the repository to create (default: $repo_name)
+  -n       dry run: build the skeleton in a temporary directory and print it,
+           touching neither GitHub nor the destination
+  -h       this message
+
+The clone goes to \$SCRIPTLETS_PRIVATE if that is set, and to ~/git/NAME
+otherwise -- the path rcm/rcrc looks in.
+EOF
+}
+
+die() {
+    echo "bootstrap-private: $1" >&2
+    exit 1
+}
+
+while getopts 'nr:h' opt; do
+    case $opt in
+    n) dry_run=1 ;;
+    r) repo_name=$OPTARG ;;
+    h)
+        usage
+        exit 0
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+[ $# -eq 0 ] || die "unexpected argument '$1'"
+
+dest=${SCRIPTLETS_PRIVATE:-$HOME/git/$repo_name}
+
+command -v git >/dev/null || die "git is required"
+
+if [ "$dry_run" -eq 1 ]; then
+    work=$(mktemp -d "${TMPDIR:-/tmp}/scriptlets-private.XXXXXX")
+    trap 'rm -rf "$work"' EXIT
+else
+    [ ! -e "$dest" ] || die "'$dest' already exists -- remove it, or set \$SCRIPTLETS_PRIVATE elsewhere"
+
+    command -v gh >/dev/null || die "the GitHub CLI is required to create the repository:
+       https://cli.github.com -- or create '$repo_name' as a private
+       repository by hand and see handbook/layout/private/README.md"
+
+    gh auth status >/dev/null 2>&1 || die "gh is not logged in -- run \`gh auth login\`"
+
+    if gh repo view "$repo_name" >/dev/null 2>&1; then
+        die "'$repo_name' already exists on GitHub -- clone it instead:
+       git clone git@github.com:\$(gh api user -q .login)/$repo_name.git '$dest'"
+    fi
+
+    work=$dest
+    mkdir -p "$work"
+fi
+
+# The repository is private in the ordinary sense as well: nothing in it is
+# anyone else's to read, and the permissions here are the ones the installed
+# files have, because rcm links rather than copies.
+chmod 700 "$work"
+
+mkdir -p "$work/rcm/ssh" "$work/rcm/hooks"
+
+cat >"$work/README.md" <<'EOF'
+# scriptlets-private
+
+The private sidecar of
+[scriptlets](https://github.com/krlmlr/scriptlets):
+a second dotfiles tree,
+merged into the same home directory,
+for what must not be in a public repository.
+
+Nothing here installs itself.
+`mise run install` in the public clone walks this tree too,
+as long as this repository sits at `~/git/scriptlets-private`
+or `$SCRIPTLETS_PRIVATE` says where it does sit.
+`mise run check` lists the merged mapping without touching anything.
+
+How the two trees merge, what wins a name they both have,
+and what this repository may and may not contain
+is `handbook/layout/private/README.md` in the public repository.
+EOF
+
+# The fragment. At the root on purpose: everything under rcm/ is installed, and
+# this tree is walked first, so an `rcm/rcrc` here would land as ~/.rcrc in
+# place of the file that sources this one. The tasks refuse to run if one
+# appears there.
+cat >"$work/rcrc" <<'EOF'
+# The sidecar's say in rcm's configuration, sourced by the public repository's
+# rcm/rcrc once it has set DOTFILES_DIRS, UNDOTTED, TAGS and OS_TAG.
+#
+# rcm reads exactly one rcrc, and those variables apply to every tree it walks,
+# so this is the only place a sidecar can change them. Append, never assign: an
+# assignment drops what the public tree needs.
+#
+# Keep this file at the repository root. Everything under rcm/ is installed,
+# and this tree is walked first, so an `rcm/rcrc` would be installed as ~/.rcrc
+# over the file that sources this one.
+
+# Top-level names in this repository that keep their spelling instead of
+# gaining a leading dot, added to the public list rather than replacing it:
+#
+# UNDOTTED="$UNDOTTED keys"
+
+# A tag beyond the account name and the platform, selecting tag-<name>/ in
+# either tree:
+#
+# TAGS="$TAGS work"
+EOF
+
+cat >"$work/rcm/bash_secrets" <<'EOF'
+# Installed as ~/.bash_secrets, sourced by ~/.bash_aliases -- and so by zsh
+# too, which reads that file through ~/.zshrc.
+#
+# The exports that must not be in a public repository: API tokens, licence
+# keys, the odd internal hostname.
+#
+# export SOME_API_TOKEN=...
+EOF
+
+cat >"$work/rcm/gitconfig.user" <<'EOF'
+# Installed as ~/.gitconfig.user, pulled in by the [include] section of
+# ~/.gitconfig.
+#
+# [user]
+# 	email = you@example.com
+EOF
+
+cat >"$work/rcm/Rprofile.private" <<'EOF'
+# Installed as ~/.Rprofile.private, sourced by ~/.Rprofile if it is there.
+#
+# options(
+#   some.private.option = "..."
+# )
+EOF
+
+cat >"$work/rcm/ssh/config-private" <<'EOF'
+# Installed as ~/.ssh/config-private, pulled in by the `Include config-private`
+# in ~/.ssh/config.
+#
+# Host internal
+#   HostName internal.example.com
+#   User you
+EOF
+
+# rcm runs a tree's own hooks, and never installs the directory they are in.
+cat >"$work/rcm/hooks/post-up" <<'EOF'
+#!/bin/sh
+# Run by rcm after it has linked this tree, from the directory it sits in.
+#
+# rcm links rather than copies, so the permissions ~/.bash_secrets and
+# ~/.ssh/config-private actually have are the ones they have here. Everything
+# in a sidecar is private by definition, so none of it is anyone else's to
+# read; ssh in particular refuses a config others can write.
+
+set -eu
+
+cd -- "$(dirname -- "$0")/../.."
+chmod -R go-rwx .
+EOF
+chmod +x "$work/rcm/hooks/post-up"
+
+# `git init -b` needs git 2.28; setting HEAD by hand works on every version,
+# and is not at the mercy of init.defaultBranch either.
+git -C "$work" init -q
+git -C "$work" symbolic-ref HEAD refs/heads/main
+git -C "$work" add -A
+git -C "$work" commit -q -m "Initial commit"
+
+if [ "$dry_run" -eq 1 ]; then
+    echo "# dry run -- nothing was created on GitHub, and $dest was not touched"
+    echo
+    echo "# the skeleton, committed as \"Initial commit\":"
+    git -C "$work" ls-files | sed 's/^/  /'
+    echo
+    echo "# it would be pushed with:"
+    echo "  gh repo create $repo_name --private --source=$dest --remote=origin --push"
+    exit 0
+fi
+
+gh repo create "$repo_name" --private --source="$work" --remote=origin --push
+
+# --push leaves the branch pushed; this is what makes it tracked, so that a
+# later bare `git push` from the clone knows where to go.
+git -C "$work" push -q -u origin main
+
+url=$(gh repo view "$repo_name" --json url -q .url 2>/dev/null || true)
+
+echo
+echo "# created:  ${url:-$(git -C "$work" remote get-url origin)}"
+echo "# cloned:   $work"
+
+# What the sidecar will actually install, resolved the way an install resolves
+# it: the destinations below come from the sidecar rather than the public tree.
+if command -v lsrc >/dev/null; then
+    echo "# it adds:"
+    RCRC="$REPO/rcm/rcrc" SCRIPTLETS_PRIVATE="$work" \
+        lsrc -d "$work/rcm" -d "$REPO/rcm" 2>/dev/null |
+        grep -F ":$work/" | cut -d: -f1 | sed 's/^/  /'
+fi
+
+cat <<EOF
+
+Next:
+
+  mise run check      # the merged mapping, without touching anything
+  mise run install    # link both trees into the home directory
+
+Put a secret in it by editing the file it belongs in, then commit and push
+from $work as usual.
+EOF
