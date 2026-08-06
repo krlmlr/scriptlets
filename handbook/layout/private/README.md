@@ -142,8 +142,9 @@ rather than let it happen quietly.
 **Tags and hooks are per tree.**
 `tag-<user>/`, `tag-<platform>/` and `host-<name>/` in the sidecar are
 selected by the same `TAGS` the public `rcrc` computes.
-`hooks/pre-up` and `hooks/post-up` are the sidecar's own:
-rcm runs them from the directory they sit in and never installs it.
+The sidecar's `hooks/` is its own,
+run in its turn alongside this repository's
+([`install/hooks/`](/handbook/install/hooks/README.md)).
 That is where the `chmod` goes that keeps `~/.ssh/config-private`
 unreadable to anyone else —
 rcm links rather than copies,

@@ -65,7 +65,9 @@ and points at mise for the three that need it.
 too long for a one-liner.
 Every task points `RCRC` at the repository's own copy of `rcrc`,
 and the ones that invoke rcm go through `lib.sh`'s `rcm_run`,
-which passes `-d`,
+which passes `-d` and sets `DOTFILES_DIRS` to the same trees —
+the second because that, not `-d`, is where rcm looks for the hooks it
+runs ([`install/hooks/`](/handbook/install/hooks/README.md)) —
 so the tasks work from any clone location
 and take effect even before — or instead of — an existing `~/.rcrc`
 (the mapping that file drives is

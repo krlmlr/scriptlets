@@ -41,13 +41,21 @@ fi
 # Every task that reaches rcm goes through here, so none of them can act on a
 # different set of trees than the others -- an install that saw the sidecar and
 # an uninstall that did not would strand every link the sidecar owns.
+#
+# The same list also goes into the environment, because rcm reads the trees
+# twice and only one of the readings honours -d: `rcup` assigns DOTFILES_DIRS
+# from it and `rcdn` keeps it to itself, while the hooks of both are looked for
+# below DOTFILES_DIRS (rcm 1.3.4). Without this an uninstall would unlink one
+# tree and run another tree's hooks -- handbook/install/hooks/README.md.
+# rcm/rcrc defers to a value already set, so the two never disagree.
 rcm_run() {
     _rcm_cmd=$1
     shift
 
     if [ -d "$SCRIPTLETS_PRIVATE/rcm" ]; then
-        "$_rcm_cmd" -d "$SCRIPTLETS_PRIVATE/rcm" -d "$DOTFILES" "$@"
+        DOTFILES_DIRS="$SCRIPTLETS_PRIVATE/rcm $DOTFILES" \
+            "$_rcm_cmd" -d "$SCRIPTLETS_PRIVATE/rcm" -d "$DOTFILES" "$@"
     else
-        "$_rcm_cmd" -d "$DOTFILES" "$@"
+        DOTFILES_DIRS="$DOTFILES" "$_rcm_cmd" -d "$DOTFILES" "$@"
     fi
 }
