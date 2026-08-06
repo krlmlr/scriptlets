@@ -1,0 +1,47 @@
+#!/bin/sh
+# Link Positron's command line tool into ~/bin, on a macOS account that has it.
+#
+# handbook/install/hooks/README.md
+
+set -eu
+
+. "$(dirname -- "$0")/../positron.sh"
+
+# Every path below is inside an application bundle macOS alone has.
+[ "$(uname -s)" = Darwin ] || exit 0
+
+if ! cli=$(positron_cli); then
+    # No bundle, so no reason for a link into one. A link of ours that still
+    # resolves is left alone -- the tool it points at is there, whatever this
+    # run was told to look for.
+    if positron_link_is_ours && [ ! -e "$link" ]; then
+        echo "removing $link: the Positron.app it pointed into is gone"
+        rm -f "$link"
+    fi
+    exit 0
+fi
+
+# Already right: the common case, and it says nothing.
+if [ -L "$link" ] && [ "$(readlink "$link")" = "$cli" ]; then
+    exit 0
+fi
+
+# Anything else in the way belongs to the account. rcm asks before replacing a
+# file it did not create; this hook cannot ask -- an install must not wait at a
+# prompt -- so it keeps what is there and says so.
+if [ -e "$link" ] || [ -L "$link" ]; then
+    if ! positron_link_is_ours; then
+        echo "$link exists and is not ours; leaving it alone" >&2
+        exit 0
+    fi
+fi
+
+# ~/bin is there by now -- rcm has linked the scripts into it before this hook
+# runs -- but not when the hook is run by hand.
+mkdir -p "$(dirname -- "$link")"
+
+# rm first rather than `ln -sfn`: -n is not POSIX, and without it a link that
+# points at a directory would be followed into rather than replaced.
+rm -f "$link"
+ln -s "$cli" "$link"
+echo "linked $link -> $cli"

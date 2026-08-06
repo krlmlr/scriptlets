@@ -11,7 +11,12 @@ SCRIPTLETS_PRIVATE="${SCRIPTLETS_PRIVATE:-$HOME/git/scriptlets-private}"
 # order that lets a sidecar override rather than be silently ignored. A
 # directory that is not there is skipped, so naming it unconditionally costs a
 # machine without a sidecar nothing.
-DOTFILES_DIRS="$SCRIPTLETS_PRIVATE/rcm $HOME/git/scriptlets/rcm"
+#
+# A value already in the environment wins, and that is how the tasks name the
+# trees they also pass to rcm with -d, from a clone anywhere (mise-tasks/lib.sh
+# says why both are needed). What is set here is what a bare `rcup` or `lsrc`
+# gets.
+DOTFILES_DIRS="${DOTFILES_DIRS:-$SCRIPTLETS_PRIVATE/rcm $HOME/git/scriptlets/rcm}"
 
 # Names that must *not* gain a leading dot. Everything else in the dotfiles
 # directory does: `bashrc` becomes ~/.bashrc, `ssh/config` becomes

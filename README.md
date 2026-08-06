@@ -57,6 +57,11 @@ and what none of them carries.
   linked into place by rcm under
   [per-user and per-platform tags](handbook/layout/README.md),
   with `~/bin` put on the `PATH` on macOS too.
+* On macOS, installing also links
+  [Positron's command line tool](handbook/install/hooks/README.md)
+  into `~/bin` as `positron` —
+  the file inside the bundle is called `code`,
+  which is VS Code's.
 * [`mise run import`](handbook/install/import/README.md)
   moves a dotfile you already have into the repository
   and links it back where it was.

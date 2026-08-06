@@ -153,6 +153,20 @@ and they run in name order:
   It links the `fd`, `gsed` and `gsort` names Linux does not ship
   ([`install/prerequisites/`](/handbook/install/prerequisites/README.md))
   and skips where the commands behind them are missing too.
+- `78-positron`: the hooks that keep `~/bin/positron` pointing at
+  Positron's command line tool
+  ([`install/hooks/`](/handbook/install/hooks/README.md))
+  link it, leave it alone once it is right,
+  keep a file of the account's own that is in the way,
+  drop a link into a bundle that is gone,
+  and take the link away again on the way out.
+  It also drives one install and uninstall through the tasks,
+  for the half running the hooks by hand cannot show:
+  that rcm reaches them at all, from a clone anywhere.
+  It builds a bundle of its own and stubs `uname`,
+  because Positron is macOS-only and on neither CI runner,
+  and brings its own home directory,
+  the throw-away one being what the other checks read.
 - `90-force`: `mise run force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check
