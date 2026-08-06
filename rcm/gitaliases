@@ -133,3 +133,9 @@
 	stp = stash pop
 	std = stash drop
 	stl = stash list
+	# ---
+	# Worktree: git spells the concept as two words itself,
+	# in --work-tree and GIT_WORK_TREE, and they give the two letters.
+	# w is switch, and git matches an alias name in full, never by
+	# prefix, so the two never meet.
+	wt = worktree
