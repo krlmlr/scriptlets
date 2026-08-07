@@ -1,6 +1,7 @@
 [rerere]
 	enabled = true
 [merge]
+	# Needs Git >= 2.35
 	conflictstyle = zdiff3
 	ff = false
 [diff]
