@@ -156,4 +156,4 @@ Homebrew's `azure-cli` installs `az`, which is a different one.
 
 *To deepen: run the `pacman` lines on an Arch machine;
 collect what the shipped configuration reaches for —
-`delta`, `daff`, `git-lfs`, `tig`, `diffuse`.*
+`delta`, `daff`, `git-lfs`, `tig`, `diffuse`, `zed`.*
