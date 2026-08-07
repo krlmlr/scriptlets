@@ -18,6 +18,14 @@ set -u
 PATH="$HOME/bin:$PATH"
 export PATH
 
+# The throw-away home has no git identity, and neither does a CI runner: the
+# repository's ~/.gitconfig only carries one for an account with a tag.
+GIT_AUTHOR_NAME=check
+GIT_AUTHOR_EMAIL=check@example
+GIT_COMMITTER_NAME=check
+GIT_COMMITTER_EMAIL=check@example
+export GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL
+
 work=$HOME/git-pr-check
 rm -rf "$work"
 git init -q "$work"

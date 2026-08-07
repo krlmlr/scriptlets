@@ -84,11 +84,10 @@ and is what the `pra` alias adds;
 **`gh-repo-setup`** — set `gh`'s default repository, and GitHub's merge
 options for the repository of the current directory:
 a pull request that can be brought up to date from the web,
-and a branch that goes when it merges.
-`-a` / `--auto-merge` adds auto-merge,
-which belongs to a repository that merges its own pull requests rather
-than to a fork,
-so the run after `gh repo fork` is the one without it.
+a branch that goes when it merges, and auto-merge.
+All three are settings a repository offers rather than performs,
+so the run after `gh repo fork` sets the same three:
+a fork that never merges a pull request is no reason to leave one off.
 Which repository that is comes from `upstream`,
 or from `origin` where there is no `upstream`,
 spelled as owner and name because `gh repo edit` refuses a bare one.

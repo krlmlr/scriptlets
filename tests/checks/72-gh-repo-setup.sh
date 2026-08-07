@@ -64,11 +64,7 @@ assert_match "the repository is addressed by owner and name" \
 assert_match "a pull request can be updated from the web" "*--allow-update-branch*" \
     "$output"
 assert_match "a merged branch goes" "*--delete-branch-on-merge*" "$output"
-assert_equal "and auto-merge stays off until it is asked for" "" \
-    "$(printf '%s\n' "$output" | grep -o -- '--enable-auto-merge' || true)"
-
-run --auto-merge
-assert_match "--auto-merge enables it" "*--enable-auto-merge*" "$output"
+assert_match "and auto-merge is offered" "*--enable-auto-merge*" "$output"
 
 # --- where it refuses -------------------------------------------------------
 

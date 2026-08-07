@@ -1,43 +1,40 @@
 #!/bin/sh
 # Point `gh` at the repository this working copy belongs to, and set the three
 # merge options every repository here wants: a pull request that can be brought
-# up to date from the web, a branch that goes when it merges, and -- where the
-# repository is one this account merges into rather than sends to -- auto-merge.
+# up to date from the web, a branch that goes when it merges, and auto-merge.
 #
 # Run it after a fresh clone, and again after `gh repo fork`, which leaves the
-# fork with GitHub's defaults; the fork is not where pull requests merge, so
-# that run is the one without --auto-merge.
+# fork with GitHub's defaults. All three are settings a repository offers
+# rather than performs, so a fork that never merges a pull request is no reason
+# to leave any of them off.
 set -eu
 
 dry_run=0
-auto_merge=0
 
 usage() {
     cat <<'EOF'
-Usage: gh-repo-setup [-n|--dry-run] [-a|--auto-merge]
+Usage: gh-repo-setup [-n|--dry-run]
 
 Set `gh`'s default repository and GitHub's merge options for the repository
 of the current directory:
 
   gh repo set-default <owner/repo>
-  gh repo edit <owner/repo> --allow-update-branch --delete-branch-on-merge
+  gh repo edit <owner/repo> --allow-update-branch --delete-branch-on-merge \
+      --enable-auto-merge
 
 The repository is the one `upstream` points at, or `origin` where there is
 no `upstream` remote, spelled as owner and name because `gh repo edit`
 refuses a bare one.
 
 Options:
-  -n, --dry-run     print the commands instead of running them
-  -a, --auto-merge  add --enable-auto-merge, for a repository that merges
-                    its own pull requests
-  -h, --help        show this help
+  -n, --dry-run  print the commands instead of running them
+  -h, --help     show this help
 EOF
 }
 
 while [ $# -gt 0 ]; do
     case "$1" in
     -n | --dry-run) dry_run=1 ;;
-    -a | --auto-merge) auto_merge=1 ;;
     -h | --help)
         usage
         exit 0
@@ -114,9 +111,4 @@ if [ "$dry_run" -eq 0 ] && ! command -v gh >/dev/null; then
 fi
 
 run gh repo set-default "$slug"
-
-if [ "$auto_merge" -eq 1 ]; then
-    run gh repo edit "$slug" --allow-update-branch --delete-branch-on-merge --enable-auto-merge
-else
-    run gh repo edit "$slug" --allow-update-branch --delete-branch-on-merge
-fi
+run gh repo edit "$slug" --allow-update-branch --delete-branch-on-merge --enable-auto-merge

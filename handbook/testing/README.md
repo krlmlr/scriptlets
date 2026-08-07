@@ -148,7 +148,7 @@ and they run in name order:
 - `72-gh-repo-setup`: the owner and name `gh-repo-setup` recovers from
   every spelling a remote comes in,
   which remote it asks first,
-  and the options it sets with and without auto-merge.
+  and the three options it sets.
   Neither check reaches GitHub, and neither needs `gh` installed:
   `--dry-run` puts the commands on stdout instead of running them.
 - `75-h`: `h` runs the command in every repository below the current
