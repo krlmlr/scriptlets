@@ -1,7 +1,7 @@
 [rerere]
 	enabled = true
 [merge]
-	conflictstyle = diff3
+	conflictstyle = zdiff3
 	ff = false
 [diff]
 	algorithm = histogram
