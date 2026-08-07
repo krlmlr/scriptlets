@@ -259,9 +259,46 @@ ensure_git() {
     git -C "$dest" symbolic-ref HEAD refs/heads/main
 }
 
+require_identity() {
+    git -C "$dest" var GIT_AUTHOR_IDENT >/dev/null 2>&1 ||
+        die "git has no identity here -- set user.name and user.email first"
+}
+
+# The history starts from an empty commit, so the skeleton arrives as a diff
+# like everything after it rather than as the state the repository began in.
+# What that buys is a root to stand on: `git rebase --onto` can reach every
+# real commit, the first one can be reverted or rewritten like any other, and
+# `git diff <root>` is the whole history of the tree.
+ensure_root_commit() {
+    if [ "$dry_run" -eq 1 ]; then
+        if [ -d "$dest/.git" ] &&
+            git -C "$dest" rev-parse --verify -q HEAD >/dev/null 2>&1; then
+            same "root commit"
+        else
+            made 'empty root commit "Initial commit"'
+        fi
+        return 0
+    fi
+
+    if git -C "$dest" rev-parse --verify -q HEAD >/dev/null; then
+        same "root commit"
+        return 0
+    fi
+
+    require_identity
+    git -C "$dest" commit -q --allow-empty -m "Initial commit"
+    made 'empty root commit "Initial commit"'
+}
+
 ensure_commit() {
     if [ "$dry_run" -eq 1 ]; then
-        [ -d "$dest/.git" ] || made "commit \"Initial commit\""
+        if [ ! -d "$dest/.git" ]; then
+            made 'commit "Add the sidecar skeleton"'
+        elif [ -n "$(git -C "$dest" status --porcelain)" ]; then
+            made "commit of what is uncommitted here"
+        else
+            same "commit (nothing to commit)"
+        fi
         return 0
     fi
 
@@ -272,13 +309,14 @@ ensure_commit() {
         return 0
     fi
 
-    git -C "$dest" var GIT_AUTHOR_IDENT >/dev/null 2>&1 ||
-        die "git has no identity here -- set user.name and user.email first"
+    require_identity
 
-    if git -C "$dest" rev-parse --verify -q HEAD >/dev/null; then
-        message="Update the sidecar skeleton"
+    # One commit means the empty root and nothing else, so this is the skeleton
+    # arriving; anything later is a change to it.
+    if [ "$(git -C "$dest" rev-list --count HEAD)" -eq 1 ]; then
+        message="Add the sidecar skeleton"
     else
-        message="Initial commit"
+        message="Update the sidecar skeleton"
     fi
 
     git -C "$dest" commit -q -m "$message"
@@ -405,6 +443,7 @@ echo
 ensure_dir
 ensure_files
 ensure_git
+ensure_root_commit
 ensure_commit
 ensure_github
 ensure_description
