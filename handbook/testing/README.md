@@ -103,6 +103,9 @@ and they run in name order:
   while a shell started inside that one marks for itself.
   An interactive bash reading a pipe runs its prompt command and expands
   `PS0`, which is what lets the chain be checked without a terminal.
+  On a bash too old for `PS0` — the `/bin/bash` macOS ships — the check
+  follows the degradation rather than skipping,
+  and asserts that the prompts are marked and the command is not.
   It reads the file this repository ships rather than `~/.bashrc`:
   the throw-away home keeps the stock one it was seeded with
   until `mise run force` replaces it.
