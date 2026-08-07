@@ -60,7 +60,9 @@
 	# b -d
 	# b -D
 	# ---
-	fft = "!sh -c 'git bvv | $(which gsed || which sed)  -r -n \"/^ +([^ ]+) +[^ ]+ [[]([^:]+): behind.*$/ {s//git push . \\2:\\1/ p}\" | sh -x' -"
+	# The fast-forward is `git ff` in ~/bin now, and reaches the branches a
+	# worktree holds as well; the old spelling warns, then forwards.
+	fft = "!echo 'warning: fft is now ff' >&2; git ff"
 	# === Conflict resolution
 	ma = merge --abort
 	# ---
