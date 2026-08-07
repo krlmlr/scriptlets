@@ -1,7 +1,22 @@
 # Installed as ~/.rcrc, and also read directly by `mise run install` on a
 # machine that does not have it yet (via the RCRC environment variable).
 
-DOTFILES_DIRS="$HOME/git/scriptlets/rcm"
+# Where a private sidecar repository lives, if this machine has one: a second
+# dotfiles tree, not public, merged into the same home directory.
+# handbook/layout/private/README.md.
+SCRIPTLETS_PRIVATE="${SCRIPTLETS_PRIVATE:-$HOME/git/scriptlets-private}"
+
+# The sidecar goes first. Where the same name exists in both trees rcm takes
+# the one it reaches first and says nothing about the other, so this is the
+# order that lets a sidecar override rather than be silently ignored. A
+# directory that is not there is skipped, so naming it unconditionally costs a
+# machine without a sidecar nothing.
+#
+# A value already in the environment wins, and that is how the tasks name the
+# trees they also pass to rcm with -d, from a clone anywhere (mise-tasks/lib.sh
+# says why both are needed). What is set here is what a bare `rcup` or `lsrc`
+# gets.
+DOTFILES_DIRS="${DOTFILES_DIRS:-$SCRIPTLETS_PRIVATE/rcm $HOME/git/scriptlets/rcm}"
 
 # Names that must *not* gain a leading dot. Everything else in the dotfiles
 # directory does: `bashrc` becomes ~/.bashrc, `ssh/config` becomes
@@ -22,3 +37,14 @@ esac
 # directory installs nothing extra. This replaces the old
 # `if [ -d personalized/$USER ]`.
 TAGS="$(id -un) $OS_TAG"
+
+# The sidecar's say in the variables above. rcm reads exactly one rcrc and
+# applies DOTFILES_DIRS, UNDOTTED and TAGS to every tree it walks, so a sidecar
+# cannot ship its own: it appends to them here instead.
+#
+# The fragment sits at the sidecar's root rather than in its rcm/, because
+# everything in there is installed -- and the sidecar is walked first, so an
+# `rcm/rcrc` would install as ~/.rcrc over this very file.
+if [ -r "$SCRIPTLETS_PRIVATE/rcrc" ]; then
+  . "$SCRIPTLETS_PRIVATE/rcrc"
+fi

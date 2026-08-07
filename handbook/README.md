@@ -15,7 +15,7 @@ and the same question brings both to the same leaf.
   and off it again: the tasks, the bootstrap script,
   importing a file you already have, prerequisites
 * [`layout/`](layout/) — how the repository maps onto the home
-  directory: the dot rules, the tags, the `PATH`,
+  directory: the dot rules, the tags, the private sidecar, the `PATH`,
   the home-grown layout it replaced
 * [`config/`](config/) — what the installed configuration does:
   the inventory, zsh startup profiling, zsh completion

@@ -1,3 +1,5 @@
 .Rproj.user
-private/
+# Anchored: unanchored, this matched a directory named `private` at any depth,
+# including a handbook leaf about the private sidecar repository.
+/private/
 .vscode/

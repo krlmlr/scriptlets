@@ -1,6 +1,6 @@
 # The mapping
 
-Everything that ends up in the home directory lives in
+Everything rcm links into the home directory lives in
 [`rcm/`](/rcm).
 A name there gains a leading dot on the way to `$HOME`,
 so `rcm/bashrc` becomes `~/.bashrc`
@@ -16,15 +16,24 @@ rcm skips names that already start with a dot inside `rcm/`,
 which is why the placeholder that brings `~/log` into existence
 is [`rcm/log/dummy`](/rcm/log/dummy), kept dotless.
 
+`rcm/hooks/` is the one name rcm keeps for itself:
+it runs what is below it, on every tree it walks, and installs none of it.
+A hook is also the one thing here that can put something in the home
+directory without a file behind it —
+a symbolic link to a path outside the repository is a decision
+that has to be made on the machine
+([`install/hooks/`](/handbook/install/hooks/README.md)).
+
 **`rcrc` itself** sets `DOTFILES_DIRS`, `UNDOTTED` and `TAGS`
 (the tags are [`layout/tags/`](/handbook/layout/tags/README.md)'s),
 and is installed as `~/.rcrc`.
-It hardcodes `DOTFILES_DIRS="$HOME/git/scriptlets/rcm"`,
+`DOTFILES_DIRS` defaults there to `$HOME/git/scriptlets/rcm`,
 so a bare `rcup` or `lsrc` finds nothing
 unless the clone lives at `~/git/scriptlets`,
 where the bootstrap script puts it
 ([`install/bootstrap/`](/handbook/install/bootstrap/README.md));
-the tasks work from any location
+a value already in the environment wins instead,
+which is how the tasks work from any location
 ([`install/tasks/`](/handbook/install/tasks/README.md) says how).
 
 **What an install touches.**

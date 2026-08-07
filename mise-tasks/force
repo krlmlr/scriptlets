@@ -3,4 +3,4 @@
 set -eu
 . "$(dirname -- "$0")/lib.sh"
 
-exec rcup -f -d "$DOTFILES" "$@"
+rcm_run rcup -f "$@"
