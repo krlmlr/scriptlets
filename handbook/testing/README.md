@@ -104,6 +104,19 @@ and they run in name order:
 - `50-makefile`: the `Makefile` fallback agrees with the tasks
   it stands in for,
   and the targets it does not implement say so instead of pretending.
+- `55-editor`: `$EDITOR` and `$VISUAL` name a Zed told to wait
+  in a login shell of each of the three kinds,
+  git edits with the same value,
+  `^X^E` is bound in an interactive zsh,
+  and a `PATH` without Zed on it falls back to vim
+  ([`config/editor/`](/handbook/config/editor/README.md)).
+  The `--wait` is the half worth pinning:
+  an editor that returns before the file is written
+  discards the commit message and the command line without a word.
+  It brings its own home directory and installs into it,
+  because `~/.profile` carries the value
+  and the throw-away home has the one `/etc/skel` seeded;
+  and it stubs `zed`, which is on neither CI runner.
 - `60-zsh-startup`: a zsh startup complains about nothing,
   and `~/.zshrc` binds `mise` to the stub —
   the generated completion is *not* loaded at startup,
