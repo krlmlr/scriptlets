@@ -56,8 +56,10 @@ and is marked as such in the trie so the cost is visible.
 ## The trie
 
 Every alias, by the letters that reach it.
-The names that borrow an occupied prefix come first, alphabetically,
-then the letter families.
+One alphabetical run, in which a name that heads a group of its own
+comes before the family whose letter it borrowed —
+`dm` before `d`, `conflicts` before `c` —
+so a group is read before the family it would be taken for a variant of.
 `*` is an alias, `!` one that expands to a shell command,
 and `.` a node no alias stops at — a prefix that only leads somewhere.
 
@@ -67,39 +69,6 @@ and pinned by the `07-git-aliases` check
 so an alias that arrives without it fails the run.
 
 ```text
-conflicts * diff --name-only --diff-filter=U
-
-dm !
-└─h !
-
-echo !
-
-fft !
-
-lsf !
-
-mu * merge-update
-
-pr .
-├─a * pr --auto-merge
-└─m !
-
-sq !
-
-st .
-├─d * stash drop
-├─l * stash list
-├─p * stash pop
-└─s * stash save
-
-wt * worktree
-├─a * worktree add
-├─b !
-├─l * worktree list
-├─m * worktree move
-├─p * worktree prune
-└─r * worktree remove
-
 a * add
 ├─a * add .
 ├─c * commit --all --verbose
@@ -111,6 +80,8 @@ b * branch --sort=committerdate
 ├─n * branch --sort=committerdate --no-merged
 └─v * branch -v --sort=committerdate
    └─v * branch -vv --sort=committerdate
+
+conflicts * diff --name-only --diff-filter=U
 
 c .
 ├─h * cherry-pick
@@ -130,17 +101,27 @@ c .
    ├─b * checkout -b
    └─p * checkout --patch
 
+dm !
+└─h !
+
 d * diff
 ├─c * diff --cached
 │  └─w * diff --cached --word-diff
 ├─d !
 ├─u * diff @{u}
-└─w * diff --word-diff
+├─w * diff --word-diff
+└─z * difftool --dir-diff --no-symlinks --tool=zed
+
+echo !
 
 e * restore
 
+fft !
+
 f * fetch --prune
 └─a * fetch --all --prune -j 32
+
+lsf !
 
 l * log --numstat --graph --decorate
 ├─1 * log --oneline --decorate
@@ -150,12 +131,18 @@ l * log --numstat --graph --decorate
 ├─l * log --oneline --graph --decorate
 └─p * log --patch --graph --decorate
 
+mu * merge-update
+
 m * merge
 ├─a * merge --abort
 ├─f * merge --ff
 ├─o * merge --no-edit
 └─s * merge --squash --ff
    └─o !
+
+pr .
+├─a * pr --auto-merge
+└─m !
 
 p .
 ├─f * push --force-with-lease
@@ -190,19 +177,39 @@ r * rebase
 ├─p * rebase --preserve-merges
 └─s * rebase --skip
 
+sq !
+
+st .
+├─d * stash drop
+├─l * stash list
+├─p * stash pop
+└─s * stash save
+
 s * status
 └─p * status --porcelain
+
+wt * worktree
+├─a * worktree add
+├─b !
+├─l * worktree list
+├─m * worktree move
+├─p * worktree prune
+└─r * worktree remove
 
 w * switch
 ```
 
 ## What the trie is for
 
-**A free letter is visible.** `g`, `i`, `j`, `k`, `n`, `o`, `t`, `u`, `v`,
-`x`, `y` and `z` head nothing, and a group's own letters are as easy to read:
-the `w` family has one member, so `switch` has room for its options,
-and `wt` had room for the worktree subcommands before they were added.
+**A free letter is visible**, and so is a free second one:
+the letters that head nothing are where a command still fits,
+and a family with few members is where its own options still fit —
+`w` holds `switch` alone, so `switch`'s flags have the room
+the `worktree` subcommands took under `wt`.
+Counting them here would be a list going stale beside the one that cannot,
+so the trie is where they are read.
 
-**A borrowed prefix is visible too**, which is what the first groups are:
-a name arriving above the letter families is a name that will read as a
-variant of something it is not.
+**A borrowed prefix is visible too:**
+a group standing immediately before a letter family — `mu` before `m`,
+`sq` and `st` before `s` — is a name that would otherwise read as a
+variant of that family, and does not belong to it.
