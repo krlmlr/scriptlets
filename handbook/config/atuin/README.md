@@ -7,6 +7,9 @@ and, once `atuin login` has been run, the same history on every machine.
 [`rcm/zshrc`](/rcm/zshrc) picks it up where it is installed
 and does nothing at all where it is not,
 leaving `Ctrl-R` to zsh.
+What the shells keep for themselves — the files the arrows, `fc` and `!!`
+read, and what a leading space does to each store — is
+[`config/history/`](/handbook/config/history/README.md)'s.
 
 **The generated init script is written to a file, not evaluated.**
 `atuin init zsh` writes a shell script to standard output,

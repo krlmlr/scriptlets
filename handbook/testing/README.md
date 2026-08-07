@@ -146,6 +146,16 @@ and they run in name order:
   which the audit truncates —
   mtimes cannot tell a re-audit within the same second
   from no audit at all.
+- `61-zsh-history`: an interactive zsh reads the newest day-files out of
+  `~/.zsh_history.d` and stops
+  ([`config/history/`](/handbook/config/history/README.md)):
+  the newest is there, one beyond the window is not,
+  the migrated single-file history is not read at all,
+  today's file is read once rather than twice,
+  and the name it is read from is the day and nothing else.
+  The history is fabricated, dated in 2020 so that it sorts below whatever
+  today is, and the question goes in on a pipe —
+  `zsh -ic` never reaches a prompt, which is where today's own file arrives.
 - `62-zsh-prompt-marks`: the prompt marks
   ([`config/prompt-marks/`](/handbook/config/prompt-marks/README.md))
   are the bytes they should be, in the order they should be in;
