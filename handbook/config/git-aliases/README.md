@@ -14,9 +14,19 @@ Which file lands where is
 A command that is typed daily takes a letter, its variants take a second,
 and a variant of a variant takes a third:
 `b` is `branch`, `bv` adds `-v`, `bvv` adds the second one.
-The push family says it in the file itself —
-the second letter picks the variant, an optional third picks the remote —
-and every other family reads the same way.
+The push family carries it furthest, and is worth learning as a scheme:
+`p` and then the variant — `h` plain, `f` for `--force-with-lease`,
+`t` for `--follow-tags`, `u` for `--set-upstream` —
+and then, where a third letter follows, the remote the current branch
+goes to: `c` for cynkra, `o` for origin, `u` for upstream,
+`k` for krlmlr where an account has one.
+`puo` is therefore `push --set-upstream origin HEAD`, read left to right.
+
+**A name takes git's own abbreviation where git has one.**
+`wt` is `worktree` because git spells the concept as two words itself,
+in `--work-tree` and `GIT_WORK_TREE`,
+so the two letters are the initials of the thing
+rather than a squeeze of one word.
 
 **A name that borrows an occupied prefix is not a variant of it.**
 `conflicts` begins with the letters of `checkout` and is a `diff`;
@@ -30,9 +40,16 @@ out of the family whose prefix it borrowed
 and gives it a group of its own.
 
 **A renamed spelling warns and forwards rather than vanishing.**
-`sq`, `phuc`, `phuo` and `prm` are the names their replacements used to have:
+`sq`, `fft`, `phuc`, `phuo` and `prm` are the names their replacements used
+to have:
 each prints one line to stderr and runs the new one,
 so fingers that learned the old spelling are corrected rather than stopped.
+`qs` took `sq`'s work because a squash is a `reset --soft` that ends in a
+commit, and belongs to the reset family rather than under `status`;
+`ff` took `fft`'s because the fast-forward became a script that reaches
+the branches a worktree holds ([`tools/`](/handbook/tools/README.md));
+`pr` took `prm`'s because the script it stands for opens against the
+default branch already.
 
 **A destructive variant keeps its long spelling.**
 `q --hard`, `b -d`, `b -D`, `clean` and `rm` appear in the file as comments
@@ -56,6 +73,63 @@ A plain expansion can lose it too:
 completion walks the expansion a word at a time,
 so a `-c` whose value carries a space — `dt`'s does, to keep its colour —
 leaves it holding the tail of that value rather than the command.
+
+## What the longer expansions do
+
+Most expansions are their own explanation.
+These are the ones that are not, and the file points here for them.
+
+**`dz` opens the whole diff in Zed, and takes edits back.**
+`--dir-diff` hands the tool both trees in one call rather than a pair of
+files at a time, and `zed --diff` recurses into two directories and shows
+every changed file in a single multi-diff view.
+`--no-symlinks` is what makes that work:
+the right-hand tree is symlinks into the working tree otherwise,
+and the walk behind `--diff` steps over those,
+leaving every file looking deleted.
+It waits where `dm` backgrounds,
+because git takes the trees down when the tool exits —
+and copies whatever was edited on the right back into the working tree
+first.
+Its arguments are `git diff`'s, so `git dz HEAD^!` is `dmh`'s view.
+
+**`dzm` is the same against the branch this one grew out of.**
+It takes the merge base rather than `main...`,
+and that is the whole of it:
+git copies edits back only from the side that *is* the working tree,
+so naming two sides — which `main...` does, expanding to `main...HEAD` —
+makes both of them temporary copies and discards what was typed.
+One side named leaves the working tree as the other,
+and the merge base puts the fork point opposite it,
+which is what `main...` was reaching for.
+Uncommitted work is in the view as well, which is the point.
+The branch is the remote's own default,
+read from `refs/remotes/upstream/HEAD` and then `refs/remotes/origin/HEAD`
+— `git remote set-head origin --auto` is what writes those down —
+with `main` where neither says, and an argument overriding all of it.
+
+**`dt` diffs with difftastic**, which compares syntax trees rather than
+lines, and so tells a brace that moved from a line that changed.
+It sets `diff.external` for the one invocation rather than as a setting,
+so `git diff` stays what it was.
+`--color always` is not decoration:
+git hands an external diff to the pager,
+and a difft that sees a pipe rather than a terminal turns its colour off,
+while the `less -FRX` in [`rcm/gitconfig`](/rcm/gitconfig) passes the
+escapes through.
+That space inside the value is what costs the alias its completion,
+above.
+Where `difft` is not installed the alias says so and stops
+([`install/prerequisites/`](/handbook/install/prerequisites/README.md)).
+
+**`wtb` puts a worktree beside the repository it belongs to**, named for
+both: `~/git/repo` and `branch-name` make `~/git/repo-branch-name`.
+The name comes from the main worktree rather than the current one,
+so a run from inside a linked worktree is a sibling rather than a nest,
+and a slash in the branch name folds to a dash for the same reason.
+A branch that already exists, here or on exactly one remote, is checked
+out — git's own guessing sets the tracking branch up —
+and a name that is neither becomes a new branch.
 
 ## The trie
 
