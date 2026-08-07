@@ -118,7 +118,7 @@ echo ! bash -c 'echo "${@: 0}"'
 
 e * restore
 
-fft ! sh -c 'git bvv | $(which gsed || which sed)  -r -n "/^ +([^ …
+fft ! echo 'warning: fft is now ff' >&2; git ff
 
 f * fetch --prune
 └─a * fetch --all --prune -j 32
