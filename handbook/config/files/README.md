@@ -8,7 +8,7 @@ The naming rules that turn `rcm/bashrc` into `~/.bashrc` are
 | File | Installed as | |
 | --- | --- | --- |
 | [`rcrc`](/rcm/rcrc) | `~/.rcrc` | drives the mapping itself |
-| [`profile`](/rcm/profile), [`zprofile`](/rcm/zprofile) | `~/.profile`, `~/.zprofile` | login shells of any kind: `~/bin` and `~/.local/bin` on the `PATH` ([`layout/path/`](/handbook/layout/path/README.md)) |
+| [`profile`](/rcm/profile), [`zprofile`](/rcm/zprofile) | `~/.profile`, `~/.zprofile` | login shells of any kind: `~/bin` and `~/.local/bin` on the `PATH` ([`layout/path/`](/handbook/layout/path/README.md)), and the [editor](/handbook/config/editor/README.md) every tool is handed |
 | [`bashrc`](/rcm/bashrc), [`bash_profile`](/rcm/bash_profile), [`bash_aliases`](/rcm/bash_aliases) | `~/.bashrc`, `~/.bash_profile`, `~/.bash_aliases` | interactive bash: prompt, history, aliases |
 | [`tag-macos/bash_aliases_os`](/rcm/tag-macos/bash_aliases_os), [`tag-linux/bash_aliases_os`](/rcm/tag-linux/bash_aliases_os) | `~/.bash_aliases_os` | the aliases, completions and bindings of one platform, sourced from `~/.bash_aliases` |
 | [`zshenv`](/rcm/zshenv), [`zshrc`](/rcm/zshrc) | `~/.zshenv`, `~/.zshrc` | zsh: the startup profiler for every shell, completion, history and [prompt marks](/handbook/config/prompt-marks/README.md) for the interactive ones |
