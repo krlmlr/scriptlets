@@ -154,11 +154,19 @@ autoload -Uz bashcompinit && bashcompinit
 # ---------------------------------------------------------------------------
 # Editor and aliases
 # ---------------------------------------------------------------------------
+# The default is ~/.profile's, for every shell
+# (handbook/config/editor/README.md); a terminal that is an editor window
+# takes it over, so that a commit written there opens where it was started.
 if [[ $TERM_PROGRAM == vscode ]]; then
   case $__CFBundleIdentifier in
     com.microsoft.VSCode) export EDITOR="code --wait" ;;
     co.posit.positron)    export EDITOR="positron --wait" ;;
   esac
+
+  # $VISUAL follows $EDITOR rather than standing still: git and zsh's
+  # edit-command-line both read it first, so the value from ~/.profile would
+  # shadow the line above and open the editor this terminal is not.
+  export VISUAL=$EDITOR
 fi
 
 compdef g=git
@@ -198,6 +206,19 @@ if [[ -z ${precmd_functions[(r)_ghostty_deferred_init]} ]]; then
     PS1=$'%{\e]133;A\a%}'$PS1$'%{\e]133;B\a%}'
   fi
 fi
+
+# ---------------------------------------------------------------------------
+# ^X^E opens the command line being typed in the editor, and takes back
+# whatever the editor leaves behind
+# (handbook/config/editor/README.md in the scriptlets repository).
+#
+# `autoload` registers the name and reads nothing: the function is compiled on
+# the first press of the key and never in a shell that does not press it,
+# which is what keeps a widget off the startup budget.
+# ---------------------------------------------------------------------------
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^X^E' edit-command-line
 
 # Last line on purpose: the mark records when this file was *done*, and the gap
 # between it and the first prompt is everything the terminal does after the

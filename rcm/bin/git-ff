@@ -1,0 +1,125 @@
+#!/bin/sh
+# Fast-forward every branch that is behind the remote branch it tracks, the
+# ones checked out in a worktree included.
+#
+# Two mechanisms, because one cannot do both halves. A branch nothing has
+# checked out is moved by pushing into this repository -- `git push .
+# <upstream>:<branch>` -- which refuses anything that is not a fast-forward and
+# so is safe by construction. A branch that is checked out cannot be pushed to
+# at all: git refuses to update the branch of any worktree, the current one and
+# a linked one alike, because the index and the working tree would no longer
+# agree with it. Those are fast-forwarded from inside their own worktree
+# instead, with `git merge --ff-only`, and only where nothing is uncommitted
+# there -- a dirty worktree is left alone and named.
+set -eu
+
+dry_run=0
+
+usage() {
+    cat <<'EOF'
+Usage: git ff [-n|--dry-run]
+
+Fast-forward every branch that is behind its upstream:
+
+  a branch nothing has checked out  ->  git push . <upstream>:<branch>
+  a branch a worktree holds         ->  git merge --ff-only, in that worktree
+
+Branches that are ahead, or that have diverged, are not fast-forwardable
+and are left alone; so is a worktree with uncommitted changes, which is
+named rather than passed over in silence. Nothing is fetched -- run
+`git fa` first, and this second.
+
+Options:
+  -n, --dry-run  say what would happen, change nothing
+  -h, --help     show this help
+EOF
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -n | --dry-run) dry_run=1 ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    *)
+        printf 'git-ff: unknown option: %s\n' "$1" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+# Says "fatal: not a git repository" in git's own words, and stops.
+git rev-parse --git-dir >/dev/null
+
+# Which worktree holds which branch, as `branch<tab>path` lines. The main
+# worktree is in there too: its branch is as unpushable as a linked one's.
+held=$(git worktree list --porcelain |
+    awk '
+        /^worktree /  { path = substr($0, 10) }
+        /^branch /    { print substr($0, 19) "\t" path }
+    ')
+
+# path_of BRANCH -- the worktree holding it, or nothing.
+path_of() {
+    printf '%s\n' "$held" |
+        awk -F'\t' -v branch="$1" '$1 == branch { print $2; exit }'
+}
+
+# say WORD MESSAGE -- one line per branch, so a run reads as a list.
+say() {
+    printf '%-10s %s\n' "$1" "$2"
+}
+
+status=0
+
+# The branches are read from a file rather than from a pipe, because a `while`
+# on the right of a `|` runs in a subshell, and the exit status this sets there
+# would be thrown away with it.
+branches=$(mktemp "${TMPDIR:-/tmp}/git-ff.XXXXXX")
+trap 'rm -f "$branches"' EXIT HUP INT TERM
+
+# `%(upstream:track,nobracket)` says "behind 2" for the branches this is for,
+# "ahead 1" or "ahead 1, behind 2" for the ones it is not, and nothing at all
+# for a branch with no upstream or one that is level.
+git for-each-ref --format='%(refname:short)%09%(upstream:short)%09%(upstream:track,nobracket)' \
+    refs/heads >"$branches"
+
+while IFS="$(printf '\t')" read -r branch upstream track; do
+    case $track in
+    behind\ *) ;;
+    *) continue ;;
+    esac
+
+    worktree=$(path_of "$branch")
+
+    if [ -z "$worktree" ]; then
+        if [ "$dry_run" -eq 1 ]; then
+            say "would push" "$branch <- $upstream ($track)"
+        elif git push --quiet . "$upstream:$branch"; then
+            say "pushed" "$branch <- $upstream ($track)"
+        else
+            say "failed" "$branch <- $upstream"
+            status=1
+        fi
+        continue
+    fi
+
+    if [ -n "$(git -C "$worktree" status --porcelain)" ]; then
+        say "dirty" "$branch in $worktree ($track)"
+        continue
+    fi
+
+    if [ "$dry_run" -eq 1 ]; then
+        say "would merge" "$branch in $worktree ($track)"
+    elif git -C "$worktree" merge --quiet --ff-only "$upstream" >/dev/null; then
+        say "merged" "$branch in $worktree ($track)"
+    else
+        say "failed" "$branch in $worktree"
+        status=1
+    fi
+done <"$branches"
+
+exit $status

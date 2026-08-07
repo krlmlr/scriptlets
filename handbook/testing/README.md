@@ -56,6 +56,12 @@ and they run in name order:
   It calls the helpers directly,
   reading neither the repository nor the home directory,
   so it runs before the installed checks too.
+- `07-git-aliases`: the trie in
+  [`config/git-aliases/`](/handbook/config/git-aliases/README.md)
+  is what the aliases render to,
+  rather than a snapshot of what they once rendered to.
+  It reads the repository alone, as the two before it do,
+  and an alias added or renamed fails it until the page is regenerated.
 - `10-path`: the scripts are on the `PATH` of a login shell,
   in every shell an account may log in with, and they run.
 - `15-tasks`: a bare `mise run` offers the task list
@@ -104,6 +110,19 @@ and they run in name order:
 - `50-makefile`: the `Makefile` fallback agrees with the tasks
   it stands in for,
   and the targets it does not implement say so instead of pretending.
+- `55-editor`: `$EDITOR` and `$VISUAL` name a Zed told to wait
+  in a login shell of each of the three kinds,
+  git edits with the same value,
+  `^X^E` is bound in an interactive zsh,
+  and a `PATH` without Zed on it falls back to vim
+  ([`config/editor/`](/handbook/config/editor/README.md)).
+  The `--wait` is the half worth pinning:
+  an editor that returns before the file is written
+  discards the commit message and the command line without a word.
+  It brings its own home directory and installs into it,
+  because `~/.profile` carries the value
+  and the throw-away home has the one `/etc/skel` seeded;
+  and it stubs `zed`, which is on neither CI runner.
 - `60-zsh-startup`: a zsh startup complains about nothing,
   and `~/.zshrc` binds `mise` to the stub —
   the generated completion is *not* loaded at startup,
@@ -140,7 +159,25 @@ and they run in name order:
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub
   remotes of a throw-away repository
   and leaves every other remote alone,
-  through `~/bin` and through the `git sr` alias alike.
+  through the `~/bin` the installation puts on the `PATH`.
+- `71-git-pr`: what `git pr` would run, read off its `--dry-run`:
+  the title is the first commit's subject rather than the last,
+  the issue closed is the one the branch name numbers,
+  and the trailing field of that name stays a suffix.
+- `72-gh-repo-setup`: the owner and name `gh-repo-setup` recovers from
+  every spelling a remote comes in,
+  which remote it asks first,
+  and the three options it sets.
+  Neither check reaches GitHub, and neither needs `gh` installed:
+  `--dry-run` puts the commands on stdout instead of running them.
+- `73-git-ff`: `git ff` moves a branch nothing has checked out
+  and one a linked worktree holds — the second is the case
+  `git push .` cannot reach, and the reason the script exists —
+  while a worktree with uncommitted changes and a diverged branch
+  are left as they were.
+  Its remote is a second repository below the throw-away home
+  and the clone is made from that path,
+  so the fetches and the push stay on this disk.
 - `75-h`: `h` runs the command in every repository below the current
   directory, and each line of output says which one it came from.
   Both halves matter:

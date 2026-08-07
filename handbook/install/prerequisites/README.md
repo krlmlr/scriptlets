@@ -11,10 +11,12 @@ and what individual scripts assume beyond that.
 and only `import` and the tests need it
 ([`install/tasks/`](/handbook/install/tasks/README.md) has the split).
 
-The [GitHub CLI](https://cli.github.com) is needed by one script alone:
-[`bootstrap-private`](/bootstrap-private) creates a repository with it,
-and says what to do by hand where it is missing
-([`layout/private/`](/handbook/layout/private/README.md)).
+The [GitHub CLI](https://cli.github.com) is what everything here says to
+GitHub with: [`bootstrap-private`](/bootstrap-private) creates a
+repository with it, and says what to do by hand where it is missing
+([`layout/private/`](/handbook/layout/private/README.md));
+`git-pr` and `gh-repo-setup` refuse to run without it
+([`tools/`](/handbook/tools/README.md)).
 
 Putting `~/bin` on the `PATH` is not among the things left to you:
 the shipped profiles do it, on macOS as well as on Ubuntu
@@ -156,4 +158,4 @@ Homebrew's `azure-cli` installs `az`, which is a different one.
 
 *To deepen: run the `pacman` lines on an Arch machine;
 collect what the shipped configuration reaches for —
-`delta`, `daff`, `git-lfs`, `tig`, `diffuse`.*
+`delta`, `daff`, `git-lfs`, `tig`, `diffuse`, `zed`.*

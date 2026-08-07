@@ -1,7 +1,8 @@
 [rerere]
 	enabled = true
 [merge]
-	conflictstyle = diff3
+	# Needs Git >= 2.35
+	conflictstyle = zdiff3
 	ff = false
 [diff]
 	algorithm = histogram
@@ -20,6 +21,8 @@
 	cmd = "~/bin/imgdiff-bg \"$LOCAL\" \"$REMOTE\""
 [difftool "diffpdf"]
 	cmd = "diffpdf \"$LOCAL\" \"$REMOTE\""
+[difftool "zed"]
+	cmd = "zed --wait --diff \"$LOCAL\" \"$REMOTE\""
 [merge "daff-csv"]
 	name = daff tabular csv merge
 	driver = daff merge --output %A %O %A %B
