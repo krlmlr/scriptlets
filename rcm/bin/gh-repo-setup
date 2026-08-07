@@ -1,0 +1,114 @@
+#!/bin/sh
+# Point `gh` at the repository this working copy belongs to, and set the three
+# merge options every repository here wants: a pull request that can be brought
+# up to date from the web, a branch that goes when it merges, and auto-merge.
+#
+# Run it after a fresh clone, and again after `gh repo fork`, which leaves the
+# fork with GitHub's defaults. All three are settings a repository offers
+# rather than performs, so a fork that never merges a pull request is no reason
+# to leave any of them off.
+set -eu
+
+dry_run=0
+
+usage() {
+    cat <<'EOF'
+Usage: gh-repo-setup [-n|--dry-run]
+
+Set `gh`'s default repository and GitHub's merge options for the repository
+of the current directory:
+
+  gh repo set-default <owner/repo>
+  gh repo edit <owner/repo> --allow-update-branch --delete-branch-on-merge \
+      --enable-auto-merge
+
+The repository is the one `upstream` points at, or `origin` where there is
+no `upstream` remote, spelled as owner and name because `gh repo edit`
+refuses a bare one.
+
+Options:
+  -n, --dry-run  print the commands instead of running them
+  -h, --help     show this help
+EOF
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -n | --dry-run) dry_run=1 ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    *)
+        printf 'gh-repo-setup: unknown option: %s\n' "$1" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+# Says "fatal: not a git repository" in git's own words, and stops.
+git rev-parse --git-dir >/dev/null
+
+url=
+for remote in upstream origin; do
+    url=$(git remote get-url "$remote" 2>/dev/null || true)
+    if [ -n "$url" ]; then
+        break
+    fi
+done
+
+if [ -z "$url" ]; then
+    printf 'gh-repo-setup: this repository has no upstream or origin remote\n' >&2
+    exit 1
+fi
+
+# owner/repo out of either spelling a remote comes in --
+# git@github.com:owner/repo.git, https://github.com/owner/repo.git, and the
+# same two without the suffix. The last two path components are the answer,
+# whatever stands in front of them.
+slug=$(printf '%s\n' "$url" |
+    sed -e 's#[.]git$##' -e 's#/$##' -e 's#^.*[:/]\([^/][^/]*/[^/][^/]*\)$#\1#')
+
+case $slug in
+*/*[!/]) ;;
+*)
+    printf 'gh-repo-setup: cannot read owner/repo out of %s\n' "$url" >&2
+    exit 1
+    ;;
+esac
+
+# quote ARGUMENT -- as the shell would need it written, so that a --dry-run
+# line can be pasted back into a terminal.
+quote() {
+    case $1 in
+    '' | *[!A-Za-z0-9._/=:@#-]*)
+        printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
+        ;;
+    *)
+        printf '%s' "$1"
+        ;;
+    esac
+}
+
+# run COMMAND... -- or print it, when --dry-run says so.
+run() {
+    if [ "$dry_run" -eq 1 ]; then
+        line=
+        for argument in "$@"; do
+            line="$line $(quote "$argument")"
+        done
+        printf '%s\n' "${line# }"
+    else
+        "$@"
+    fi
+}
+
+if [ "$dry_run" -eq 0 ] && ! command -v gh >/dev/null; then
+    printf 'gh-repo-setup: the GitHub CLI is required: https://cli.github.com\n' >&2
+    exit 1
+fi
+
+run gh repo set-default "$slug"
+run gh repo edit "$slug" --allow-update-branch --delete-branch-on-merge --enable-auto-merge

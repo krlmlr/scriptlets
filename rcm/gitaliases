@@ -60,7 +60,9 @@
 	# b -d
 	# b -D
 	# ---
-	fft = "!sh -c 'git bvv | $(which gsed || which sed)  -r -n \"/^ +([^ ]+) +[^ ]+ [[]([^:]+): behind.*$/ {s//git push . \\2:\\1/ p}\" | sh -x' -"
+	# The fast-forward is `git ff` in ~/bin now, and reaches the branches a
+	# worktree holds as well; the old spelling warns, then forwards.
+	fft = "!echo 'warning: fft is now ff' >&2; git ff"
 	# === Conflict resolution
 	ma = merge --abort
 	# ---
@@ -89,6 +91,17 @@
 	dcw = diff --cached --word-diff
 	dm = !sh -c 'diffuse -m "$@" &' -
 	dmh = !sh -c 'diffuse -c HEAD &' -
+	# The same diff in Zed: --dir-diff hands the tool both trees in one
+	# call, and `zed --diff` recurses into a pair of directories and
+	# shows every changed file in a single multi-diff view.
+	# --no-symlinks is what makes that work: the right-hand tree is
+	# symlinks into the working tree otherwise, and the walk behind
+	# --diff steps over those, leaving every file looking deleted.
+	# This one waits where dm backgrounds -- git takes the trees down
+	# when the tool exits, and copies whatever was edited on the right
+	# back into the working tree first.
+	# Arguments are git diff's: `git dz HEAD^!` is dmh's view.
+	dz = difftool --dir-diff --no-symlinks --tool=zed
 	f = fetch --prune
 	fa = fetch --all --prune -j 32
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
@@ -122,14 +135,37 @@
 	qh = reset HEAD
 	sp = status --porcelain
 	# https://stackoverflow.com/a/5201642/946850
-	sq = !sh -c 'git reset --soft ${1:-main} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
-	sr = ssh-remote
-	# hub
-	pr = !sh -c 'hub pull-request "$@"'
-	prm = !sh -c 'hub pull-request -b main "$@"'
+	# The squash belongs to the reset family: the letters are qs, and the
+	# old spelling warns, then forwards.
+	qs = "!sh -c 'git reset --soft ${1:-main} && git commit --edit -m \"$(git log --format=%B --reverse HEAD..HEAD@{1})\"' -"
+	sq = "!echo 'warning: sq is now qs' >&2; git qs"
+	# Pull requests: `git pr` is the script in ~/bin, and needs no alias --
+	# a git-<name> on the PATH wins over an alias that spells it, so one
+	# here would never run. `pra` adds the auto-merge, and `prm` warns,
+	# then forwards: the script opens against the default branch already.
+	pra = pr --auto-merge
+	prm = "!echo 'warning: prm is now pr' >&2; git pr"
 	# ---
 	# stash
 	sts = stash save
 	stp = stash pop
 	std = stash drop
 	stl = stash list
+	# ---
+	# Worktree: git spells the concept as two words itself,
+	# in --work-tree and GIT_WORK_TREE, and they give the two letters.
+	# w is switch, and git matches an alias name in full, never by
+	# prefix, so the two never meet.
+	wt = worktree
+	wta = worktree add
+	wtl = worktree list
+	wtm = worktree move
+	wtp = worktree prune
+	wtr = worktree remove
+	# wtb <branch> puts a worktree beside the repository it belongs to,
+	# named for both: ~/git/repo and branch-name make
+	# ~/git/repo-branch-name, and a slash in the branch name folds to a
+	# dash, so the sibling stays one directory rather than a nest.
+	# A branch that exists, here or on a remote, is checked out;
+	# a name that is neither becomes a new branch.
+	wtb = "!f() { r=$(git worktree list --porcelain | sed -n '1s/^worktree //p'); d=$r-$(printf %s $1 | tr / -); if git show-ref --verify --quiet refs/heads/$1 || test -n \"$(git for-each-ref --count=1 'refs/remotes/*/'$1)\"; then git worktree add \"$d\" $1; else git worktree add -b $1 \"$d\"; fi; }; f"
