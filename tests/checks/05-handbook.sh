@@ -25,6 +25,26 @@ else
     fail "every handbook directory has a README.md" "missing:$missing"
 fi
 
+# --- every page is tracked -------------------------------------------------
+
+# A page that exists here but not in the repository passes every check below,
+# because they all read the working tree: the links resolve, the child lists
+# agree, and the tree looks whole. It is only missing for everyone else --
+# a clone, a fresh checkout, CI -- where it fails as a dangling link, a long
+# way from the page that was never added. `.gitignore` is enough to cause it.
+
+untracked=
+for page in $(find "$REPO/handbook" -name '*.md' | sort); do
+    git -C "$REPO" ls-files --error-unmatch "$page" >/dev/null 2>&1 ||
+        untracked="$untracked ${page#$REPO/}"
+done
+
+if [ -z "$untracked" ]; then
+    pass "every handbook page is tracked by git"
+else
+    fail "every handbook page is tracked by git" "untracked:$untracked"
+fi
+
 # --- every subdirectory is in its parent's child list ----------------------
 
 unlisted=

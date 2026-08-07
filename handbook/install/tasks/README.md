@@ -14,6 +14,7 @@ reachable through [mise](https://mise.jdx.dev) or through `make`:
 | `mise run force` | `make force` | link every file, replacing ones that already exist |
 | `mise run check` | `make check` | list the mapping without touching the filesystem |
 | `mise run uninstall` | `make uninstall` | remove every symbolic link rcm owns |
+| `mise run nosleep-grant` | `make nosleep-grant` | let `nosleep` flip the sleep flag without a password, on macOS ([`tools/`](/handbook/tools/README.md)) |
 | `mise run import <file>` | — | move a file in from the home directory ([`install/import/`](/handbook/install/import/README.md)) |
 | `mise run test` | — | run the checks against a throw-away home directory ([`testing/`](/handbook/testing/README.md)) |
 | `mise run test-container` | — | the same on Linux, from a machine that is not |
@@ -63,11 +64,20 @@ and points at mise for the three that need it.
 [`mise-tasks/import`](/mise-tasks/import) is the one task
 too long for a one-liner.
 Every task points `RCRC` at the repository's own copy of `rcrc`,
-and the ones that invoke rcm pass `-d`,
+and the ones that invoke rcm go through `lib.sh`'s `rcm_run`,
+which passes `-d` and sets `DOTFILES_DIRS` to the same trees —
+the second because that, not `-d`, is where rcm looks for the hooks it
+runs ([`install/hooks/`](/handbook/install/hooks/README.md)) —
 so the tasks work from any clone location
 and take effect even before — or instead of — an existing `~/.rcrc`
 (the mapping that file drives is
 [`layout/mapping/`](/handbook/layout/mapping/README.md)'s).
+`rcm_run` is also what adds the private sidecar's tree where there is
+one ([`layout/private/`](/handbook/layout/private/README.md)):
+rcm's `-d` replaces the directory list rather than adding to it,
+so a task that passes one has to pass them all,
+and having one caller means install, force, check and uninstall
+cannot come apart over which trees they act on.
 
 **Uninstalling has one edge.**
 `mise run uninstall` (`rcdn`) removes directories it leaves empty,

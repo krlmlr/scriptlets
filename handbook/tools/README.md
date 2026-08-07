@@ -24,6 +24,11 @@ the script's help owns the detail and the entry stays a summary.
 **`h`** finds every Git repository below the current directory
 and executes a command in each of them.
 Linked worktrees are included, since they carry a `.git` file.
+Bare repositories are not:
+they have no `.git` entry to be found by —
+HEAD, config, objects and refs sit at the top of the directory instead —
+so a bare clone stays out of the sweep,
+and needs something other than a sweep to keep it up to date.
 **`s`** prepends `git` — it is a wrapper around `h git`.
 The switches:
 
@@ -41,6 +46,15 @@ The switches:
   (or `--paged` is set), and disabled otherwise.
   The [`NO_COLOR`](https://no-color.org/) environment variable also
   disables color unless `--color=always` is given.
+
+The exit status is the parallel run's, not the repositories'.
+Every generated command ends in the `sed` that names its output,
+so a repository whose command failed says so in the output
+and leaves `$?` at zero.
+`-i` is the mode that stops at the first failure
+and passes that status on,
+so a script that needs to know reaches for it
+rather than for the parallel default.
 
 [`gita`](https://github.com/nosarthur/gita) both does too much and not
 enough; these stay home-grown.
@@ -129,6 +143,36 @@ so it is installed on macOS only.
 **`bkg`** — execute a command in the background
 and show a desktop notification *in case of error*.
 Installed on macOS only, for the same reason as `n`.
+
+### Sleep (macOS only)
+
+**`nosleep`** — stop the machine from sleeping, or let it sleep again.
+`nosleep on` and `nosleep off` say which,
+and a bare `nosleep` flips whichever way the machine currently sits,
+reading the current state from `pmset -g`.
+This is `pmset -a disablesleep` and deliberately not `caffeinate`:
+the flag survives a closed lid,
+which is the case the tool exists for.
+Writing it needs root,
+so the script names `sudo` rather than hope for a cached credential —
+and a request for the state the machine is already in
+changes nothing and asks for no password.
+**`slf`** ("sleep forbid") and **`sla`** ("sleep allow")
+are the two spellings at three letters,
+for the times both are typed often.
+Installed on macOS only, since `pmset` is macOS's.
+
+`mise run nosleep-grant` retires the password prompt
+([`install/tasks/`](/handbook/install/tasks/README.md)):
+it writes a rule to `/etc/sudoers.d/nosleep`
+that lets this account run `pmset -a disablesleep` with a 1 and with a 0,
+and nothing else.
+sudo compares the arguments it is given literally,
+so a rule that spells them out grants those two lines alone —
+not `disablesleep 2`, not another `pmset` setting.
+`--print` shows the rule without writing it, `--remove` takes it back,
+and `nosleep` needs none of it:
+without the rule it asks for a password, as it always has.
 
 ### The rest
 

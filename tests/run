@@ -7,11 +7,14 @@
 #   tests/run 10-path    run the named checks only
 #
 # KEEP_TEST_HOME=1 leaves the home directory behind for inspection.
+# TEST_TIMING=0 drops the block of durations the run otherwise ends with.
 
 set -eu
 
 REPO=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 export REPO
+
+. "$REPO/tests/timing.sh"
 
 if ! command -v rcup >/dev/null; then
     echo "rcm is required: apt install rcm / brew install rcm" >&2
@@ -22,6 +25,41 @@ if ! command -v mise >/dev/null; then
     echo "mise is required: https://mise.run" >&2
     exit 1
 fi
+
+# The durations, collected as `MILLISECONDS LABEL` lines and rendered at the
+# end by timing_report (tests/timing.sh). Anything richer than a number and a
+# label would have to survive the pipeline that prints them.
+timings=
+
+timing=1
+case ${TEST_TIMING-1} in
+'' | 0 | no | off | false) timing= ;;
+esac
+
+if [ -n "$timing" ]; then
+    timing_init
+fi
+
+# mark -- the clock now, or nothing at all when the durations are switched
+# off, so that a run which will not print them forks nothing to measure them.
+mark() {
+    if [ -n "$timing" ]; then
+        now_ms
+    fi
+}
+
+# record LABEL STARTED -- one line of the block, closing what mark opened.
+record() {
+    if [ -n "$timing" ]; then
+        timings="$timings$(($(now_ms) - $2)) $1
+"
+    fi
+}
+
+# Everything the run does is below this line, and the total covers all of it:
+# the throw-away home directory and its seeding are the run's work too, and a
+# total that quietly left them out would be smaller than the step CI times.
+run_started=$(mark)
 
 # The checks run tasks with HOME pointing at the throw-away directory, where
 # mise finds none of the trust it recorded for the real one. Naming the
@@ -91,7 +129,9 @@ echo "# mise run install"
 
 # Stdin comes from /dev/null throughout: rcup asks before replacing a file that
 # already exists and differs, and a check must never wait for an answer.
+started=$(mark)
 mise -q -C "$REPO" run install >/dev/null </dev/null
+record install "$started"
 
 status=0
 
@@ -104,8 +144,21 @@ for check in "$REPO"/tests/checks/*.sh; do
     fi
 
     echo "# $name"
+    started=$(mark)
     sh "$check" </dev/null || status=1
+    record "$name" "$started"
 done
+
+# Before the verdict, so that a run which ends in a failure still says where
+# its time went. The total is wall clock, not the sum of the lines above it.
+if [ -n "$timing" ]; then
+    echo "# durations"
+    if [ "$TEST_CLOCK" = seconds ]; then
+        echo "# no millisecond clock here -- whole seconds, rounded down"
+    fi
+    printf '%s%s total\n' "$timings" "$(($(now_ms) - run_started))" |
+        timing_report
+fi
 
 failures=$(wc -l <"$TEST_FAILURES" | tr -d ' ')
 

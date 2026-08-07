@@ -31,6 +31,20 @@ assert_equal() {
     fi
 }
 
+# assert_match DESCRIPTION PATTERN TEXT -- PATTERN is a shell glob, unquoted on
+# purpose, so `Usage:*` matches a message whose tail is a path.
+assert_match() {
+    case $3 in
+    $2)
+        pass "$1"
+        ;;
+    *)
+        fail "$1" "no match for: $2
+  actual: $3"
+        ;;
+    esac
+}
+
 # assert_in_path DESCRIPTION DIRECTORY PATH_VALUE
 assert_in_path() {
     case ":$3:" in

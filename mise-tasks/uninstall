@@ -3,4 +3,4 @@
 set -eu
 . "$(dirname -- "$0")/lib.sh"
 
-exec rcdn -d "$DOTFILES" "$@"
+rcm_run rcdn "$@"

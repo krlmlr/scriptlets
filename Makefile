@@ -8,9 +8,9 @@
 
 all: install
 
-.PHONY: all install force check uninstall import test test-container
+.PHONY: all install force check uninstall nosleep-grant import test test-container
 
-install force check uninstall:
+install force check uninstall nosleep-grant:
 	@$(CURDIR)/mise-tasks/$@
 
 import test test-container:

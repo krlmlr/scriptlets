@@ -1,0 +1,16 @@
+#!/bin/sh
+# Take the ~/bin/positron link away again, before rcm unlinks the rest.
+#
+# handbook/install/hooks/README.md
+
+set -eu
+
+. "$(dirname -- "$0")/../positron.sh"
+
+# No platform test here: what identifies the link is where it points, and only
+# the machine that has a Positron.app ever got one. Before rather than after,
+# so that ~/bin is empty by the time rcm prunes the directories it empties.
+if positron_link_is_ours; then
+    echo "removing $link"
+    rm -f "$link"
+fi
