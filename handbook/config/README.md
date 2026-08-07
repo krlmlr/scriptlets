@@ -11,3 +11,4 @@ and how anything gets there at all is
 * [`zsh-startup/`](zsh-startup/) — every interactive zsh times its own startup
 * [`completion/`](completion/) — zsh completion, audited daily instead of per shell
 * [`prompt-marks/`](prompt-marks/) — every prompt, command and exit status marked for the terminal
+* [`editor/`](editor/) — the editor every tool is handed, and the widget that hands it the command line
