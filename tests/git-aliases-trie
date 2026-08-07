@@ -35,18 +35,25 @@ function is_alias(name) {
     return (name in expansion)
 }
 
-# A shell alias says `!` and no more: the file owns its text, and a line of the
-# tree is about where a name sits rather than what it expands to.
 function mark_of(name) {
     if (!is_alias(name))
         return "."
     return substr(expansion[name], 1, 1) == "!" ? "!" : "*"
 }
 
-function summary_of(name) {
-    if (!is_alias(name) || substr(expansion[name], 1, 1) == "!")
+# A shell alias shows the first 60 characters of what it runs, which is enough
+# to tell one from another; the file owns the rest, and an ellipsis says where
+# it takes over. The leading `!` is the mark rather than part of the text.
+function summary_of(name,   text) {
+    if (!is_alias(name))
         return ""
-    return expansion[name]
+    text = expansion[name]
+    if (substr(text, 1, 1) != "!")
+        return text
+    text = substr(text, 2)
+    if (length(text) > 60)
+        text = substr(text, 1, 60) "\342\200\246"
+    return text
 }
 
 # The label an edge carries: one letter, or the whole run of them where every
