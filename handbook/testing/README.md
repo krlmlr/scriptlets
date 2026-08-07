@@ -141,6 +141,16 @@ and they run in name order:
   remotes of a throw-away repository
   and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.
+- `71-git-pr`: what `git pr` would run, read off its `--dry-run`:
+  the title is the first commit's subject rather than the last,
+  the issue closed is the one the branch name numbers,
+  and the trailing field of that name stays a suffix.
+- `72-gh-repo-setup`: the owner and name `gh-repo-setup` recovers from
+  every spelling a remote comes in,
+  which remote it asks first,
+  and the options it sets with and without auto-merge.
+  Neither check reaches GitHub, and neither needs `gh` installed:
+  `--dry-run` puts the commands on stdout instead of running them.
 - `75-h`: `h` runs the command in every repository below the current
   directory, and each line of output says which one it came from.
   Both halves matter:

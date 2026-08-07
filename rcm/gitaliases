@@ -124,9 +124,12 @@
 	# https://stackoverflow.com/a/5201642/946850
 	sq = !sh -c 'git reset --soft ${1:-main} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
 	sr = ssh-remote
-	# hub
-	pr = !sh -c 'hub pull-request "$@"'
-	prm = !sh -c 'hub pull-request -b main "$@"'
+	# Pull requests: `git pr` is the script in ~/bin, and needs no alias --
+	# a git-<name> on the PATH wins over an alias that spells it, so one
+	# here would never run. `pra` adds the auto-merge, and `prm` warns,
+	# then forwards: the script opens against the default branch already.
+	pra = pr --auto-merge
+	prm = "!echo 'warning: prm is now pr' >&2; git pr"
 	# ---
 	# stash
 	sts = stash save
