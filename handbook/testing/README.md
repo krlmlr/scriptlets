@@ -170,6 +170,14 @@ and they run in name order:
   and the three options it sets.
   Neither check reaches GitHub, and neither needs `gh` installed:
   `--dry-run` puts the commands on stdout instead of running them.
+- `73-git-ff`: `git ff` moves a branch nothing has checked out
+  and one a linked worktree holds — the second is the case
+  `git push .` cannot reach, and the reason the script exists —
+  while a worktree with uncommitted changes and a diverged branch
+  are left as they were.
+  Its remote is a second repository below the throw-away home
+  and the clone is made from that path,
+  so the fetches and the push stay on this disk.
 - `75-h`: `h` runs the command in every repository below the current
   directory, and each line of output says which one it came from.
   Both halves matter:
