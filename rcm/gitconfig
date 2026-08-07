@@ -1,7 +1,8 @@
 [rerere]
 	enabled = true
 [merge]
-	conflictstyle = diff3
+	# Needs Git >= 2.35
+	conflictstyle = zdiff3
 	ff = false
 [diff]
 	algorithm = histogram

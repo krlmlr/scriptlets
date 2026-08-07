@@ -140,7 +140,7 @@ and they run in name order:
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub
   remotes of a throw-away repository
   and leaves every other remote alone,
-  through `~/bin` and through the `git sr` alias alike.
+  through the `~/bin` the installation puts on the `PATH`.
 - `71-git-pr`: what `git pr` would run, read off its `--dry-run`:
   the title is the first commit's subject rather than the last,
   the issue closed is the one the branch name numbers,
