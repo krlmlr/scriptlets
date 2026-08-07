@@ -65,6 +65,26 @@ non-repository case under review below.
 
 ### Git, one repository at a time
 
+**`git-ff`** — fast-forward every branch that is behind the branch it
+tracks, in one pass, fetching nothing:
+`git fa` first, `git ff` second.
+Two mechanisms, because neither reaches both halves.
+A branch nothing has checked out is moved by pushing into the repository
+itself, `git push . <upstream>:<branch>`,
+which refuses anything that is not a fast-forward and so cannot go wrong;
+a branch a worktree holds cannot be pushed to at all —
+git declines to move the branch of any worktree, the current one and a
+linked one alike, since the index and the working tree would stop
+agreeing with it —
+and is fast-forwarded from inside that worktree with `merge --ff-only`.
+A worktree with uncommitted changes is skipped and named,
+because a branch left behind in silence reads exactly like one that was
+already up to date;
+a branch that has diverged is not fast-forwardable and is left alone.
+`-n` / `--dry-run` says what would happen.
+`git ff` is the whole spelling — the old `fft` warns and forwards —
+and the branches of *other* repositories are `s plf`'s, further up.
+
 **`git-pr`** — open the pull request for the current branch, or update
 the one that is already there: push the branch, let `gh` fill the body
 from its commits, then correct the title to the first commit's subject
