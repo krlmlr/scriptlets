@@ -162,6 +162,11 @@ are the two spellings at three letters,
 for the times both are typed often.
 Installed on macOS only, since `pmset` is macOS's.
 
+Nothing takes the flag back on its own:
+sleep stays forbidden until something allows it again,
+through a closed lid and down to an empty battery.
+There is no timer here, and no floor under the battery.
+
 `mise run nosleep-grant` retires the password prompt
 ([`install/tasks/`](/handbook/install/tasks/README.md)):
 it writes a rule to `/etc/sudoers.d/nosleep`
