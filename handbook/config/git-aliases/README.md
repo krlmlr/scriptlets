@@ -52,6 +52,10 @@ Git's completion expands an alias to its first command word,
 so `git wt <TAB>` offers the `worktree` subcommands;
 an alias that begins with `!` gets no completion at all,
 and is marked as such in the trie so the cost is visible.
+A plain expansion can lose it too:
+completion walks the expansion a word at a time,
+so a `-c` whose value carries a space — `dt`'s does, to keep its colour —
+leaves it holding the tail of that value rather than the command.
 
 ## The trie
 
@@ -110,9 +114,11 @@ d * diff
 ├─c * diff --cached
 │  └─w * diff --cached --word-diff
 ├─d ! sh -c 'git diff | delta --max-line-length 2048 --navigate'
+├─t * -c diff.external='difft --color always' diff
 ├─u * diff @{u}
 ├─w * diff --word-diff
 └─z * difftool --dir-diff --no-symlinks --tool=zed
+   └─m ! f() { b=${1:-$(git symbolic-ref --short refs/remotes/upstrea…
 
 echo ! bash -c 'echo "${@: 0}"'
 

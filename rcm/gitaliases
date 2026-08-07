@@ -102,6 +102,27 @@
 	# back into the working tree first.
 	# Arguments are git diff's: `git dz HEAD^!` is dmh's view.
 	dz = difftool --dir-diff --no-symlinks --tool=zed
+	# The same again, against the branch this one grew out of.
+	# The merge base, and not `main...`: naming two sides makes both of
+	# them temporary copies, and whatever was edited on the right is
+	# thrown away when the tool exits. One side named leaves the working
+	# tree as the other, and that is the side written back -- so
+	# uncommitted work is in the view as well, which is the point.
+	# The branch is the remote's own idea of its default, upstream before
+	# origin; `git remote set-head origin --auto` is what writes that
+	# down, and main stands in where neither says. Name one to override.
+	dzm = "!f() { b=${1:-$(git symbolic-ref --short refs/remotes/upstream/HEAD 2>/dev/null || git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || echo main)}; git dz $(git merge-base $b HEAD); }; f"
+	# Difftastic compares syntax trees rather than lines, which is what
+	# tells a brace that moved from a line that changed.
+	# --color always because git hands an external diff to the pager, and
+	# a difft that sees a pipe rather than a terminal turns its colour
+	# off; the `less -FRX` in gitconfig passes the escapes through.
+	# An option and then a command, so `dt` takes git diff's arguments.
+	# It is also where completion stops: git's completion reads an alias
+	# word by word to find the command it stands for, and the space inside
+	# the quoted value leaves it holding `always'` -- the price of the
+	# colour, since the value has to be one word to survive that walk.
+	dt = -c diff.external='difft --color always' diff
 	f = fetch --prune
 	fa = fetch --all --prune -j 32
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"
