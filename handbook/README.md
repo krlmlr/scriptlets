@@ -18,7 +18,8 @@ and the same question brings both to the same leaf.
   directory: the dot rules, the tags, the private sidecar, the `PATH`,
   the home-grown layout it replaced
 * [`config/`](config/) — what the installed configuration does:
-  the inventory, zsh startup profiling, zsh completion
+  the inventory, zsh startup profiling, zsh completion,
+  the prompt marks, the editor
 * [`tools/`](tools/) — the scripts that land in `~/bin`,
   grouped by what they are for, each with its status
 * [`testing/`](testing/) — the throw-away home directory,

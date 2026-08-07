@@ -1,0 +1,137 @@
+#!/bin/sh
+# Open the pull request for the current branch, the way this account always
+# opens one: push the branch, let `gh` fill the body from the commits, then
+# correct the two things `--fill` gets wrong for a branch of several commits --
+# the title, which should be the first commit's subject rather than the branch
+# name, and the issue the branch is named after.
+#
+# Re-running updates the title and body of the pull request that is already
+# there, so an amended first commit is one `git pr` away from a matching title.
+set -eu
+
+dry_run=0
+auto_merge=0
+
+usage() {
+    cat <<'EOF'
+Usage: git pr [-n|--dry-run] [-a|--auto-merge]
+
+Open (or update) the pull request for the current branch:
+
+  git push --set-upstream origin HEAD
+  gh pr create --fill
+  gh pr edit --title <first commit subject> [--body <Closes lines>]
+
+The title is the subject of the first commit since the default branch of
+`upstream`, or of `origin` where there is no `upstream` remote.
+
+The body is derived from the branch name: it is split on dashes, the last
+field is dropped as the disambiguating suffix, and every field that is a
+number becomes a `Closes #<number>.` line. A branch name that yields none
+leaves the body `--fill` wrote alone.
+
+Options:
+  -n, --dry-run     print the commands instead of running them
+  -a, --auto-merge  end with `gh pr merge --auto --squash`
+  -h, --help        show this help
+EOF
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -n | --dry-run) dry_run=1 ;;
+    -a | --auto-merge) auto_merge=1 ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    *)
+        printf 'git-pr: unknown option: %s\n' "$1" >&2
+        usage >&2
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+# Says "fatal: not a git repository" in git's own words, and stops.
+git rev-parse --git-dir >/dev/null
+
+# quote ARGUMENT -- as the shell would need it written, so that a --dry-run
+# line can be pasted back into a terminal.
+quote() {
+    case $1 in
+    '' | *[!A-Za-z0-9._/=:@#-]*)
+        printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
+        ;;
+    *)
+        printf '%s' "$1"
+        ;;
+    esac
+}
+
+# run COMMAND... -- or print it, when --dry-run says so.
+run() {
+    if [ "$dry_run" -eq 1 ]; then
+        line=
+        for argument in "$@"; do
+            line="$line $(quote "$argument")"
+        done
+        printf '%s\n' "${line# }"
+    else
+        "$@"
+    fi
+}
+
+# The branch every pull request here is opened against: what the remote itself
+# says its default branch is, `upstream` before `origin` because a fork's
+# `origin` is the fork. `git remote set-head <remote> --auto` writes it.
+base=
+for remote in upstream origin; do
+    base=$(git symbolic-ref --short "refs/remotes/$remote/HEAD" 2>/dev/null || true)
+    if [ -n "$base" ]; then
+        break
+    fi
+done
+
+if [ -z "$base" ]; then
+    printf 'git-pr: no default branch known for upstream or origin --\n' >&2
+    printf '        run `git remote set-head origin --auto`\n' >&2
+    exit 1
+fi
+
+title=$(git log --reverse --format=%s "$base..HEAD" | head -n 1)
+
+if [ -z "$title" ]; then
+    printf 'git-pr: no commits between %s and HEAD\n' "$base" >&2
+    exit 1
+fi
+
+# The trailing field of a branch name is the suffix that keeps two branches
+# about the same issue apart, so it never becomes a `Closes` line, however
+# numeric it looks.
+body=$(git rev-parse --abbrev-ref HEAD |
+    awk -F- '{ for (i = 1; i < NF; i++) if ($i ~ /^[0-9]+$/) print "Closes #" $i "." }')
+
+if [ "$dry_run" -eq 0 ] && ! command -v gh >/dev/null; then
+    printf 'git-pr: the GitHub CLI is required: https://cli.github.com\n' >&2
+    exit 1
+fi
+
+run git push --set-upstream origin HEAD
+
+# `--fill` refuses a branch that already has a pull request, and the edit below
+# is exactly what that branch needs, so the create is the step that is skipped.
+if [ "$dry_run" -eq 1 ] || ! gh pr view --json number >/dev/null 2>&1; then
+    run gh pr create --fill
+fi
+
+if [ -n "$body" ]; then
+    run gh pr edit --title "$title" --body "$body"
+else
+    run gh pr edit --title "$title"
+fi
+
+if [ "$auto_merge" -eq 1 ]; then
+    run gh pr merge --auto --squash
+fi

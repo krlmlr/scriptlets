@@ -65,6 +65,53 @@ non-repository case under review below.
 
 ### Git, one repository at a time
 
+**`git-ff`** — fast-forward every branch that is behind the branch it
+tracks, in one pass, fetching nothing:
+`git fa` first, `git ff` second.
+Two mechanisms, because neither reaches both halves.
+A branch nothing has checked out is moved by pushing into the repository
+itself, `git push . <upstream>:<branch>`,
+which refuses anything that is not a fast-forward and so cannot go wrong;
+a branch a worktree holds cannot be pushed to at all —
+git declines to move the branch of any worktree, the current one and a
+linked one alike, since the index and the working tree would stop
+agreeing with it —
+and is fast-forwarded from inside that worktree with `merge --ff-only`.
+A worktree with uncommitted changes is skipped and named,
+because a branch left behind in silence reads exactly like one that was
+already up to date;
+a branch that has diverged is not fast-forwardable and is left alone.
+`-n` / `--dry-run` says what would happen.
+`git ff` is the whole spelling — the old `fft` warns and forwards —
+and the branches of *other* repositories are `s plf`'s, further up.
+
+**`git-pr`** — open the pull request for the current branch, or update
+the one that is already there: push the branch, let `gh` fill the body
+from its commits, then correct the title to the first commit's subject
+and close the issue the branch is named after.
+The title needs correcting because `gh pr create --fill` reaches for the
+branch name once a branch has more than one commit;
+the issue comes out of that name, which is split on dashes,
+its last field dropped as the suffix that keeps two branches about the
+same issue apart,
+and every field that is a number turned into a `Closes` line.
+The branch it opens against is what the remote says its default branch
+is — `upstream` before `origin`, since a fork's `origin` is the fork.
+`-a` / `--auto-merge` ends in `gh pr merge --auto --squash`,
+and is what the `pra` alias adds;
+`-n` / `--dry-run` prints the commands instead of running them.
+
+**`gh-repo-setup`** — set `gh`'s default repository, and GitHub's merge
+options for the repository of the current directory:
+a pull request that can be brought up to date from the web,
+a branch that goes when it merges, and auto-merge.
+All three are settings a repository offers rather than performs,
+so the run after `gh repo fork` sets the same three:
+a fork that never merges a pull request is no reason to leave one off.
+Which repository that is comes from `upstream`,
+or from `origin` where there is no `upstream`,
+spelled as owner and name because `gh repo edit` refuses a bare one.
+
 **`git-mmv`** — write `git mmv` to move several Git-controlled files
 at once, with the usual `mmv` syntax.
 
@@ -97,7 +144,6 @@ turning `https://github.com/krlmlr/scriptlets.git`
 into `git@github.com:krlmlr/scriptlets.git`.
 This is the repair for a clone made with the URL GitHub offers first,
 which asks for a password on every push.
-The `git sr` alias is the short spelling.
 Named remotes are converted, all of them when none is named,
 fetch and push URLs alike;
 remotes that already speak SSH, and HTTPS remotes on other hosts,

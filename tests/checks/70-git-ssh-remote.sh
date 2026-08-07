@@ -1,8 +1,7 @@
 #!/bin/sh
 # `git ssh-remote` converts what it promises to convert and nothing else. The
-# script is exercised through the installed ~/bin and through the `git sr`
-# alias from the installed ~/.gitaliases, so the check covers the wiring as
-# well as the conversion.
+# script is exercised through the installed ~/bin, as `git ssh-remote`, so the
+# check covers the wiring as well as the conversion.
 #
 # The repository it works on is a throw-away one below $HOME: `git init`
 # contacts nothing, and neither does rewriting a URL.
@@ -45,10 +44,9 @@ assert_equal "a remote that already speaks SSH is left alone" \
 assert_equal "a remote on another host is left alone" \
     "https://gitlab.com/krlmlr/elsewhere.git" "$(url_of elsewhere)"
 
-# --all-hosts is what that other host waits for, and the alias is the spelling
-# that has to work as well as the name does.
-assert_ok "git sr --all-hosts succeeds" \
-    git -C "$work" sr --all-hosts elsewhere
+# --all-hosts is what that other host waits for.
+assert_ok "git ssh-remote --all-hosts succeeds" \
+    git -C "$work" ssh-remote --all-hosts elsewhere
 assert_equal "--all-hosts converts a remote on another host" \
     "git@gitlab.com:krlmlr/elsewhere.git" "$(url_of elsewhere)"
 
