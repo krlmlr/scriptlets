@@ -159,7 +159,12 @@ process_git_dirs() {
     local command
 
     local color="${colors[i % ${#colors[@]}]}"
-    ((i++))
+    # `((++i))`, not `((i++))`: an arithmetic command that evaluates to 0
+    # returns 1, and post-increment evaluates to the value before it -- 0 on
+    # the first repository, which ended the run under the `set -e` above,
+    # silently and with no output at all. Pre-increment evaluates to the value
+    # after, and this counter only ever climbs away from 0.
+    ((++i))
 
     command="$(
       printf "cd %q &&" "$line"
@@ -193,7 +198,9 @@ process_cmd() {
       cat
     fi
   elif $interactive; then
-    local cmds
+    # Not `local`: the EXIT trap runs after this function has returned, so a
+    # local would be out of scope by then -- `set -u` would abort on it and the
+    # file would outlive the run it belongs to.
     cmds=$(mktemp -u "${TMPDIR:-/tmp}/h-cmds-XXXXXX")
     trap 'rm -f "$cmds"' EXIT
 

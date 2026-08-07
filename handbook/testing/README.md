@@ -48,6 +48,14 @@ and they run in name order:
   has the rules it enforces).
   It reads the repository, not the home directory,
   so it is first, before the installed checks.
+- `06-timing`: the clock behind the durations answers in milliseconds —
+  measured against a sleep rather than assumed,
+  because a fallback that answered in seconds
+  would fill the block with zeroes that read like measurements —
+  and the block lines up the durations it is given.
+  It calls the helpers directly,
+  reading neither the repository nor the home directory,
+  so it runs before the installed checks too.
 - `10-path`: the scripts are on the `PATH` of a login shell,
   in every shell an account may log in with, and they run.
 - `15-tasks`: a bare `mise run` offers the task list
@@ -55,6 +63,35 @@ and they run in name order:
 - `20-install`: every destination rcm lists exists,
   configuration files are symbolic links,
   and installing twice changes nothing.
+- `25-private`: a private sidecar repository
+  ([`layout/private/`](/handbook/layout/private/README.md))
+  is merged into the same home directory:
+  its own files install, its `rcrc` fragment extends `UNDOTTED`
+  instead of replacing it,
+  it wins a name both trees have,
+  its hooks run while the directory holding them is not installed,
+  uninstalling reaches its links too,
+  and an `rcrc` under its `rcm/` — which would install over `~/.rcrc` —
+  is refused.
+  It brings its own home directory and its own sidecar,
+  because the machine running it may have a real one.
+  It also reads the tasks rather than running them,
+  for the one thing running them cannot show:
+  that none of them reaches rcm on its own
+  and so decides for itself which trees to act on
+  ([`install/tasks/`](/handbook/install/tasks/README.md)).
+- `27-bootstrap-private`: `bootstrap-private` creates a sidecar
+  and converges on a re-run:
+  a dry run changes nothing and names every file it would write,
+  the first run leaves two commits on `main` —
+  an empty `Initial commit` and the skeleton on top of it —
+  with the fragment at the repository root and the hook executable,
+  and a settled run creates nothing,
+  invents no commit,
+  and leaves a file edited by hand exactly as it was.
+  GitHub is a stub answering the few `gh` calls the script makes,
+  so a step that reaches for `gh` in a new way fails here
+  rather than silently going untested.
 - `30-preexisting`: an account that came with its own
   `~/.bash_profile` keeps it,
   and `make force` is what makes the scripts reachable there.
@@ -104,6 +141,33 @@ and they run in name order:
   remotes of a throw-away repository
   and leaves every other remote alone,
   through `~/bin` and through the `git sr` alias alike.
+- `75-h`: `h` runs the command in every repository below the current
+  directory, and each line of output says which one it came from.
+  Both halves matter:
+  a run that ends on the first repository prints nothing at all,
+  which is also what an empty directory looks like,
+  so the check names the repositories it expects to hear back from.
+  The repository it is *standing in* is not among them,
+  which is the other half of "below";
+  `-n` emits the commands instead of running them;
+  and `s` reaches the same repositories with `git` in front.
+  It links the `fd`, `gsed` and `gsort` names Linux does not ship
+  ([`install/prerequisites/`](/handbook/install/prerequisites/README.md))
+  and skips where the commands behind them are missing too.
+- `78-positron`: the hooks that keep `~/bin/positron` pointing at
+  Positron's command line tool
+  ([`install/hooks/`](/handbook/install/hooks/README.md))
+  link it, leave it alone once it is right,
+  keep a file of the account's own that is in the way,
+  drop a link into a bundle that is gone,
+  and take the link away again on the way out.
+  It also drives one install and uninstall through the tasks,
+  for the half running the hooks by hand cannot show:
+  that rcm reaches them at all, from a clone anywhere.
+  It builds a bundle of its own and stubs `uname`,
+  because Positron is macOS-only and on neither CI runner,
+  and brings its own home directory,
+  the throw-away one being what the other checks read.
 - `80-tmux-prompt-keys`: the copy-mode keys
   ([`config/tmux/`](/handbook/config/tmux/README.md))
   are pressed rather than described.
@@ -125,3 +189,33 @@ and they run in name order:
 Adding a file to `tests/checks` is enough;
 `tests/run 10-path` runs one check by name,
 and `KEEP_TEST_HOME=1` leaves the home directory behind to look at.
+
+## Durations
+
+A run ends with a block of durations —
+the install it opens with, every check it ran, and the run as a whole —
+printed before the verdict,
+so a failing run says where its time went as well as a passing one.
+The whole run is wall clock rather than the sum of the parts,
+because it also covers making the throw-away home directory
+and seeding it.
+
+The block is what makes the numbers attributable in CI:
+a job times its own steps,
+and the entire suite is one step of one job,
+so without it the slow check is invisible inside the fast-looking job.
+
+There is no millisecond clock in POSIX `sh`
+and none that every machine has,
+so [`tests/timing.sh`](/tests/timing.sh) looks for one —
+`date +%N` is GNU's, macOS does not have it,
+and `perl` and `python3` both carry a sub-second clock —
+and the order it tries is that file's.
+A machine with nothing better than whole seconds is timed in them
+and says so above the block,
+rather than reporting a column of zeroes as if they were measurements.
+
+`TEST_TIMING=0`, or an empty value, drops the block;
+anything else, including leaving it unset, keeps it,
+which is the default [`tests/run`](/tests/run) sets.
+A run that will not print the durations does not measure them either.

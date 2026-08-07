@@ -29,6 +29,16 @@ against a throw-away home directory first
 ([`testing/`](handbook/testing/README.md)) —
 nothing touches yours.
 
+## Prerequisites
+
+The scripts want a GNU userland and a handful of tools besides.
+Linux carries nearly all of that already;
+macOS gets it from Homebrew, the GNU commands under their `g` names.
+[`install/prerequisites/`](handbook/install/prerequisites/README.md)
+has a line per package manager — `apt`, `dnf`, `pacman`, `brew` —
+with what wants what, the names each one spells differently,
+and what none of them carries.
+
 ## Inside
 
 * [Tools](handbook/tools/README.md) that earn their keep:
@@ -47,8 +57,18 @@ nothing touches yours.
   linked into place by rcm under
   [per-user and per-platform tags](handbook/layout/README.md),
   with `~/bin` put on the `PATH` on macOS too.
+* On macOS, installing also links
+  [Positron's command line tool](handbook/install/hooks/README.md)
+  into `~/bin` as `positron` —
+  the file inside the bundle is called `code`,
+  which is VS Code's.
 * [`mise run import`](handbook/install/import/README.md)
   moves a dotfile you already have into the repository
   and links it back where it was.
+* Secrets stay out of it:
+  [`./bootstrap-private`](handbook/layout/private/README.md)
+  creates a private repository shaped the same way,
+  and both trees are then installed as one
+  — tokens, internal hosts and the like live there.
 
 Copyright 2015-2025 Kirill Müller.

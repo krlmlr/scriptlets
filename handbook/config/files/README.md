@@ -33,6 +33,11 @@ The `tag-` prefixes select an account or a platform
 ([`layout/tags/`](/handbook/layout/tags/README.md));
 the per-account files under `~/scriptlets/` are that page's too.
 
+**Several of these include a file this repository does not ship**,
+each guarded so that its absence is not an error:
+that is where a private sidecar repository plugs in, and which include
+serves which is [`layout/private/`](/handbook/layout/private/README.md)'s.
+
 **Some of these lean on what the repository does not ship.**
 `~/.bashrc` sources `~/git/bash-git-prompt/gitprompt.sh` and
 `~/git/complete-alias/complete_alias`

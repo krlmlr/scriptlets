@@ -3,4 +3,4 @@
 set -eu
 . "$(dirname -- "$0")/lib.sh"
 
-exec lsrc -d "$DOTFILES" "$@"
+rcm_run lsrc "$@"

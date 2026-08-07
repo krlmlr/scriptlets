@@ -78,7 +78,10 @@ mkdir -p "$DOTFILES/$(dirname "$dest")"
 mv "$file" "$DOTFILES/$dest"
 
 # The whole tree, not the single file: this is the walk that applies UNDOTTED.
-rcup -d "$DOTFILES"
+# Through rcm_run, so that a machine with a private sidecar relinks both trees
+# and rcm resolves the names the way an install would -- walking the public
+# tree alone would offer to replace whatever the sidecar had won.
+rcm_run rcup
 
 echo "imported: rcm/$dest -> $file"
 echo "commit it with: git add rcm/$dest"
