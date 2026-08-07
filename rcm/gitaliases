@@ -89,6 +89,17 @@
 	dcw = diff --cached --word-diff
 	dm = !sh -c 'diffuse -m "$@" &' -
 	dmh = !sh -c 'diffuse -c HEAD &' -
+	# The same diff in Zed: --dir-diff hands the tool both trees in one
+	# call, and `zed --diff` recurses into a pair of directories and
+	# shows every changed file in a single multi-diff view.
+	# --no-symlinks is what makes that work: the right-hand tree is
+	# symlinks into the working tree otherwise, and the walk behind
+	# --diff steps over those, leaving every file looking deleted.
+	# This one waits where dm backgrounds -- git takes the trees down
+	# when the tool exits, and copies whatever was edited on the right
+	# back into the working tree first.
+	# Arguments are git diff's: `git dz HEAD^!` is dmh's view.
+	dz = difftool --dir-diff --no-symlinks --tool=zed
 	f = fetch --prune
 	fa = fetch --all --prune -j 32
 	lsf = "!f() { if [ ${GIT_PREFIX} != ${PWD} ]; then cd ${GIT_PREFIX}; fi; git ls-files $@ -z | xargs -0 -n1 '-I{}' -- git log -1 --format=%ai\\ {} '{}'; }; f"

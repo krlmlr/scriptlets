@@ -21,6 +21,8 @@
 	cmd = "~/bin/imgdiff-bg \"$LOCAL\" \"$REMOTE\""
 [difftool "diffpdf"]
 	cmd = "diffpdf \"$LOCAL\" \"$REMOTE\""
+[difftool "zed"]
+	cmd = "zed --wait --diff \"$LOCAL\" \"$REMOTE\""
 [merge "daff-csv"]
 	name = daff tabular csv merge
 	driver = daff merge --output %A %O %A %B
