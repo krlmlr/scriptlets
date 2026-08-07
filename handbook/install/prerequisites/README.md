@@ -156,6 +156,13 @@ while `compare` and `montage` are unaffected.
 **The Azure scripts drive an `azure` command** no manager here carries;
 Homebrew's `azure-cli` installs `az`, which is a different one.
 
+**`difft` is what `git dt` reaches for**, and Ubuntu 24.04 does not carry
+it: Homebrew has it as `difftastic`, and elsewhere it is
+`cargo install difftastic` or the binary from its releases.
+Where it is missing the alias says so and stops —
+`difft: not found`, then `fatal: external diff died` —
+and nothing else here wants it.
+
 *To deepen: run the `pacman` lines on an Arch machine;
 collect what the shipped configuration reaches for —
-`delta`, `daff`, `git-lfs`, `tig`, `diffuse`, `zed`.*
+`delta`, `daff`, `git-lfs`, `tig`, `diffuse`, `zed`, `difft`.*
