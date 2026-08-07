@@ -56,6 +56,12 @@ and they run in name order:
   It calls the helpers directly,
   reading neither the repository nor the home directory,
   so it runs before the installed checks too.
+- `07-git-aliases`: the trie in
+  [`config/git-aliases/`](/handbook/config/git-aliases/README.md)
+  is what the aliases render to,
+  rather than a snapshot of what they once rendered to.
+  It reads the repository alone, as the two before it do,
+  and an alias added or renamed fails it until the page is regenerated.
 - `10-path`: the scripts are on the `PATH` of a login shell,
   in every shell an account may log in with, and they run.
 - `15-tasks`: a bare `mise run` offers the task list

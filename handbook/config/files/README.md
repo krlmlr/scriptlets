@@ -14,7 +14,7 @@ The naming rules that turn `rcm/bashrc` into `~/.bashrc` are
 | [`zshenv`](/rcm/zshenv), [`zshrc`](/rcm/zshrc) | `~/.zshenv`, `~/.zshrc` | zsh: the startup profiler for every shell, completion, history and [prompt marks](/handbook/config/prompt-marks/README.md) for the interactive ones |
 | [`zsh-startup-profile.zsh`](/rcm/zsh-startup-profile.zsh) | `~/.zsh-startup-profile.zsh` | times every interactive zsh startup ([`config/zsh-startup/`](/handbook/config/zsh-startup/README.md)) |
 | [`autoscreen`](/rcm/autoscreen) | `~/.autoscreen` | drop into `screen` automatically on an interactive SSH login |
-| [`gitconfig`](/rcm/gitconfig), [`gitaliases`](/rcm/gitaliases) | `~/.gitconfig`, `~/.gitaliases` | Git settings and aliases; pulls in several optional `~/.gitconfig.*` includes |
+| [`gitconfig`](/rcm/gitconfig), [`gitaliases`](/rcm/gitaliases) | `~/.gitconfig`, `~/.gitaliases` | Git settings and aliases, whose names are [`config/git-aliases/`](/handbook/config/git-aliases/README.md)'s; pulls in several optional `~/.gitconfig.*` includes |
 | [`gitignore`](/rcm/gitignore) | `~/.gitignore` | global excludes, wired up via `core.excludesfile` |
 | [`ssh/config`](/rcm/ssh/config) | `~/.ssh/config` | keep-alives plus `Include`s for Colima, OrbStack and the per-user overrides |
 | [`Rprofile`](/rcm/Rprofile) | `~/.Rprofile` | R defaults: CRAN mirror selection, `usethis`/`testthat`/`pillar` options, per-project `.lib` and `Makevars` hooks |

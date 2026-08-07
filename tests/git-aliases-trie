@@ -1,0 +1,166 @@
+#!/bin/sh
+# Render rcm/gitaliases as the trie that handbook/config/git-aliases/README.md
+# carries, and print it on stdout. `07-git-aliases` compares the page against
+# this, so the page is derived rather than typed, and an alias that arrives
+# without it fails the run until it is regenerated:
+#
+#   tests/git-aliases-trie
+#
+# The shape is derived. The names that head a group of their own are the list
+# below, because nothing in the file says which they are: each one borrows the
+# prefix of a command it has nothing to do with -- `conflicts` under `co`, the
+# stash under `s` -- and would read as a variant of it anywhere else in the tree.
+set -eu
+
+# Longest first is not needed here, the code sorts them; what matters is that a
+# head which is not an alias itself, `st` and `pr` among them, becomes a node
+# with no command of its own.
+promoted='conflicts dm echo fft lsf mu pr sq st wt'
+
+repo=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+
+git config -f "$repo/rcm/gitaliases" --list |
+    sed -n 's/^alias\.//p' |
+    awk -v promoted="$promoted" '
+{
+    name = $0
+    sub(/=.*$/, "", name)
+    text = $0
+    sub(/^[^=]*=/, "", text)
+    expansion[name] = text
+    names[++count] = name
+}
+
+function is_alias(name) {
+    return (name in expansion)
+}
+
+# A shell alias says `!` and no more: the file owns its text, and a line of the
+# tree is about where a name sits rather than what it expands to.
+function mark_of(name) {
+    if (!is_alias(name))
+        return "."
+    return substr(expansion[name], 1, 1) == "!" ? "!" : "*"
+}
+
+function summary_of(name) {
+    if (!is_alias(name) || substr(expansion[name], 1, 1) == "!")
+        return ""
+    return expansion[name]
+}
+
+# The label an edge carries: one letter, or the whole run of them where every
+# step in between is a node no alias stops at.
+function edge_label(base, first,   label, node, extension) {
+    label = first
+    while (1) {
+        node = base label
+        if (is_alias(node))
+            return label
+        extension = only_child(node)
+        if (extension == "")
+            return label
+        label = label extension
+    }
+}
+
+# The one letter every name below NODE continues with, or nothing where they
+# differ -- which is what makes a chain worth collapsing.
+function only_child(node,   i, name, letter, found) {
+    found = ""
+    for (i = 1; i <= count; i++) {
+        name = names[i]
+        if (name == node || index(name, node) != 1 || group_of(name) != base_group)
+            continue
+        letter = substr(name, length(node) + 1, 1)
+        if (found == "")
+            found = letter
+        else if (found != letter)
+            return ""
+    }
+    return found
+}
+
+# The group a name belongs to: the longest promoted head it starts with, or its
+# first letter.
+function group_of(name,   i, head, best) {
+    best = ""
+    for (i = 1; i <= heads; i++) {
+        head = promoted_head[i]
+        if (index(name, head) == 1 && length(head) > length(best))
+            best = head
+    }
+    return best == "" ? substr(name, 1, 1) : best
+}
+
+function line_of(node, indent, connector, label,   mark, summary) {
+    mark = mark_of(node)
+    summary = summary_of(node)
+    return indent connector label " " mark (summary == "" ? "" : " " summary)
+}
+
+function render(base, indent,   i, j, name, label, seen, labels, n, last, node) {
+    n = 0
+    delete seen
+    for (i = 1; i <= count; i++) {
+        name = names[i]
+        if (name == base || index(name, base) != 1 || group_of(name) != base_group)
+            continue
+        label = edge_label(base, substr(name, length(base) + 1, 1))
+        if (label in seen)
+            continue
+        seen[label] = 1
+        labels[++n] = label
+    }
+    for (i = 1; i < n; i++)
+        for (j = i + 1; j <= n; j++)
+            if (labels[j] < labels[i]) {
+                label = labels[i]; labels[i] = labels[j]; labels[j] = label
+            }
+    for (i = 1; i <= n; i++) {
+        last = (i == n)
+        node = base labels[i]
+        print line_of(node, indent, last ? "\342\224\224\342\224\200" : "\342\224\234\342\224\200", labels[i])
+        render(node, indent (last ? "   " : "\342\224\202  ") spaces(length(labels[i]) - 1))
+    }
+}
+
+function spaces(n,   s) {
+    s = ""
+    while (n-- > 0)
+        s = s " "
+    return s
+}
+
+END {
+    heads = split(promoted, promoted_head, " ")
+
+    groups = 0
+    for (i = 1; i <= count; i++) {
+        head = group_of(names[i])
+        if (!(head in seen_group)) {
+            seen_group[head] = 1
+            group[++groups] = head
+        }
+    }
+
+    # The names that head a group come first, alphabetically, then the letters.
+    for (i = 1; i < groups; i++)
+        for (j = i + 1; j <= groups; j++) {
+            a = group[i]; b = group[j]
+            if ((length(b) > 1 && length(a) == 1) ||
+                (((length(a) > 1 && length(b) > 1) ||
+                    (length(a) == 1 && length(b) == 1)) && b < a)) {
+                group[i] = b; group[j] = a
+            }
+        }
+
+    for (i = 1; i <= groups; i++) {
+        base_group = group[i]
+        print line_of(base_group, "", "", base_group)
+        render(base_group, "")
+        if (i < groups)
+            print ""
+    }
+}
+'
