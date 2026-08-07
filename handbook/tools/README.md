@@ -97,7 +97,6 @@ turning `https://github.com/krlmlr/scriptlets.git`
 into `git@github.com:krlmlr/scriptlets.git`.
 This is the repair for a clone made with the URL GitHub offers first,
 which asks for a password on every push.
-The `git sr` alias is the short spelling.
 Named remotes are converted, all of them when none is named,
 fetch and push URLs alike;
 remotes that already speak SSH, and HTTPS remotes on other hosts,

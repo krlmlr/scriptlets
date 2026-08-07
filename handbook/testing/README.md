@@ -140,7 +140,7 @@ and they run in name order:
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub
   remotes of a throw-away repository
   and leaves every other remote alone,
-  through `~/bin` and through the `git sr` alias alike.
+  through the `~/bin` the installation puts on the `PATH`.
 - `75-h`: `h` runs the command in every repository below the current
   directory, and each line of output says which one it came from.
   Both halves matter:

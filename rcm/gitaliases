@@ -122,8 +122,10 @@
 	qh = reset HEAD
 	sp = status --porcelain
 	# https://stackoverflow.com/a/5201642/946850
-	sq = !sh -c 'git reset --soft ${1:-main} && git commit --edit -m$(git log --format=%B --reverse HEAD..HEAD@{1})'
-	sr = ssh-remote
+	# The squash belongs to the reset family: the letters are qs, and the
+	# old spelling warns, then forwards.
+	qs = "!sh -c 'git reset --soft ${1:-main} && git commit --edit -m \"$(git log --format=%B --reverse HEAD..HEAD@{1})\"' -"
+	sq = "!echo 'warning: sq is now qs' >&2; git qs"
 	# hub
 	pr = !sh -c 'hub pull-request "$@"'
 	prm = !sh -c 'hub pull-request -b main "$@"'
@@ -133,3 +135,21 @@
 	stp = stash pop
 	std = stash drop
 	stl = stash list
+	# ---
+	# Worktree: git spells the concept as two words itself,
+	# in --work-tree and GIT_WORK_TREE, and they give the two letters.
+	# w is switch, and git matches an alias name in full, never by
+	# prefix, so the two never meet.
+	wt = worktree
+	wta = worktree add
+	wtl = worktree list
+	wtm = worktree move
+	wtp = worktree prune
+	wtr = worktree remove
+	# wtb <branch> puts a worktree beside the repository it belongs to,
+	# named for both: ~/git/repo and branch-name make
+	# ~/git/repo-branch-name, and a slash in the branch name folds to a
+	# dash, so the sibling stays one directory rather than a nest.
+	# A branch that exists, here or on a remote, is checked out;
+	# a name that is neither becomes a new branch.
+	wtb = "!f() { r=$(git worktree list --porcelain | sed -n '1s/^worktree //p'); d=$r-$(printf %s $1 | tr / -); if git show-ref --verify --quiet refs/heads/$1 || test -n \"$(git for-each-ref --count=1 'refs/remotes/*/'$1)\"; then git worktree add \"$d\" $1; else git worktree add -b $1 \"$d\"; fi; }; f"
