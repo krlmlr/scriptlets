@@ -217,3 +217,40 @@ fi
 if false; then
 . "$HOME/.local/bin/rigenv"
 fi
+
+# ---------------------------------------------------------------------------
+# Semantic prompt marks (OSC 133): where a prompt begins, where a command
+# started producing output, where it ended and with what status.
+#
+# Why bash prints them instead of keeping them in $PS1 as zsh does, what PS0
+# has to do with it, and what a bash older than 4.4 gets:
+# handbook/config/prompt-marks/README.md in the scriptlets repository.
+#
+# Last in the file, so that this runs first at every prompt: $? belongs to the
+# command line only until the next thing in $PROMPT_COMMAND has run.
+# ---------------------------------------------------------------------------
+case " ${BASH_SOURCE[*]} " in
+*ghostty*) ;;
+*)
+    # PS0 is printed once a command line has been read and before it runs,
+    # which is what C means. ${x:=y} assigns as it expands, so the one
+    # expansion also leaves behind the fact that a command ran.
+    if shopt -q promptvars; then
+        __osc133_output_mark=$'\033]133;C\007'
+        PS0='${__osc133_ran:=$__osc133_output_mark}'
+    fi
+
+    __osc133_precmd() {
+        local ret=$?
+
+        if [ -n "${__osc133_ran:-}" ]; then
+            __osc133_ran=
+            printf '\033]133;D;%s\007' "$ret"
+        fi
+
+        printf '\033]133;A\007'
+    }
+
+    PROMPT_COMMAND="__osc133_precmd${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
+    ;;
+esac
