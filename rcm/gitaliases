@@ -84,6 +84,16 @@
 	cha = cherry-pick --abort
 	chs = cherry-pick --skip
 	# ===
+	v = revert
+	vc = revert --continue
+	va = revert --abort
+	vs = revert --skip
+	# ---
+	vh = revert HEAD
+	vo = revert --no-edit
+	vn = revert --no-commit
+	vm = revert --mainline 1
+	# ===
 	ac = commit --all --verbose
 	acm = commit --all --message
 	cir = !sh -c 'git commit --reuse-message=${1:-HEAD}' -
