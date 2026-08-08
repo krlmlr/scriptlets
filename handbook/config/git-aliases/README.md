@@ -28,6 +28,11 @@ in `--work-tree` and `GIT_WORK_TREE`,
 so the two letters are the initials of the thing
 rather than a squeeze of one word.
 
+**A command whose initial is taken reads on for a free letter.**
+`v` is `revert` because `rebase` holds the `r` and `restore` the `e`:
+the name is the first letter of the word that nothing else had claimed,
+which is how `switch` came to be `w` and `restore` itself `e`.
+
 **A name that borrows an occupied prefix is not a variant of it.**
 `conflicts` begins with the letters of `checkout` and is a `diff`;
 the stash sits under the letter `status` holds.
@@ -57,6 +62,10 @@ rather than as aliases:
 they are named so that nobody wonders whether they were forgotten,
 and left unaliased so that they stay two seconds slower to type than the
 recoverable ones.
+The `v` family is the recoverable undo, and keeps its short names:
+a revert is an ordinary commit on top,
+so it undoes published work without rewriting any of it,
+and is itself undone by reverting it.
 
 **A name a script already answers to gets no alias.**
 A `git-<name>` on the `PATH` wins over an alias that spells it,
@@ -121,6 +130,25 @@ That space inside the value is what costs the alias its completion,
 above.
 Where `difft` is not installed the alias says so and stops
 ([`install/prerequisites/`](/handbook/install/prerequisites/README.md)).
+
+**`vm` reverts a merge, from the side it was merged into.**
+Git refuses a merge commit without `--mainline`,
+because two parents leave nothing to say
+which of them the tree goes back to.
+`1` is the side that was already there,
+so the alias undoes what came in and keeps what it came into;
+any other number is rare enough to spell out.
+What the revert commit records is that the merged branch is merged *and*
+undone, so merging it again brings nothing back:
+the way back is to revert the revert.
+
+**`vn` stages a revert without committing it**,
+which is how several of them become one commit —
+`git vn A..B`, and then a single commit of the lot.
+Git prepares a message as it goes and each revert overwrites the one
+before, so what is left names a single commit of the range —
+the oldest, because a revert walks newest first.
+The message for the whole range is written rather than accepted.
 
 **`wtb` puts a worktree beside the repository it belongs to**, named for
 both: `~/git/repo` and `branch-name` make `~/git/repo-branch-name`.
@@ -269,6 +297,15 @@ st .
 
 s * status
 └─p * status --porcelain
+
+v * revert
+├─a * revert --abort
+├─c * revert --continue
+├─h * revert HEAD
+├─m * revert --mainline 1
+├─n * revert --no-commit
+├─o * revert --no-edit
+└─s * revert --skip
 
 wt * worktree
 ├─a * worktree add
