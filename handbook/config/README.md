@@ -12,3 +12,5 @@ and how anything gets there at all is
 * [`completion/`](completion/) — zsh completion, audited daily instead of per shell
 * [`prompt-marks/`](prompt-marks/) — every prompt, command and exit status marked for the terminal
 * [`editor/`](editor/) — the editor every tool is handed, and the widget that hands it the command line
+* [`history/`](history/) — every command kept forever, one plain-text file per day
+* [`atuin/`](atuin/) — `Ctrl-R` over every command, from a generated script kept on disk

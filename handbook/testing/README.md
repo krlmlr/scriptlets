@@ -22,6 +22,16 @@ the CI runner's `/etc/skel` carries a `~/.bash_profile`
 no stock Ubuntu account has,
 and seeding it would test the CI image instead of the platform.
 
+`$XDG_CACHE_HOME` is pointed at that home directory too.
+`$HOME` alone is not enough:
+what a shell caches goes to `$XDG_CACHE_HOME` wherever that is set,
+so on a machine that sets it
+the checks would delete and rewrite the real user's cache
+while believing they were working in a directory of their own.
+The other XDG directories are deliberately left alone,
+because mise reads its own configuration and state from them
+and these checks run mise.
+
 **In CI**,
 [`.github/workflows/test.yaml`](/.github/workflows/test.yaml)
 runs the suite on Ubuntu and on macOS.
@@ -136,6 +146,16 @@ and they run in name order:
   which the audit truncates —
   mtimes cannot tell a re-audit within the same second
   from no audit at all.
+- `61-zsh-history`: an interactive zsh reads the newest day-files out of
+  `~/.zsh_history.d` and stops
+  ([`config/history/`](/handbook/config/history/README.md)):
+  the newest is there, one beyond the window is not,
+  the migrated single-file history is not read at all,
+  today's file is read once rather than twice,
+  and the name it is read from is the day and nothing else.
+  The history is fabricated, dated in 2020 so that it sorts below whatever
+  today is, and the question goes in on a pipe —
+  `zsh -ic` never reaches a prompt, which is where today's own file arrives.
 - `62-zsh-prompt-marks`: the prompt marks
   ([`config/prompt-marks/`](/handbook/config/prompt-marks/README.md))
   are the bytes they should be, in the order they should be in;
@@ -156,6 +176,18 @@ and they run in name order:
   and every documented way of turning the profiling off
   ([`config/zsh-startup/`](/handbook/config/zsh-startup/README.md))
   turns it off.
+- `67-zsh-atuin`: the generated atuin init script
+  ([`config/atuin/`](/handbook/config/atuin/README.md))
+  is written to a file and sourced from there
+  rather than produced at every shell,
+  rewritten when the binary or the configuration file is newer than it,
+  never replaced by an empty or half-written one,
+  and absent without complaint where atuin is not installed.
+  A stand-in `atuin` on the `PATH` counts its own runs
+  and fails the ways the real one fails,
+  so the checks neither need the real atuin nor want it —
+  the one case that does need the machine's own answer,
+  no atuin at all, is skipped where there is one.
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub
   remotes of a throw-away repository
   and leaves every other remote alone,
