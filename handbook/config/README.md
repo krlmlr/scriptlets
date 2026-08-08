@@ -12,3 +12,4 @@ and how anything gets there at all is
 * [`completion/`](completion/) — zsh completion, audited daily instead of per shell
 * [`prompt-marks/`](prompt-marks/) — every prompt, command and exit status marked for the terminal
 * [`editor/`](editor/) — the editor every tool is handed, and the widget that hands it the command line
+* [`tmux/`](tmux/) — copy mode that knows where the prompts are

@@ -67,6 +67,7 @@ Windows is out of scope.
 | `finicky.js` — browser picker, macOS-only app | `toprc` — `top`'s Linux configuration format |
 | `bin/n`, `bin/bkg` — notify via `terminal-notifier` | `screenrc-xpra` — starts an xpra X11 session |
 | `bin/soffice-macos` — drives `/Applications/LibreOffice.app` | |
+| `tmux-clipboard.conf` — pipes a tmux copy through `pbcopy` | |
 | `bash_aliases_os` — `csv`/`csv2`/`tsv`, `bit` completion | `bash_aliases_os` — `pxc`, `xo`, the `xclip` key bindings, `/usr/lib/ccache` |
 
 The shared [`rcm/bash_aliases`](/rcm/bash_aliases) sources
