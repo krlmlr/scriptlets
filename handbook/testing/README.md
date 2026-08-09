@@ -149,6 +149,15 @@ and they run in name order:
   a prompt with escapes switched off is left alone,
   and a shell with Ghostty's integration loaded leaves the marking to it
   while a shell started inside that one marks for itself.
+- `63-zsh-cwd-report`: the working directory
+  ([`config/current-directory/`](/handbook/config/current-directory/README.md))
+  reaches the terminal as a file URL that names the host,
+  with the path percent-encoded a byte at a time —
+  a directory outside ASCII is what separates that from the encoding
+  that only ever works on this machine.
+  A change of directory is reported twice, once as it happens
+  and once at the prompt after it,
+  and the same Ghostty pair as above says who reports at all.
 - `65-zsh-startup-profile`: a shell that reaches a prompt is timed,
   recorded once and broken down by startup file;
   one that does not — a script, a `zsh -c`, a benchmark run —
