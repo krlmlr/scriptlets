@@ -208,6 +208,32 @@ if [[ -z ${precmd_functions[(r)_ghostty_deferred_init]} ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# The working directory (OSC 7): what a terminal opens a new tab, split or
+# window in, and what it resolves a clicked file name against.
+#
+# Why the path is encoded a byte at a time, why it is sent from two hooks
+# rather than one, and what tmux does with it:
+# handbook/config/current-directory/README.md in the scriptlets repository.
+# ---------------------------------------------------------------------------
+if [[ -z ${precmd_functions[(r)_ghostty_deferred_init]} ]]; then
+  autoload -Uz add-zsh-hook
+
+  _osc7_report_cwd() {
+    # LC_ALL=C makes the pattern match one byte at a time, so a path outside
+    # ASCII becomes the UTF-8 bytes a file URL is made of rather than code
+    # points. Nothing here forks: $(( )) is arithmetic, not a command.
+    setopt localoptions extended_glob
+    local LC_ALL=C
+    local -a match mbegin mend
+    local encoded=${PWD//(#m)[^A-Za-z0-9_.!~*()\'\/-]/%${(l:2::0:)$(([##16]#MATCH))}}
+    print -n "\e]7;file://${HOST}${encoded}\a"
+  }
+
+  add-zsh-hook chpwd _osc7_report_cwd
+  add-zsh-hook precmd _osc7_report_cwd
+fi
+
+# ---------------------------------------------------------------------------
 # ^X^E opens the command line being typed in the editor, and takes back
 # whatever the editor leaves behind
 # (handbook/config/editor/README.md in the scriptlets repository).

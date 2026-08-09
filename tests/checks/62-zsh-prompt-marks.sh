@@ -33,9 +33,18 @@ fi
 # stdout only: the startup profiler reports on stderr, as does anything a
 # system-wide zshrc has to say. cat -v so that a sequence can be written out
 # in a check and compared as ordinary text.
+#
+# The working-directory reports ~/.zshrc sends from the same hooks are dropped
+# rather than expected here -- they are 63-zsh-cwd-report.sh's -- and dropped
+# by pattern rather than by counting, so anything else that appears on stdout
+# still shows up in a failure. Their path is percent-encoded, so the ^ that
+# cat -v writes control characters with cannot occur inside one.
 marks() {
+    esc=$(printf '\033')
+    bel=$(printf '\007')
     printf '%s' "$1" |
         env -u ZDOTDIR TERM_PROGRAM= TMUX= zsh -i 2>/dev/null |
+        sed "s/$esc]7;[^$bel]*$bel//g" |
         cat -v | tr -d '\n'
 }
 
