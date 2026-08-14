@@ -109,13 +109,14 @@ done
 HOME=$TEST_HOME
 export HOME
 
-# The cache directory goes with it. $HOME alone is not enough: what the shell
-# caches -- the completion dump, atuin's generated init script -- goes to
-# $XDG_CACHE_HOME wherever that is set, so on a machine that sets it the
-# checks would delete and rewrite the real user's cache while believing they
-# were working in a home directory of their own. A deleted completion dump
-# comes back by itself; an atuin init script written by a stand-in `atuin`
-# does not, and would be sourced by every interactive shell from then on.
+# The cache directory goes with it. $HOME alone is not enough: what a shell
+# caches -- the completion dump, atuin's generated init script, mise's
+# generated activation script -- goes to $XDG_CACHE_HOME wherever that is set,
+# so on a machine that sets it the checks would delete and rewrite the real
+# user's cache while believing they were working in a home directory of their
+# own. A deleted completion dump comes back by itself; a script written by a
+# stand-in `atuin` or `mise` does not, and would be sourced by every
+# interactive shell from then on.
 #
 # The other XDG directories are deliberately left alone: mise reads its own
 # configuration and state from them, and these checks run mise.

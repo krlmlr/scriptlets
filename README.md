@@ -52,6 +52,10 @@ and what none of them carries.
   so the line that added 200 ms is caught the day it lands —
   and zsh's completion dump is
   [audited once a day, not once a shell](handbook/config/completion/README.md).
+* [mise is activated in both interactive shells](handbook/config/mise/README.md)
+  from a generated script kept on disk,
+  so the tools a directory asks for are on the `PATH`
+  without a `mise` process at every shell start.
 * [Configuration](handbook/config/README.md) for bash, zsh, Git, SSH,
   R, vim, screen and more,
   linked into place by rcm under

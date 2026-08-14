@@ -19,7 +19,7 @@ and the same question brings both to the same leaf.
   the home-grown layout it replaced
 * [`config/`](config/) — what the installed configuration does:
   the inventory, zsh startup profiling, zsh completion,
-  the prompt marks, the working directory, the history, the editor
+  the prompt marks, the working directory, the history, the editor, mise
 * [`tools/`](tools/) — the scripts that land in `~/bin`,
   grouped by what they are for, each with its status
 * [`testing/`](testing/) — the throw-away home directory,

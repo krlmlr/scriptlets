@@ -216,6 +216,28 @@ and they run in name order:
   so the checks neither need the real atuin nor want it —
   the one case that does need the machine's own answer,
   no atuin at all, is skipped where there is one.
+- `68-zsh-mise`, `69-bash-mise`: mise's activation script
+  ([`config/mise/`](/handbook/config/mise/README.md))
+  is written to a file and sourced from there
+  rather than produced at every shell,
+  rewritten unless the file is the newer of the two,
+  so that a mise it cannot be told apart from counts as an upgrade,
+  kept in a file named for that binary
+  so a second mise elsewhere gets one of its own,
+  never replaced by an empty or half-written one,
+  and absent without complaint
+  both where mise is not on the `PATH`
+  and where the cache directory cannot be made —
+  which is a regular file standing in for one,
+  because these checks are as often as not run by a user
+  whom a mere permission would not stop.
+  A stand-in `mise` counts its own runs and fails the ways a rewrite
+  fails, so the checks neither need the real mise nor want it —
+  it is on the `PATH` here, since the run refuses to start without one,
+  and the case that needs it gone takes it off the `PATH` instead.
+  The bash half names [`rcm/bashrc`](/rcm/bashrc) as its rcfile,
+  because the throw-away home keeps the `~/.bashrc` it was seeded with
+  until `90-force` replaces it.
 - `70-git-ssh-remote`: `git ssh-remote` converts the HTTPS GitHub
   remotes of a throw-away repository
   and leaves every other remote alone,
