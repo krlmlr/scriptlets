@@ -70,6 +70,16 @@ brew install terminal-notifier                    # n and bkg, macOS alone
 brew install expect imagemagick jq mplayer wget   # under review
 ```
 
+None of those lines stops to ask,
+even where a name drags in a dependency that is not installed yet:
+[`rcm/tag-macos/homebrew/brew.env`](/rcm/tag-macos/homebrew/brew.env)
+sets `HOMEBREW_NO_ASK`,
+and pins how stale a formula index `brew` will work from.
+It is Homebrew's own environment file, installed as `~/.homebrew/brew.env`,
+read by `brew` itself rather than by a shell —
+which is why the settings live there
+and not among the aliases in `~/.bash_aliases_os`.
+
 **Debian and Ubuntu.**
 
 ```sh
@@ -156,6 +166,13 @@ while `compare` and `montage` are unaffected.
 **The Azure scripts drive an `azure` command** no manager here carries;
 Homebrew's `azure-cli` installs `az`, which is a different one.
 
+**`difft` is what `git dt` reaches for**, and Ubuntu 24.04 does not carry
+it: Homebrew has it as `difftastic`, and elsewhere it is
+`cargo install difftastic` or the binary from its releases.
+Where it is missing the alias says so and stops —
+`difft: not found`, then `fatal: external diff died` —
+and nothing else here wants it.
+
 *To deepen: run the `pacman` lines on an Arch machine;
 collect what the shipped configuration reaches for —
-`delta`, `daff`, `git-lfs`, `tig`, `diffuse`, `zed`.*
+`delta`, `daff`, `git-lfs`, `tig`, `diffuse`, `zed`, `difft`.*

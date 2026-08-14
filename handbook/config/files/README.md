@@ -11,13 +11,14 @@ The naming rules that turn `rcm/bashrc` into `~/.bashrc` are
 | [`profile`](/rcm/profile), [`zprofile`](/rcm/zprofile) | `~/.profile`, `~/.zprofile` | login shells of any kind: `~/bin` and `~/.local/bin` on the `PATH` ([`layout/path/`](/handbook/layout/path/README.md)), and the [editor](/handbook/config/editor/README.md) every tool is handed |
 | [`bashrc`](/rcm/bashrc), [`bash_profile`](/rcm/bash_profile), [`bash_aliases`](/rcm/bash_aliases) | `~/.bashrc`, `~/.bash_profile`, `~/.bash_aliases` | interactive bash: prompt, history, aliases |
 | [`tag-macos/bash_aliases_os`](/rcm/tag-macos/bash_aliases_os), [`tag-linux/bash_aliases_os`](/rcm/tag-linux/bash_aliases_os) | `~/.bash_aliases_os` | the aliases, completions and bindings of one platform, sourced from `~/.bash_aliases` |
-| [`zshenv`](/rcm/zshenv), [`zshrc`](/rcm/zshrc) | `~/.zshenv`, `~/.zshrc` | zsh: the startup profiler for every shell, completion, history and [prompt marks](/handbook/config/prompt-marks/README.md) for the interactive ones |
+| [`zshenv`](/rcm/zshenv), [`zshrc`](/rcm/zshrc) | `~/.zshenv`, `~/.zshrc` | zsh: the startup profiler for every shell, completion, history, [prompt marks](/handbook/config/prompt-marks/README.md) and the [working directory](/handbook/config/current-directory/README.md) for the interactive ones |
 | [`zsh-startup-profile.zsh`](/rcm/zsh-startup-profile.zsh) | `~/.zsh-startup-profile.zsh` | times every interactive zsh startup ([`config/zsh-startup/`](/handbook/config/zsh-startup/README.md)) |
 | [`autoscreen`](/rcm/autoscreen) | `~/.autoscreen` | drop into `screen` automatically on an interactive SSH login |
 | [`gitconfig`](/rcm/gitconfig), [`gitaliases`](/rcm/gitaliases) | `~/.gitconfig`, `~/.gitaliases` | Git settings and aliases, whose names are [`config/git-aliases/`](/handbook/config/git-aliases/README.md)'s; pulls in several optional `~/.gitconfig.*` includes |
 | [`gitignore`](/rcm/gitignore) | `~/.gitignore` | global excludes, wired up via `core.excludesfile` |
 | [`ssh/config`](/rcm/ssh/config) | `~/.ssh/config` | keep-alives plus `Include`s for Colima, OrbStack and the per-user overrides |
 | [`Rprofile`](/rcm/Rprofile) | `~/.Rprofile` | R defaults: CRAN mirror selection, `usethis`/`testthat`/`pillar` options, per-project `.lib` and `Makevars` hooks |
+| [`tag-macos/R/`](/rcm/tag-macos/R) | `~/.R/` | what R compiles packages with, one file per profile and a dispatcher that picks between them ([`config/r-makevars/`](/handbook/config/r-makevars/README.md)) |
 | [`air.toml`](/rcm/air.toml) | `~/air.toml` | fallback config for the `air` R formatter — formats nothing unless a project overrides it |
 | [`editorconfig`](/rcm/editorconfig) | `~/.editorconfig` | indentation defaults |
 | [`vimrc`](/rcm/vimrc), [`tigrc`](/rcm/tigrc) | `~/.vimrc`, `~/.tigrc` | vim and tig |
@@ -26,6 +27,7 @@ The naming rules that turn `rcm/bashrc` into `~/.bashrc` are
 | [`screenrc`](/rcm/screenrc), [`tag-linux/screenrc-xpra`](/rcm/tag-linux/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window on Linux, and is a placeholder on macOS |
 | [`tmux.conf`](/rcm/tmux.conf), [`tag-macos/tmux-clipboard.conf`](/rcm/tag-macos/tmux-clipboard.conf) | `~/.tmux.conf`, `~/.tmux-clipboard.conf` | tmux: [copy mode that knows where the prompts are](/handbook/config/tmux/README.md); the second names `pbcopy`, and ships on macOS alone |
 | [`config/diffuse/diffuserc`](/rcm/config/diffuse/diffuserc) | `~/.config/diffuse/diffuserc` | dark colour scheme for the Diffuse merge tool |
+| [`tag-macos/homebrew/brew.env`](/rcm/tag-macos/homebrew/brew.env) | `~/.homebrew/brew.env` | Homebrew's own environment file: how stale an index it tolerates, and that it may install dependencies unasked; macOS only |
 | [`tag-macos/finicky.js`](/rcm/tag-macos/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky; macOS only |
 | [`git/R/`](/rcm/git/R) | `~/git/R/` | CMake and build helpers for working on the R sources in CLion |
 
