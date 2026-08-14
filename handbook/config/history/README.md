@@ -56,14 +56,30 @@ and the arrow keys walk them in that order.
 Deferring the cost therefore means giving up the in-memory list
 and letting something outside the shell answer searches instead.
 
-The cost is per line rather than per file —
-measured with zsh 5.9 on Linux, about 13 ms and 5 MB of resident memory
-per megabyte of history read,
-so it is set by how much history there is
-rather than by how many days it is spread over.
+The cost is mostly per line — measured with zsh 5.9 on Linux,
+about 13 ms and 5 MB of resident memory per megabyte of history read —
+with a smaller term per file, about 0.04 ms for the open and close,
+which only shows up where the day-files are small.
+Either way it is paid at every shell start and grows with every day kept.
 `HISTSIZE` and `SAVEHIST` are both set to ten million in
 [`rcm/zshrc`](/rcm/zshrc),
 which is what stops the list being trimmed at either end.
+
+**So the read is bounded:** the newest `$ZSH_HISTORY_PRELOAD_DAYS`
+day-files, 30 unless the environment says otherwise.
+Today's file counts toward that number and is then skipped,
+so a shell starts with the twenty-nine days before it,
+and `legacy.log` is not read at all.
+A year of history at a megabyte a month would otherwise be
+about 150 ms of every shell start, for entries the arrow keys never reach.
+
+What the bound costs is reach: `Up`, `!!` and `fc` stop at the window,
+where before they stopped only at the beginning of time.
+What is outside it is still on disk and still searchable —
+by `grep`, and by [`config/atuin/`](/handbook/config/atuin/README.md),
+which is what `Ctrl-R` asks now.
+Raising the number is a matter of exporting it before the shell starts,
+and the cost of doing so is the paragraph above.
 
 ## Nothing is written when the day turns
 
@@ -101,6 +117,22 @@ were each found by counting a cluster here.
 `HIST_IGNORE_DUPS` still collapses a command repeated back to back,
 and `HIST_IGNORE_SPACE` keeps a command out of the history altogether
 when it is typed with a leading space.
+
+## What a leading space does, and does not
+
+`HIST_IGNORE_SPACE` keeps a space-prefixed command out of this history.
+It does not keep it out of atuin's.
+atuin records from a `preexec` hook, which receives the line as typed,
+leading space and all,
+and decides by its own filters — `history_filter`, `cwd_filter`,
+`secrets_filter` —
+of which the first two are empty
+unless `~/.config/atuin/config.toml` says otherwise.
+
+So the habit still hides a command from the list the arrow keys walk,
+and leaves it in the store `Ctrl-R` now searches.
+A `history_filter` of `^\s` is where the two would be made to agree;
+this repository does not ship one.
 
 ## Repairing a directory
 

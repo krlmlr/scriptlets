@@ -16,3 +16,4 @@ and how anything gets there at all is
 * [`editor/`](editor/) — the editor every tool is handed, and the widget that hands it the command line
 * [`mise/`](mise/) — mise activated from a generated script kept on disk, in both shells
 * [`r-makevars/`](r-makevars/) — what R compiles with, switched per build by an environment variable
+* [`atuin/`](atuin/) — `Ctrl-R` over every command, from a generated script kept on disk

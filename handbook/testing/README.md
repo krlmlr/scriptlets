@@ -146,6 +146,19 @@ and they run in name order:
   which the audit truncates —
   mtimes cannot tell a re-audit within the same second
   from no audit at all.
+- `61-zsh-history`: the day-files
+  ([`config/history/`](/handbook/config/history/README.md))
+  are named for the day and nothing else — asked twice, because the date is
+  spelled twice and the rotation hook quietly corrects the other spelling.
+  A prior day's commands are in the in-memory list and today's file is read
+  once rather than twice; the preload reaches the newest day-files and stops,
+  leaving the ones beyond the window and the migrated single-file history
+  unread, and the environment can say how many days to take.
+  The rotation hook writes nothing, which is the whole of its job.
+  `zsh-history-repair` puts a directory a writing hook left behind back,
+  each entry once, in the day it was run on.
+  The history is fabricated and the question goes in on a pipe:
+  `zsh -ic` never reaches a prompt, and the hooks run from `precmd`.
 - `62-zsh-prompt-marks`: the prompt marks
   ([`config/prompt-marks/`](/handbook/config/prompt-marks/README.md))
   are the bytes they should be, in the order they should be in;
@@ -175,6 +188,18 @@ and they run in name order:
   and every documented way of turning the profiling off
   ([`config/zsh-startup/`](/handbook/config/zsh-startup/README.md))
   turns it off.
+- `67-zsh-atuin`: the generated atuin init script
+  ([`config/atuin/`](/handbook/config/atuin/README.md))
+  is written to a file and sourced from there
+  rather than produced at every shell,
+  rewritten when the binary or the configuration file is newer than it,
+  never replaced by an empty or half-written one,
+  and absent without complaint where atuin is not installed.
+  A stand-in `atuin` on the `PATH` counts its own runs
+  and fails the ways the real one fails,
+  so the checks neither need the real atuin nor want it —
+  the one case that does need the machine's own answer,
+  no atuin at all, is skipped where there is one.
 - `68-zsh-mise`, `69-bash-mise`: mise's activation script
   ([`config/mise/`](/handbook/config/mise/README.md))
   is written to a file and sourced from there
