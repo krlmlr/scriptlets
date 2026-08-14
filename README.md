@@ -61,6 +61,10 @@ and what none of them carries.
   linked into place by rcm under
   [per-user and per-platform tags](handbook/layout/README.md),
   with `~/bin` put on the `PATH` on macOS too.
+* [What R compiles packages with is a profile you name per build](handbook/config/r-makevars/README.md) —
+  `R_MAKEVARS_PROFILE=release R CMD INSTALL .` —
+  so switching between an unoptimised build, an optimised one
+  and a stricter compiler edits nothing and leaves nothing switched.
 * On macOS, installing also links
   [Positron's command line tool](handbook/install/hooks/README.md)
   into `~/bin` as `positron` —

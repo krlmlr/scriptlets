@@ -1,0 +1,10 @@
+# Optimised, and still with debug information: what a profiler and a crash
+# report need to stay readable.
+#
+# handbook/config/r-makevars/README.md.
+
+CFLAGS     = -O3 -g
+CXXFLAGS   = -O3 -g
+CXX11FLAGS = -O3 -g
+CXX14FLAGS = -O3 -g
+CXX17FLAGS = -O3 -g

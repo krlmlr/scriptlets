@@ -1,0 +1,378 @@
+#!/usr/bin/env zsh
+#
+# Put a per-day zsh history directory back in order.
+#
+# handbook/config/history/README.md in the scriptlets repository.
+#
+#   zsh-history-repair [--apply] [DIRECTORY]
+#
+# DIRECTORY defaults to ~/.zsh_history.d. Without --apply nothing is written:
+# the report says what would change, and that is the mode to run first.
+#
+# It leaves the directory holding every timestamped entry exactly once, in the
+# file for the day it was run on and in the order it was run; `legacy.log`
+# keeps the entries that carry no timestamp, and nothing else. Day-files whose
+# name carries a stray `}` are renamed. Running it again has nothing to do.
+#
+# Entries are compared whole, timestamp and elapsed time included, so two runs
+# of one command count twice unless they fell in the same second and took the
+# same time -- those collapse, and HIST_IGNORE_DUPS had already dropped them
+# where they were typed back to back.
+#
+# --apply moves the originals to DIRECTORY.backup-<timestamp> rather than
+# deleting them, so the repair is one `mv` from undone.
+#
+# Run it with no other interactive zsh open: today's file is rewritten like any
+# other, and a shell appending to it meanwhile writes into the backup.
+
+emulate -L zsh
+setopt err_exit no_unset pipe_fail extended_glob
+
+zmodload zsh/datetime
+
+case ${1-} in
+-h | --help)
+  awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "$0"
+  exit 0
+  ;;
+esac
+
+apply=
+dir=
+
+while (( $# )); do
+  case $1 in
+  --apply) apply=1 ;;
+  -*) print -u2 "unknown option: $1"; exit 2 ;;
+  *)
+    [[ -z $dir ]] || { print -u2 "one directory at a time: $1"; exit 2 }
+    dir=$1
+    ;;
+  esac
+  shift
+done
+
+: ${dir:=$HOME/.zsh_history.d}
+
+[[ -d $dir ]] || { print -u2 "not a directory: $dir"; exit 1 }
+
+# tilde DIRECTORY -- what the report calls a path, so that a home-directory
+# path reads the way it is typed.
+tilde() { print -r -- ${1/#$HOME/\~} }
+
+# thousands NUMBER -- 2431882 as 2,431,882. Counts here run to the millions,
+# which is the whole point of the report, and a run of digits that long says
+# nothing at a glance.
+thousands() {
+  local n=$1 out=
+  while (( ${#n} > 3 )); do
+    out=,${n[-3,-1]}$out
+    n=${n[1,-4]}
+  done
+  print -r -- $n$out
+}
+
+# count NUMBER SINGULAR PLURAL -- the number and the noun that agrees with it.
+count() {
+  if (( $1 == 1 )); then
+    print -r -- "$1 $2"
+  else
+    print -r -- "$(thousands $1) $3"
+  fi
+}
+
+# bytes SIZE -- a size in the unit that makes it readable.
+bytes() {
+  local -a units=(B KB MB GB)
+  local -F size=$1
+  local i=1
+  while (( size >= 1024 && i < $#units )); do
+    (( size = size / 1024.0 ))
+    (( i++ ))
+  done
+  printf '%.1f %s\n' $size $units[i]
+}
+
+# size_of FILE... -- the total size of the files named, in bytes.
+size_of() {
+  local -a sizes
+  local f total=0
+  for f in "$@"; do
+    zstat -A sizes +size -- $f
+    : $(( total += sizes[1] ))
+  done
+  print -r -- $total
+}
+
+zmodload zsh/stat
+
+# --- what to read -----------------------------------------------------------
+#
+# A day-file, with or without the stray brace, and legacy.log. Anything else in
+# the directory is somebody else's and is left alone -- named in the report, so
+# that a file this would have quietly ignored is a file the reader knows about.
+
+typeset -a inputs=( $dir/<->-<->-<->.log(N) $dir/<->-<->-<->\}.log(N) $dir/legacy.log(N) )
+typeset -a ignored=( ${dir}/*(N.^-/) )
+ignored=( ${ignored:|inputs} )
+
+if (( ! $#inputs )); then
+  print -r -- "$(tilde $dir) holds no history files to repair"
+  exit 0
+fi
+
+# Oldest first, so that the sequence numbers below rise with the age of the
+# file: where two copies of an entry share a second, the one in the file that
+# was written first is the one kept.
+inputs=( ${(o)inputs} )
+
+typeset -i read_bytes=$(size_of $inputs)
+
+print -r -- "$(tilde $dir) -- $(count $#inputs file files), $(bytes $read_bytes)"
+print
+
+typeset -a braced=( ${(M)inputs:#*\}.log} )
+if (( $#braced )); then
+  print -r -- "  $(count $#braced "file carries" "files carry") a stray } in the name, from the old HISTFILE spelling"
+fi
+
+# --- the work happens in a staging directory --------------------------------
+#
+# Every history entry passes through here, so the staging files are private from
+# the moment awk creates them rather than from a chmod afterwards.
+
+umask 077
+
+work=$(mktemp -d "${TMPDIR:-/tmp}/zsh-history-repair.XXXXXX")
+staged=$work/staged
+mkdir -p $staged
+
+cleanup() { rm -rf -- $work }
+trap cleanup EXIT INT TERM
+
+# --- pass one: how far back does this history go ----------------------------
+#
+# The day an entry belongs to is a local-time question, and awk cannot answer it
+# portably: strftime is a GNU extension, and macOS ships the one-true awk. So
+# zsh answers it once for every hour in the range and hands awk the table.
+#
+# Splitting entries is the same rule in both passes, and it is zsh's own: an
+# entry is a run of lines where every line but the last ends in a backslash,
+# which is how a command that spans lines is written and how it is read back. A
+# `: <epoch>:<elapsed>;` prefix on the first line is what dates it -- a history
+# written without EXTENDED_HISTORY carries none, and every line stands alone.
+
+typeset -a span=( ${(f)"$(awk '
+  FILENAME != seen_file { seen_file = FILENAME; cont = 0 }
+
+  cont == 0 && /^: [0-9]+:[0-9]*;/ {
+    epoch = substr($0, 3)
+    sub(/:.*/, "", epoch)
+    epoch += 0
+    if (epoch > 0 && (lo == 0 || epoch < lo)) lo = epoch
+    if (epoch > hi) hi = epoch
+  }
+  { cont = (substr($0, length($0), 1) == "\\") }
+  END { print lo+0; print hi+0 }
+' $inputs)"} )
+
+typeset -i lo=$span[1] hi=$span[2]
+
+table=$work/days
+if (( lo > 0 )); then
+  # An hour is the coarsest bucket that never straddles a local midnight, in
+  # every zone anyone has kept history in, so the whole range costs one strftime
+  # per hour rather than one per entry.
+  (( (hi - lo) / 86400 < 36525 )) ||
+    { print -u2 "timestamps span more than a century -- refusing to guess"; exit 1 }
+
+  typeset -a rows=()
+  typeset -i h
+  for (( h = lo / 3600; h <= hi / 3600; h++ )); do
+    rows+=( "$h	$(strftime '%Y-%m-%d' $(( h * 3600 )))" )
+  done
+  print -rl -- $rows > $table
+else
+  : > $table
+fi
+
+# --- pass two: route every entry to the day it was run on -------------------
+#
+# One record per line, so that the rest is `sort`: the day it belongs in, the
+# epoch, the entry's number, the line's number within it, and the day-file it
+# came out of. The entry's own text is the last field and is never parsed again
+# -- it may hold tabs, and every field ahead of it is a date or digits, so the
+# five tabs that delimit them are the first five.
+#
+# An entry with no timestamp cannot be dated and stays in legacy.log, in the
+# order it was read.
+
+awk -v table=$table '
+  BEGIN {
+    FS = "\t"
+    while ((getline row < table) > 0) {
+      split(row, f, "\t")
+      day[f[1]] = f[2]
+    }
+  }
+
+  function flush() {
+    if (! held) return
+    where = epoch > 0 ? day[int(epoch / 3600)] : ""
+    if (where == "") { where = "legacy"; stamp = 0 } else stamp = epoch
+    for (i = 1; i <= held; i++)
+      printf "%s\t%d\t%d\t%d\t%s\t%s\n", where, stamp, seq, i, source, line[i]
+    held = 0
+  }
+
+  # The pending entry belongs to the file that is ending, so it is flushed
+  # before `source` moves on -- and an entry never spans two files, whatever
+  # the last line of this one ends in.
+  FILENAME != seen_file {
+    flush()
+    cont = 0
+    seen_file = FILENAME
+    n = split(FILENAME, parts, "/")
+    source = parts[n]
+    sub(/\.log$/, "", source)
+    sub(/\}$/, "", source)
+  }
+
+  cont == 0 {
+    flush()
+    seq++
+    epoch = 0
+    if ($0 ~ /^: [0-9]+:[0-9]*;/) {
+      epoch = substr($0, 3)
+      sub(/:.*/, "", epoch)
+      epoch += 0
+    }
+  }
+
+  {
+    line[++held] = $0
+    cont = (substr($0, length($0), 1) == "\\")
+  }
+
+  END { flush() }
+' $inputs |
+  LC_ALL=C sort -t'	' -k1,1 -k2,2n -k3,3n -k4,4n > $work/sorted
+
+# --- pass three: one copy of each entry, in the day it belongs to -----------
+#
+# The sort has put every copy of an entry in the same day and the same second,
+# so the duplicates a rotation left behind are near each other and the set of
+# distinct entries being remembered is one day's, not the directory's. It has
+# also put the copy from the oldest file first, which is the copy kept: for
+# every entry but the ones a rotation stranded, that is the original.
+
+typeset -a counts=( ${(f)"$(awk -v out=$staged '
+  BEGIN { FS = "\t" }
+
+  function text() {
+    p = index($0, "\t")
+    for (n = 0; n < 4; n++) p += index(substr($0, p + 1), "\t")
+    return substr($0, p + 1)
+  }
+
+  function flush() {
+    if (! held) return
+    if (! (buffer in seen)) {
+      seen[buffer] = 1
+      printf "%s\n", buffer > file
+      kept++
+      if (from != day) moved++
+    }
+    held = 0
+    buffer = ""
+  }
+
+  {
+    if ($1 != day) {
+      flush()
+      if (day != "") close(file)
+      day = $1
+      file = out "/" day ".log"
+      delete seen
+      files++
+    }
+
+    if ($3 != entry) { flush(); entry = $3; entries++; from = $5 }
+
+    buffer = held ? buffer "\n" text() : text()
+    held++
+  }
+
+  END {
+    flush()
+    print entries+0
+    print kept+0
+    print files+0
+    print moved+0
+  }
+' $work/sorted)"} )
+
+typeset -i entries_read=$counts[1] entries_kept=$counts[2]
+typeset -i files_written=$counts[3] entries_moved=$counts[4]
+
+typeset -a written=( $staged/*.log(N) )
+typeset -i write_bytes=0
+(( ! $#written )) || write_bytes=$(size_of $written)
+
+print -r -- "  $(count $entries_read entry entries) read, $(thousands $entries_kept) of them distinct"
+print -r -- "  $(count $(( entries_read - entries_kept )) "duplicate entry" "duplicate entries") dropped"
+if (( entries_moved )); then
+  print -r -- "  $(count $entries_moved entry entries) stranded in another day's file"
+fi
+print -r -- "  $(count $files_written file files) to write, $(bytes $write_bytes)"
+if (( read_bytes > write_bytes )); then
+  printf '  %d%% of the directory was the same commands written over again\n' \
+    $(( 100 - (100 * write_bytes / read_bytes) ))
+fi
+
+if (( $#ignored )); then
+  print
+  print -r -- "  left alone, not history this writes: ${(j:, :)${(@)ignored:t}}"
+fi
+
+if (( ! $#written )); then
+  print
+  print -r -- "nothing to write -- the history files hold no entries"
+  exit 0
+fi
+
+if [[ -z $apply ]]; then
+  print
+  print -r -- "nothing was changed; pass --apply to write it"
+  exit 0
+fi
+
+# --- swap it in -------------------------------------------------------------
+#
+# The originals move aside as a whole directory rather than file by file: the
+# repair either happened or it did not, and `mv` back is the way out of the
+# second case.
+
+backup=$dir.backup-$(strftime '%Y-%m-%dT%H-%M-%S' $EPOCHSECONDS)
+
+[[ ! -e $backup ]] || { print -u2 "backup directory exists already: $(tilde $backup)"; exit 1 }
+
+mkdir -p -- $backup
+mv -- $inputs $backup/
+
+# Copied rather than moved: $TMPDIR and $HOME are often different file systems,
+# and a rename across one fails.
+#
+# `chmod` without a `--`, which BSD chmod does not take. The mode is asserted
+# rather than left to the umask above, because this is the file the whole
+# history ends up in and nothing else here would notice it being readable.
+for f in $written; do
+  cp -- $f $dir/${f:t}
+  chmod 600 $dir/${f:t}
+done
+
+print
+print -r -- "  originals kept in $(tilde $backup)"
+print -r -- "  wrote $(count $#written file files), $(bytes $(size_of $dir/*.log(N)))"
+print
+print -r -- "open a new shell to pick the repaired history up"
