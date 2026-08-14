@@ -18,6 +18,7 @@ The naming rules that turn `rcm/bashrc` into `~/.bashrc` are
 | [`gitignore`](/rcm/gitignore) | `~/.gitignore` | global excludes, wired up via `core.excludesfile` |
 | [`ssh/config`](/rcm/ssh/config) | `~/.ssh/config` | keep-alives plus `Include`s for Colima, OrbStack and the per-user overrides |
 | [`Rprofile`](/rcm/Rprofile) | `~/.Rprofile` | R defaults: CRAN mirror selection, `usethis`/`testthat`/`pillar` options, per-project `.lib` and `Makevars` hooks |
+| [`tag-macos/R/`](/rcm/tag-macos/R) | `~/.R/` | what R compiles packages with, one file per profile and a dispatcher that picks between them ([`config/r-makevars/`](/handbook/config/r-makevars/README.md)) |
 | [`air.toml`](/rcm/air.toml) | `~/air.toml` | fallback config for the `air` R formatter — formats nothing unless a project overrides it |
 | [`editorconfig`](/rcm/editorconfig) | `~/.editorconfig` | indentation defaults |
 | [`vimrc`](/rcm/vimrc), [`tigrc`](/rcm/tigrc) | `~/.vimrc`, `~/.tigrc` | vim and tig |
