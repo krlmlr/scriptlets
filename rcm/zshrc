@@ -81,11 +81,14 @@ if false; then
 fi
 
 # ---------------------------------------------------------------------------
-# Eternal history: one file per day under ~/.zsh_history.d, kept forever.
+# Eternal history
 #
-# What each option is for, what the preload is bounded to, and which half of
-# this atuin takes over:
-# handbook/config/history/README.md in the scriptlets repository.
+# One file per day under a directory, so no single file grows without bound
+# and everything older stays on disk and greppable.
+#
+# Why the counts are kept rather than the commands deduplicated, why the day's
+# commands are on disk before any hook runs, and what `zsh-history-repair` is
+# for: handbook/config/history/README.md in the scriptlets repository.
 # ---------------------------------------------------------------------------
 HISTSIZE=10000000
 SAVEHIST=$HISTSIZE
@@ -95,7 +98,9 @@ setopt SHARE_HISTORY        # append as you go; pick up other shells' entries
 setopt HIST_IGNORE_SPACE    # a leading space keeps a command out of this one
 setopt HIST_IGNORE_DUPS     # collapse an immediate repeat
 setopt HIST_REDUCE_BLANKS
-unsetopt HIST_IGNORE_ALL_DUPS   # zsh's default already; kept as a statement
+
+# Deliberate: this is what keeps the frequency counts.
+unsetopt HIST_IGNORE_ALL_DUPS
 
 __zsh_history_dir="$HOME/.zsh_history.d"
 [[ -d $__zsh_history_dir ]] || mkdir -p "$__zsh_history_dir"
@@ -106,10 +111,12 @@ if [[ -f $HOME/.zsh_history && ! -e $__zsh_history_dir/legacy.log ]]; then
   mv "$HOME/.zsh_history" "$__zsh_history_dir/legacy.log"
 fi
 
-# strftime through prompt expansion -- what $(date) would say, without the
-# fork. The quotes keep the format's own braces out of the parameter
-# expansion's, which would otherwise end at the first of them and leave the
-# second in the file name.
+# ${(%):-"%D{...}"} is strftime via prompt expansion -- the same string $(date)
+# would give, without the fork. This runs at every prompt below, so a fork here
+# would be a fork per command.
+#
+# The format is quoted, and has to be: unquoted, the expansion ends at the first
+# } it meets, which is %D's own, and the second lands in the file name.
 HISTFILE="$__zsh_history_dir/${(%):-"%D{%Y-%m-%d}"}.log"
 
 # The newest few days into the in-memory list, oldest first so the list ends up
@@ -128,13 +135,16 @@ HISTFILE="$__zsh_history_dir/${(%):-"%D{%Y-%m-%d}"}.log"
   done
 }
 
-# Midnight rollover without a new shell. `fc -A` appends only what is new;
-# `fc -W` would write the whole preloaded list into today's file.
+# Roll over at midnight without needing a new shell: point HISTFILE at today and
+# nothing else.
+#
+# Nothing is written here, and nothing may be. SHARE_HISTORY has already appended
+# the day's commands to the day's file, and any write from this hook writes the
+# preloaded history with them -- `fc -A` does not exclude what it did not write.
 autoload -Uz add-zsh-hook
 __zsh_history_rotate() {
   local today="$__zsh_history_dir/${(%):-"%D{%Y-%m-%d}"}.log"
   [[ $HISTFILE == $today ]] && return
-  fc -A
   HISTFILE=$today
 }
 add-zsh-hook precmd __zsh_history_rotate
@@ -237,6 +247,32 @@ if [[ -z ${precmd_functions[(r)_ghostty_deferred_init]} ]]; then
 
     PS1=$'%{\e]133;A\a%}'$PS1$'%{\e]133;B\a%}'
   fi
+fi
+
+# ---------------------------------------------------------------------------
+# The working directory (OSC 7): what a terminal opens a new tab, split or
+# window in, and what it resolves a clicked file name against.
+#
+# Why the path is encoded a byte at a time, why it is sent from two hooks
+# rather than one, and what tmux does with it:
+# handbook/config/current-directory/README.md in the scriptlets repository.
+# ---------------------------------------------------------------------------
+if [[ -z ${precmd_functions[(r)_ghostty_deferred_init]} ]]; then
+  autoload -Uz add-zsh-hook
+
+  _osc7_report_cwd() {
+    # LC_ALL=C makes the pattern match one byte at a time, so a path outside
+    # ASCII becomes the UTF-8 bytes a file URL is made of rather than code
+    # points. Nothing here forks: $(( )) is arithmetic, not a command.
+    setopt localoptions extended_glob
+    local LC_ALL=C
+    local -a match mbegin mend
+    local encoded=${PWD//(#m)[^A-Za-z0-9_.!~*()\'\/-]/%${(l:2::0:)$(([##16]#MATCH))}}
+    print -n "\e]7;file://${HOST}${encoded}\a"
+  }
+
+  add-zsh-hook chpwd _osc7_report_cwd
+  add-zsh-hook precmd _osc7_report_cwd
 fi
 
 # ---------------------------------------------------------------------------

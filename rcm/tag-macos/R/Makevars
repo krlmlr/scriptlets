@@ -1,0 +1,25 @@
+# The user Makevars R reads before every compile, and all it does is choose
+# which of the profiles beside it to read.
+#
+# handbook/config/r-makevars/README.md.
+
+# `?=` would take an empty-but-set R_MAKEVARS_PROFILE as a choice of its own,
+# and go looking for a file whose name stops at the dot. This does not, so
+# `R_MAKEVARS_PROFILE=` means the default rather than an error.
+ifeq ($(strip $(R_MAKEVARS_PROFILE)),)
+R_MAKEVARS_PROFILE := debug
+endif
+
+R_MAKEVARS_PROFILE_FILE := $(HOME)/.R/Makevars.$(R_MAKEVARS_PROFILE)
+
+# A name with no file behind it is a typo, and passing over it quietly would
+# mean a build with none of the flags below and nothing to say so.
+ifeq ($(wildcard $(R_MAKEVARS_PROFILE_FILE)),)
+$(error no such R Makevars profile: R_MAKEVARS_PROFILE=$(R_MAKEVARS_PROFILE) wants $(R_MAKEVARS_PROFILE_FILE))
+endif
+
+# The profile chooses compilers and flags; common says where the toolchain is
+# and wraps whatever the profile chose in ccache. That wrapping has to see the
+# choice already made, which is why common is read second.
+include $(R_MAKEVARS_PROFILE_FILE)
+include $(HOME)/.R/Makevars.common

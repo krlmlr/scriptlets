@@ -146,16 +146,19 @@ and they run in name order:
   which the audit truncates —
   mtimes cannot tell a re-audit within the same second
   from no audit at all.
-- `61-zsh-history`: an interactive zsh reads the newest day-files out of
-  `~/.zsh_history.d` and stops
-  ([`config/history/`](/handbook/config/history/README.md)):
-  the newest is there, one beyond the window is not,
-  the migrated single-file history is not read at all,
-  today's file is read once rather than twice,
-  and the name it is read from is the day and nothing else.
-  The history is fabricated, dated in 2020 so that it sorts below whatever
-  today is, and the question goes in on a pipe —
-  `zsh -ic` never reaches a prompt, which is where today's own file arrives.
+- `61-zsh-history`: the day-files
+  ([`config/history/`](/handbook/config/history/README.md))
+  are named for the day and nothing else — asked twice, because the date is
+  spelled twice and the rotation hook quietly corrects the other spelling.
+  A prior day's commands are in the in-memory list and today's file is read
+  once rather than twice; the preload reaches the newest day-files and stops,
+  leaving the ones beyond the window and the migrated single-file history
+  unread, and the environment can say how many days to take.
+  The rotation hook writes nothing, which is the whole of its job.
+  `zsh-history-repair` puts a directory a writing hook left behind back,
+  each entry once, in the day it was run on.
+  The history is fabricated and the question goes in on a pipe:
+  `zsh -ic` never reaches a prompt, and the hooks run from `precmd`.
 - `62-zsh-prompt-marks`: the prompt marks
   ([`config/prompt-marks/`](/handbook/config/prompt-marks/README.md))
   are the bytes they should be, in the order they should be in;
@@ -169,6 +172,15 @@ and they run in name order:
   a prompt with escapes switched off is left alone,
   and a shell with Ghostty's integration loaded leaves the marking to it
   while a shell started inside that one marks for itself.
+- `63-zsh-cwd-report`: the working directory
+  ([`config/current-directory/`](/handbook/config/current-directory/README.md))
+  reaches the terminal as a file URL that names the host,
+  with the path percent-encoded a byte at a time —
+  a directory outside ASCII is what separates that from the encoding
+  that only ever works on this machine.
+  A change of directory is reported twice, once as it happens
+  and once at the prompt after it,
+  and the same Ghostty pair as above says who reports at all.
 - `65-zsh-startup-profile`: a shell that reaches a prompt is timed,
   recorded once and broken down by startup file;
   one that does not — a script, a `zsh -c`, a benchmark run —
