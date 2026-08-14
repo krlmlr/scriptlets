@@ -1,0 +1,10 @@
+# Unoptimised, with debug information: what a debugger needs to name a line.
+# The default profile, and the one Makevars.llvm builds on.
+#
+# handbook/config/r-makevars/README.md.
+
+CFLAGS     = -O0 -g
+CXXFLAGS   = -O0 -g
+CXX11FLAGS = -O0 -g
+CXX14FLAGS = -O0 -g
+CXX17FLAGS = -O0 -g

@@ -69,6 +69,7 @@ Windows is out of scope.
 | `bin/soffice-macos` — drives `/Applications/LibreOffice.app` | |
 | `bash_aliases_os` — `csv`/`csv2`/`tsv`, `bit` completion | `bash_aliases_os` — `pxc`, `xo`, the `xclip` key bindings, `/usr/lib/ccache` |
 | `homebrew/brew.env` — Homebrew's settings, in Homebrew's own format | |
+| `R/` — what R compiles with, Homebrew's toolchain throughout ([`config/r-makevars/`](/handbook/config/r-makevars/README.md)) | |
 
 The shared [`rcm/bash_aliases`](/rcm/bash_aliases) sources
 `~/.bash_aliases_os` if it exists,

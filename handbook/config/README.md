@@ -13,3 +13,4 @@ and how anything gets there at all is
 * [`prompt-marks/`](prompt-marks/) — every prompt, command and exit status marked for the terminal
 * [`current-directory/`](current-directory/) — the directory the terminal opens the next tab in
 * [`editor/`](editor/) — the editor every tool is handed, and the widget that hands it the command line
+* [`r-makevars/`](r-makevars/) — what R compiles with, switched per build by an environment variable

@@ -1,0 +1,15 @@
+# Homebrew's LLVM in place of the clang the Command Line Tools carry, which
+# trails it by some way and is patched besides.
+#
+# The flags are debug's, read from the file that owns them, so that the two
+# profiles cannot drift apart -- this one is about the compiler alone.
+#
+# handbook/config/r-makevars/README.md.
+
+CC      = /opt/homebrew/opt/llvm/bin/clang
+CXX     = /opt/homebrew/opt/llvm/bin/clang++ -std=gnu++17
+CXX11   = /opt/homebrew/opt/llvm/bin/clang++ -std=gnu++11
+CXX14   = /opt/homebrew/opt/llvm/bin/clang++ -std=gnu++14
+CXX17   = /opt/homebrew/opt/llvm/bin/clang++ -std=gnu++17
+
+include $(HOME)/.R/Makevars.debug

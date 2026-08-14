@@ -1,0 +1,25 @@
+# What every profile shares: where the toolchain is, and what wraps it.
+# ~/.R/Makevars reads this after the profile it was asked for.
+#
+# handbook/config/r-makevars/README.md.
+
+# Homebrew's headers and libraries rather than the Command Line Tools' alone.
+CPPFLAGS = -I/opt/homebrew/include
+LDFLAGS = -L/opt/homebrew/lib -fuse-ld=/opt/homebrew/bin/ld64.lld
+
+FC      = /opt/homebrew/bin/gfortran
+F77     = /opt/homebrew/bin/gfortran
+F95     = /opt/homebrew/bin/gfortran
+FLIBS   = -L/opt/homebrew/lib/gcc
+
+# Simply expanded, and so the one thing here that needs the profile to have
+# been read first: $(CC) is whatever the profile chose, or Makeconf's where it
+# chose nothing.
+CC      := ccache $(CC)
+CXX     := ccache $(CXX)
+CXX11   := ccache $(CXX11)
+CXX14   := ccache $(CXX14)
+CXX17   := ccache $(CXX17)
+
+# Appended rather than assigned, so that flags already in flight survive.
+MAKEFLAGS += -j8
