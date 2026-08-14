@@ -152,6 +152,61 @@ autoload -Uz bashcompinit && bashcompinit
 [[ -r $HOME/.bash_aliases ]] && source "$HOME/.bash_aliases"
 
 # ---------------------------------------------------------------------------
+# mise: the tools a directory asks for, on the PATH -- activated from a
+# generated script kept on disk rather than produced by a process at every
+# shell. The bash half of this is in ~/.bashrc and works the same way.
+#
+# After the bash bridge above on purpose: `mise activate` records the PATH it
+# found as $__MISE_ORIG_PATH, which is what a later `mise deactivate` puts
+# back, and ~/.bash_aliases_os adds to the PATH on Linux.
+#
+# What makes the file stale, why it is named for the binary it came from, and
+# how to force a rewrite by hand:
+# handbook/config/mise/README.md in the scriptlets repository.
+# ---------------------------------------------------------------------------
+if (( $+commands[mise] )); then
+    # Named for the binary that generated it, because `mise activate` writes
+    # that path into the script: a second mise at another path -- Homebrew's
+    # beside the one mise.run installed -- gets a file of its own rather than
+    # the first one's, whose hardcoded path it would otherwise keep calling.
+    __mise_init=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/mise-activate-${${commands[mise]#/}//\//-}.zsh
+
+    if [[ ! -s $__mise_init || $commands[mise] -nt $__mise_init ]]; then
+        # An anonymous function, so the names below are gone before the
+        # generated script is sourced -- which happens at the outer level, the
+        # way `eval "$(mise activate zsh)"` would.
+        () {
+            local new=$1.$$
+            # Quiet, and giving up rather than writing into a directory
+            # that is not there: a cache that cannot be made is meant to cost
+            # a shell its mise, and a redirection zsh cannot honour is a
+            # complaint before every prompt.
+            [[ -d ${1:h} ]] || mkdir -p ${1:h} 2>/dev/null || return
+
+            # -s and zcompile are what "good enough to publish" means: a write
+            # cut short leaves a script that does not parse, and the file being
+            # replaced is one every interactive shell sources.
+            if ! {
+                mise activate zsh >| $new 2>/dev/null &&
+                    [[ -s $new ]] &&
+                    zcompile -R -- $new 2>/dev/null &&
+                    mv -f $new.zwc $1.zwc &&
+                    mv -f $new $1
+            }; then
+                rm -f $new $new.zwc
+            fi
+        } $__mise_init
+    fi
+
+    # Guarded on the same test rather than on the file's existence, so a
+    # machine where it could never be written -- a read-only cache directory,
+    # a mise that cannot run -- gets a shell without mise rather than an error
+    # before every prompt.
+    [[ -s $__mise_init ]] && source $__mise_init
+    unset __mise_init
+fi
+
+# ---------------------------------------------------------------------------
 # Editor and aliases
 # ---------------------------------------------------------------------------
 # The default is ~/.profile's, for every shell

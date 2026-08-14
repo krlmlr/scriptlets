@@ -211,6 +211,56 @@ if [ -d /opt/homebrew ]; then
   export PATH=/opt/homebrew/bin:$PATH
 fi
 
+# ---------------------------------------------------------------------------
+# mise: the tools a directory asks for, on the PATH -- activated from a
+# generated script kept on disk rather than produced by a process at every
+# shell. The zsh half of this is in ~/.zshrc and works the same way.
+#
+# Last of the PATH, and after the block above, on purpose: `mise activate`
+# records the PATH it found as $__MISE_ORIG_PATH, which is what a later
+# `mise deactivate` puts back, so it should see the finished one.
+#
+# What makes the file stale, why it is named for the binary it came from, and
+# how to force a rewrite by hand:
+# handbook/config/mise/README.md in the scriptlets repository.
+# ---------------------------------------------------------------------------
+if command -v mise >/dev/null 2>&1; then
+    # `type -P` searches the PATH even once mise's own shell function exists,
+    # and forks nothing to do it. The path is part of the file name because
+    # `mise activate` writes it into the script: a second mise elsewhere gets
+    # a file of its own rather than one that calls the first one forever.
+    __mise_bin=$(type -P mise)
+    __mise_key=${__mise_bin#/}
+    __mise_init="${XDG_CACHE_HOME:-$HOME/.cache}/bash/mise-activate-${__mise_key//\//-}.bash"
+
+    if [[ ! -s $__mise_init || $__mise_bin -nt $__mise_init ]]; then
+        # Quiet, and the directory is tested rather than assumed: a cache
+        # that cannot be made is meant to cost the shell its mise, and a
+        # redirection into a directory that is not there is a complaint
+        # before every prompt.
+        mkdir -p "${__mise_init%/*}" 2>/dev/null
+        __mise_new="$__mise_init.$$"
+
+        # `bash -n` is a fork, and it happens only on the rewrite -- which is
+        # once per mise, not once per shell. A write cut short would otherwise
+        # be a syntax error before every prompt from here on.
+        if [ -d "${__mise_init%/*}" ] &&
+            mise activate bash >|"$__mise_new" 2>/dev/null &&
+            [ -s "$__mise_new" ] &&
+            bash -n "$__mise_new" 2>/dev/null; then
+            mv -f "$__mise_new" "$__mise_init"
+        else
+            rm -f "$__mise_new"
+        fi
+    fi
+
+    # On the same test rather than on the file's existence: where it could
+    # never be written, this is a shell without mise rather than an error
+    # before every prompt.
+    [ -s "$__mise_init" ] && . "$__mise_init"
+    unset __mise_bin __mise_key __mise_init __mise_new
+fi
+
 # rig appends this line to every startup file it knows about,
 # and only ever checks that the line is there:
 # ~/.profile sources rigenv once, for every shell, so this copy stays off.
