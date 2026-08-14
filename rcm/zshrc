@@ -86,9 +86,9 @@ fi
 # One file per day under a directory, so no single file grows without bound
 # and everything older stays on disk and greppable.
 #
-# What bash needed PROMPT_COMMAND for, zsh does natively: SHARE_HISTORY
-# appends each command as it is entered and imports what other shells have
-# appended, so concurrent sessions stay in sync with no hook.
+# Why the counts are kept rather than the commands deduplicated, why the day's
+# commands are on disk before any hook runs, and what `zsh-history-repair` is
+# for: handbook/config/history/README.md in the scriptlets repository.
 # ---------------------------------------------------------------------------
 HISTSIZE=10000000
 SAVEHIST=$HISTSIZE
@@ -99,10 +99,7 @@ setopt HIST_IGNORE_SPACE    # a leading space keeps a command out
 setopt HIST_IGNORE_DUPS     # collapse an immediate repeat
 setopt HIST_REDUCE_BLANKS
 
-# Deliberate, and the reason is the whole point of keeping history forever:
-# HIST_IGNORE_ALL_DUPS keeps only the most recent instance of a command, which
-# destroys the frequency information. "Which commands do I run enough that they
-# should be scripts in ~/bin" is a question only the counts can answer.
+# Deliberate: this is what keeps the frequency counts.
 unsetopt HIST_IGNORE_ALL_DUPS
 
 __zsh_history_dir="$HOME/.zsh_history.d"
@@ -114,10 +111,13 @@ if [[ -f $HOME/.zsh_history && ! -e $__zsh_history_dir/legacy.log ]]; then
   mv "$HOME/.zsh_history" "$__zsh_history_dir/legacy.log"
 fi
 
-# ${(%):-%D{...}} is strftime via prompt expansion -- the same string $(date)
+# ${(%):-"%D{...}"} is strftime via prompt expansion -- the same string $(date)
 # would give, without the fork. This runs at every prompt below, so a fork here
 # would be a fork per command.
-HISTFILE="$__zsh_history_dir/${(%):-%D{%Y-%m-%d}}.log"
+#
+# The format is quoted, and has to be: unquoted, the expansion ends at the first
+# } it meets, which is %D's own, and the second lands in the file name.
+HISTFILE="$__zsh_history_dir/${(%):-"%D{%Y-%m-%d}"}.log"
 
 # Pull prior days into the in-memory list so Ctrl-R reaches them. Today's file
 # is skipped: zsh loads $HISTFILE itself, and reading it twice duplicates every
@@ -130,14 +130,16 @@ HISTFILE="$__zsh_history_dir/${(%):-%D{%Y-%m-%d}}.log"
   done
 }
 
-# Roll over at midnight without needing a new shell. `fc -A` appends only what
-# is new -- never `fc -W`, which would write the entire preloaded history into
-# today's file and duplicate every prior day.
+# Roll over at midnight without needing a new shell: point HISTFILE at today and
+# nothing else.
+#
+# Nothing is written here, and nothing may be. SHARE_HISTORY has already appended
+# the day's commands to the day's file, and any write from this hook writes the
+# preloaded history with them -- `fc -A` does not exclude what it did not write.
 autoload -Uz add-zsh-hook
 __zsh_history_rotate() {
-  local today="$__zsh_history_dir/${(%):-%D{%Y-%m-%d}}.log"
+  local today="$__zsh_history_dir/${(%):-"%D{%Y-%m-%d}"}.log"
   [[ $HISTFILE == $today ]] && return
-  fc -A
   HISTFILE=$today
 }
 add-zsh-hook precmd __zsh_history_rotate

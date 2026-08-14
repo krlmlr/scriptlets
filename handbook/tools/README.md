@@ -168,6 +168,15 @@ the three views, and the profiling they sit on, are
 [`config/zsh-startup/`](/handbook/config/zsh-startup/README.md)'s,
 and `-h` prints the commentary in full.
 
+### zsh history
+
+**`zsh-history-repair`** — leave a per-day history directory holding each
+entry once, in the day it was run on;
+it reports and changes nothing until `--apply`,
+and keeps the originals when it does.
+The layout it repairs to, and what a repair cannot recover, are
+[`config/history/`](/handbook/config/history/README.md)'s.
+
 ### R
 
 **`rh`** — start RStudio with an `.Rproj` project file found in the
