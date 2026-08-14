@@ -67,6 +67,7 @@ Windows is out of scope.
 | `finicky.js` — browser picker, macOS-only app | `toprc` — `top`'s Linux configuration format |
 | `bin/n`, `bin/bkg` — notify via `terminal-notifier` | `screenrc-xpra` — starts an xpra X11 session |
 | `bin/soffice-macos` — drives `/Applications/LibreOffice.app` | |
+| `tmux-clipboard.conf` — pipes a tmux copy through `pbcopy` | |
 | `bash_aliases_os` — `csv`/`csv2`/`tsv`, `bit` completion | `bash_aliases_os` — `pxc`, `xo`, the `xclip` key bindings, `/usr/lib/ccache` |
 | `homebrew/brew.env` — Homebrew's settings, in Homebrew's own format | |
 | `R/` — what R compiles with, Homebrew's toolchain throughout ([`config/r-makevars/`](/handbook/config/r-makevars/README.md)) | |

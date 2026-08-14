@@ -15,3 +15,4 @@ and how anything gets there at all is
 * [`history/`](history/) — every command kept, one file per day, and how a directory of them is repaired
 * [`editor/`](editor/) — the editor every tool is handed, and the widget that hands it the command line
 * [`r-makevars/`](r-makevars/) — what R compiles with, switched per build by an environment variable
+* [`tmux/`](tmux/) — copy mode that knows where the prompts are

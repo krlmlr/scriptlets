@@ -214,6 +214,19 @@ and they run in name order:
   because Positron is macOS-only and on neither CI runner,
   and brings its own home directory,
   the throw-away one being what the other checks read.
+- `80-tmux-prompt-keys`: the copy-mode keys
+  ([`config/tmux/`](/handbook/config/tmux/README.md))
+  are pressed rather than described.
+  A client is attached to a pane whose prompts are marked;
+  `prefix o` copies the output of the last command,
+  `[` and `]` walk between the prompts,
+  and a `prefix o` with nothing to copy — a command still running —
+  leaves the clipboard as it found it.
+  Running the command list by hand instead
+  would pass just as well with the binding deleted.
+  The prompts are synthetic, a script printing what a shell would print,
+  so tmux's half is checked whatever the machine's login shell is.
+  Skipped where tmux is missing or older than 3.4.
 - `90-force`: `mise run force` replaces the files rcm skipped,
   and the scripts are still found afterwards.
   It runs last because it is the one check

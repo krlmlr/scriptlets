@@ -25,6 +25,7 @@ The naming rules that turn `rcm/bashrc` into `~/.bashrc` are
 | [`log/dummy`](/rcm/log/dummy) | `~/log/dummy` | placeholder that brings `~/log` into existence |
 | [`tag-linux/toprc`](/rcm/tag-linux/toprc) | `~/.toprc` | top; the format is the Linux one, so it installs there only |
 | [`screenrc`](/rcm/screenrc), [`tag-linux/screenrc-xpra`](/rcm/tag-linux/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window on Linux, and is a placeholder on macOS |
+| [`tmux.conf`](/rcm/tmux.conf), [`tag-macos/tmux-clipboard.conf`](/rcm/tag-macos/tmux-clipboard.conf) | `~/.tmux.conf`, `~/.tmux-clipboard.conf` | tmux: [copy mode that knows where the prompts are](/handbook/config/tmux/README.md); the second names `pbcopy`, and ships on macOS alone |
 | [`config/diffuse/diffuserc`](/rcm/config/diffuse/diffuserc) | `~/.config/diffuse/diffuserc` | dark colour scheme for the Diffuse merge tool |
 | [`tag-macos/homebrew/brew.env`](/rcm/tag-macos/homebrew/brew.env) | `~/.homebrew/brew.env` | Homebrew's own environment file: how stale an index it tolerates, and that it may install dependencies unasked; macOS only |
 | [`tag-macos/finicky.js`](/rcm/tag-macos/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky; macOS only |
