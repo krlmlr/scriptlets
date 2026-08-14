@@ -70,6 +70,16 @@ brew install terminal-notifier                    # n and bkg, macOS alone
 brew install expect imagemagick jq mplayer wget   # under review
 ```
 
+None of those lines stops to ask,
+even where a name drags in a dependency that is not installed yet:
+[`rcm/tag-macos/homebrew/brew.env`](/rcm/tag-macos/homebrew/brew.env)
+sets `HOMEBREW_NO_ASK`,
+and pins how stale a formula index `brew` will work from.
+It is Homebrew's own environment file, installed as `~/.homebrew/brew.env`,
+read by `brew` itself rather than by a shell —
+which is why the settings live there
+and not among the aliases in `~/.bash_aliases_os`.
+
 **Debian and Ubuntu.**
 
 ```sh
