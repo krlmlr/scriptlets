@@ -92,6 +92,47 @@ assert_equal "today's file is read once, not twice" \
     "1" \
     "$(ask 'print "probe=$(fc -l 1 | grep -c seeded-into-today)"')"
 
+# --- how far back the preload reaches ---------------------------------------
+#
+# Every day-file was read at every shell start, and the directory gains one a
+# day, so the read grew with the account's age for entries the arrow keys never
+# reach. It is bounded now, and the bound is what is checked: a slower shell
+# fails nothing on its own.
+#
+# Thirty-one seeded days, and today's file counts toward the window too, so the
+# newest thirty are today and the twenty-nine before it -- which reaches back
+# to the third of the seeded month and no further.
+
+rm -rf "$dir"
+
+day=1
+while [ "$day" -le 31 ]; do
+    seed "2020-01-$(printf '%02d' "$day")" \
+        "$((1577880000 + (day - 1) * 86400))" \
+        "echo seeded-day-$(printf '%02d' "$day")"
+    day=$((day + 1))
+done
+
+printf ': %s:0;%s\n' 1500000000 'echo seeded-from-legacy' >>"$dir/legacy.log"
+
+assert_equal "the newest day-files are read" \
+    "1 1" \
+    "$(ask 'print "probe=$(fc -l 1 | grep -c seeded-day-31) $(fc -l 1 | grep -c seeded-day-03)"')"
+
+assert_equal "the days beyond the window are not" \
+    "0 0" \
+    "$(ask 'print "probe=$(fc -l 1 | grep -c seeded-day-02) $(fc -l 1 | grep -c seeded-day-01)"')"
+
+assert_equal "and neither is the migrated single-file history" \
+    "0" \
+    "$(ask 'print "probe=$(fc -l 1 | grep -c seeded-from-legacy)"')"
+
+# The window is a number a shell can be told, and the default is the fact worth
+# pinning: the shell says which it used by what it read.
+assert_equal "the environment sets how many days are read" \
+    "1 0" \
+    "$(ZSH_HISTORY_PRELOAD_DAYS=3 ask 'print "probe=$(fc -l 1 | grep -c seeded-day-30) $(fc -l 1 | grep -c seeded-day-29)"')"
+
 # --- the rotation hook writes nothing ---------------------------------------
 #
 # $HISTFILE is pointed at a day that is not today -- the state a shell is in

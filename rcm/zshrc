@@ -95,7 +95,7 @@ SAVEHIST=$HISTSIZE
 
 setopt EXTENDED_HISTORY     # `: <epoch>:<elapsed>;<cmd>` -- bash's HISTTIMEFORMAT
 setopt SHARE_HISTORY        # append as you go; pick up other shells' entries
-setopt HIST_IGNORE_SPACE    # a leading space keeps a command out
+setopt HIST_IGNORE_SPACE    # a leading space keeps a command out of this one
 setopt HIST_IGNORE_DUPS     # collapse an immediate repeat
 setopt HIST_REDUCE_BLANKS
 
@@ -119,12 +119,17 @@ fi
 # } it meets, which is %D's own, and the second lands in the file name.
 HISTFILE="$__zsh_history_dir/${(%):-"%D{%Y-%m-%d}"}.log"
 
-# Pull prior days into the in-memory list so Ctrl-R reaches them. Today's file
-# is skipped: zsh loads $HISTFILE itself, and reading it twice duplicates every
-# entry. (N) is null-glob, so an empty directory is not an error.
+# The newest few days into the in-memory list, oldest first so the list ends up
+# in the order the commands were run. Today's file is among them and skipped:
+# zsh loads $HISTFILE itself, and reading it twice duplicates every entry.
+# legacy.log is not preloaded at all.
 () {
+  local -a recent=(
+    "$__zsh_history_dir"/[0-9]*.log(NOn[1,${ZSH_HISTORY_PRELOAD_DAYS:-30}])
+  )
   local f
-  for f in "$__zsh_history_dir"/legacy.log(N) "$__zsh_history_dir"/[0-9]*.log(N); do
+
+  for f in ${(Oa)recent}; do
     [[ $f == $HISTFILE ]] && continue
     fc -R "$f"
   done
@@ -143,6 +148,41 @@ __zsh_history_rotate() {
   HISTFILE=$today
 }
 add-zsh-hook precmd __zsh_history_rotate
+
+# ---------------------------------------------------------------------------
+# atuin: Ctrl-R over every command ever run, searched from a generated script
+# kept on disk rather than produced by a process at every shell.
+#
+# What makes the file stale, why the rewrite is staged through a file of its
+# own, and how to force one by hand:
+# handbook/config/atuin/README.md in the scriptlets repository.
+# ---------------------------------------------------------------------------
+if (( $+commands[atuin] )); then
+  () {
+    local init=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/atuin-init.zsh
+    local config=${XDG_CONFIG_HOME:-$HOME/.config}/atuin/config.toml
+    [[ -d ${init:h} ]] || mkdir -p ${init:h}
+
+    if [[ ! -s $init || $commands[atuin] -nt $init || $config -nt $init ]]; then
+      local new=$init.$$
+
+      # -s and zcompile are what "good enough to publish" means: `atuin init`
+      # exits 0 with an empty stdout when its own paths are broken, and a
+      # write cut short leaves a script that does not parse.
+      if ! {
+        atuin init zsh --disable-up-arrow >| $new &&
+          [[ -s $new ]] &&
+          zcompile -R -- $new 2>/dev/null &&
+          mv -f $new.zwc $init.zwc &&
+          mv -f $new $init
+      }; then
+        rm -f $new $new.zwc
+      fi
+    fi
+
+    [[ -s $init ]] && source $init
+  }
+fi
 
 # ---------------------------------------------------------------------------
 # The bash bridge
