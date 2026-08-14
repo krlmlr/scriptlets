@@ -181,6 +181,22 @@ and they run in name order:
   A change of directory is reported twice, once as it happens
   and once at the prompt after it,
   and the same Ghostty pair as above says who reports at all.
+- `64-bash-prompt-marks`: the same marks from bash
+  ([`config/prompt-marks/`](/handbook/config/prompt-marks/README.md)),
+  which sends three of the four and sends them from elsewhere:
+  a command line is marked start to finish with its status,
+  the status is the command line's rather than the history sync's,
+  a bare Enter is not a command that ended,
+  and a shell Ghostty's integration is sourcing leaves the marking to it
+  while a shell started inside that one marks for itself.
+  An interactive bash reading a pipe runs its prompt command and expands
+  `PS0`, which is what lets the chain be checked without a terminal.
+  On a bash too old for `PS0` — the `/bin/bash` macOS ships — the check
+  follows the degradation rather than skipping,
+  and asserts that the prompts are marked and the command is not.
+  It reads the file this repository ships rather than `~/.bashrc`:
+  the throw-away home keeps the stock one it was seeded with
+  until `mise run force` replaces it.
 - `65-zsh-startup-profile`: a shell that reaches a prompt is timed,
   recorded once and broken down by startup file;
   one that does not — a script, a `zsh -c`, a benchmark run —
