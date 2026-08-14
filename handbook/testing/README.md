@@ -179,7 +179,8 @@ and they run in name order:
   ([`config/mise/`](/handbook/config/mise/README.md))
   is written to a file and sourced from there
   rather than produced at every shell,
-  rewritten when the binary that generated it is newer,
+  rewritten unless the file is the newer of the two,
+  so that a mise it cannot be told apart from counts as an upgrade,
   kept in a file named for that binary
   so a second mise elsewhere gets one of its own,
   never replaced by an empty or half-written one,

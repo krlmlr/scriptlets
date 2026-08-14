@@ -233,7 +233,13 @@ if command -v mise >/dev/null 2>&1; then
     __mise_key=${__mise_bin#/}
     __mise_init="${XDG_CACHE_HOME:-$HOME/.cache}/bash/mise-activate-${__mise_key//\//-}.bash"
 
-    if [[ ! -s $__mise_init || $__mise_bin -nt $__mise_init ]]; then
+    # The question is whether the file is newer than mise, rather than whether
+    # mise is newer than the file, so that a tie counts as an upgrade. macOS's
+    # own bash compares whole seconds: a mise replaced in the same second the
+    # file was written would otherwise never be newer than it, and the file
+    # would stand until someone deleted it by hand. A tie the other way costs
+    # one rewrite, and only until the clock moves on.
+    if [[ ! -s $__mise_init || ! $__mise_init -nt $__mise_bin ]]; then
         # Quiet, and the directory is tested rather than assumed: a cache
         # that cannot be made is meant to cost the shell its mise, and a
         # redirection into a directory that is not there is a complaint
@@ -250,7 +256,10 @@ if command -v mise >/dev/null 2>&1; then
             bash -n "$__mise_new" 2>/dev/null; then
             mv -f "$__mise_new" "$__mise_init"
         else
-            rm -f "$__mise_new"
+            # Quiet for the same reason the mkdir is: where the cache
+            # directory could not be made, BSD `rm -f` still reports the path
+            # below it as not a directory, once before every prompt.
+            rm -f "$__mise_new" 2>/dev/null
         fi
     fi
 

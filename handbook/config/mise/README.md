@@ -35,10 +35,20 @@ for a mise at `/usr/local/bin/mise` —
 so a second mise, Homebrew's beside the one `mise.run` installed,
 generates and reads a file of its own.
 
-**A rewrite is due when the binary is newer than the file.**
+**A rewrite is due unless the file is newer than the binary.**
 That is one stat of a path the shell has already resolved,
 against a file it is about to read;
 neither shell forks to decide.
+The comparison is that way round, rather than asking whether the binary
+is the newer of the two,
+so that a tie counts as an upgrade:
+macOS's own bash compares whole seconds,
+and a mise replaced in the same second the file was written
+would otherwise never be newer than it,
+leaving the pair stuck with the older script for good.
+A tie the other way costs one rewrite,
+and only until the clock moves on.
+
 An mtime is a proxy for a version rather than a promise of one:
 a mise unpacked from an archive can arrive
 with an mtime older than the file it ought to replace,

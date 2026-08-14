@@ -173,7 +173,11 @@ if (( $+commands[mise] )); then
     # the first one's, whose hardcoded path it would otherwise keep calling.
     __mise_init=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/mise-activate-${${commands[mise]#/}//\//-}.zsh
 
-    if [[ ! -s $__mise_init || $commands[mise] -nt $__mise_init ]]; then
+    # Whether the file is newer than mise, rather than whether mise is newer
+    # than the file, so that a tie counts as an upgrade -- the spelling the
+    # bash half needs, where whole seconds are all the comparison has, and the
+    # one both should be read with.
+    if [[ ! -s $__mise_init || ! $__mise_init -nt $commands[mise] ]]; then
         # An anonymous function, so the names below are gone before the
         # generated script is sourced -- which happens at the outer level, the
         # way `eval "$(mise activate zsh)"` would.

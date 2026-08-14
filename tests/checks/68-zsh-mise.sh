@@ -1,7 +1,7 @@
 #!/bin/sh
 # mise's activation in zsh: the generated script is written to a file and
-# sourced from there, rewritten when the binary that generated it is newer than
-# the file, named for that binary, never replaced by a broken one, and missed
+# sourced from there, rewritten unless the file is newer than the binary that
+# generated it, named for that binary, never replaced by a broken one, and missed
 # by nobody where mise is not on the PATH.
 #
 # A stand-in `mise` on the PATH does the talking. It counts its own runs,
@@ -111,6 +111,12 @@ else
         "$(ls -l "$cache" "$cache.zwc" 2>&1)"
 fi
 
+# The stand-in and the file it generates are written moments apart, and a shell
+# that compares whole seconds cannot tell such a pair apart -- which the rule in
+# the startup file reads as an upgrade. Dated into the past, the stand-in is
+# unambiguously the older of the two, which is the case asked about here.
+touch -t 202001010000 "$standin/mise"
+
 before=$(runs "$standin/mise")
 probe "$standin" >/dev/null
 probe "$standin" >/dev/null
@@ -126,6 +132,16 @@ touch "$standin/mise"
 probe "$standin" >/dev/null
 
 assert_equal "a mise newer than the file makes the next shell rewrite it" \
+    "$((before + 1))" "$(runs "$standin/mise")"
+
+# And a mise the file cannot be told apart from counts as an upgrade too --
+# same mtime to the second, which is all the comparison has on macOS. The
+# other reading would leave such a pair stuck with the older script for good.
+before=$(runs "$standin/mise")
+touch -r "$cache" "$standin/mise"
+probe "$standin" >/dev/null
+
+assert_equal "so does one the file cannot be told apart from" \
     "$((before + 1))" "$(runs "$standin/mise")"
 
 # ---------------------------------------------------------------------------
