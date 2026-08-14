@@ -1,0 +1,22 @@
+# Homebrew's GCC in place of clang, with the uninitialised-variable warnings
+# promoted to errors: the profile for what clang does not diagnose.
+#
+# handbook/config/r-makevars/README.md.
+
+CC      = gcc-15
+CXX     = g++-15 -std=gnu++17
+CXX11   = g++-15 -std=gnu++11
+CXX14   = g++-15 -std=gnu++14
+CXX17   = g++-15 -std=gnu++17
+
+# The point of the profile, and so the same set for every language.
+GCC_WARNINGS = -Wall -Wuninitialized -Wmaybe-uninitialized \
+               -Werror=uninitialized -Werror=maybe-uninitialized
+
+# -fpermissive is a C++ option, and GCC says so on every C file it is handed
+# for -- which is why CFLAGS is the one line here without it.
+CFLAGS     = -O2 $(GCC_WARNINGS)
+CXXFLAGS   = -O2 $(GCC_WARNINGS) -fpermissive
+CXX11FLAGS = -O2 $(GCC_WARNINGS) -fpermissive
+CXX14FLAGS = -O2 $(GCC_WARNINGS) -fpermissive
+CXX17FLAGS = -O2 $(GCC_WARNINGS) -fpermissive

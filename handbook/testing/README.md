@@ -149,7 +149,16 @@ and they run in name order:
   a prompt with escapes switched off is left alone,
   and a shell with Ghostty's integration loaded leaves the marking to it
   while a shell started inside that one marks for itself.
-- `63-bash-prompt-marks`: the same marks from bash
+- `63-zsh-cwd-report`: the working directory
+  ([`config/current-directory/`](/handbook/config/current-directory/README.md))
+  reaches the terminal as a file URL that names the host,
+  with the path percent-encoded a byte at a time —
+  a directory outside ASCII is what separates that from the encoding
+  that only ever works on this machine.
+  A change of directory is reported twice, once as it happens
+  and once at the prompt after it,
+  and the same Ghostty pair as above says who reports at all.
+- `64-bash-prompt-marks`: the same marks from bash
   ([`config/prompt-marks/`](/handbook/config/prompt-marks/README.md)),
   which sends three of the four and sends them from elsewhere:
   a command line is marked start to finish with its status,

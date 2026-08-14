@@ -17,6 +17,11 @@ tab_width = 4
 [DESCRIPTION]
 trim_trailing_whitespace = false
 
+# Trailing whitespace and the final newline are part of a patch's content
+[*.{patch,diff,rej}]
+insert_final_newline = false
+trim_trailing_whitespace = false
+
 # Tab indentation (no size specified)
 [Makefile]
 indent_style = tab
