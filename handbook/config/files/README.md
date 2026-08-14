@@ -25,6 +25,7 @@ The naming rules that turn `rcm/bashrc` into `~/.bashrc` are
 | [`tag-linux/toprc`](/rcm/tag-linux/toprc) | `~/.toprc` | top; the format is the Linux one, so it installs there only |
 | [`screenrc`](/rcm/screenrc), [`tag-linux/screenrc-xpra`](/rcm/tag-linux/screenrc-xpra) | `~/.screenrc`, `~/.screenrc-xpra` | GNU screen; the second starts an `xpra` server in a window on Linux, and is a placeholder on macOS |
 | [`config/diffuse/diffuserc`](/rcm/config/diffuse/diffuserc) | `~/.config/diffuse/diffuserc` | dark colour scheme for the Diffuse merge tool |
+| [`tag-macos/homebrew/brew.env`](/rcm/tag-macos/homebrew/brew.env) | `~/.homebrew/brew.env` | Homebrew's own environment file: how stale an index it tolerates, and that it may install dependencies unasked; macOS only |
 | [`tag-macos/finicky.js`](/rcm/tag-macos/finicky.js) | `~/.finicky.js` | per-URL browser routing via Finicky; macOS only |
 | [`git/R/`](/rcm/git/R) | `~/git/R/` | CMake and build helpers for working on the R sources in CLion |
 
