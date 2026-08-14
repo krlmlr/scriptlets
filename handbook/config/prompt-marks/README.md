@@ -1,12 +1,15 @@
 # Semantic prompt marks
 
-Every interactive zsh tells the terminal where each prompt begins and ends,
+Every interactive shell tells the terminal where each prompt begins,
 where the command it accepted started running,
 and where that command ended with which exit status.
 The sequences are
 [OSC 133](https://gitlab.freedesktop.org/Per_Bothner/specifications/-/blob/master/proposals/semantic-prompts.md),
-the semantic-prompt escapes,
-and [`rcm/zshrc`](/rcm/zshrc) is where they are sent from.
+the semantic-prompt escapes.
+[`rcm/zshrc`](/rcm/zshrc) sends them, and so does
+[`rcm/bashrc`](/rcm/bashrc) —
+the same four marks in zsh, three of them in bash,
+for the reason the bash section below gives.
 
 A terminal that reads them can jump from prompt to prompt,
 select or copy the output of a single command,
@@ -17,6 +20,8 @@ they take up no columns, and nothing here is tied to one terminal.
 tmux 3.4 records `A` and `C` against the lines they arrive on
 and drops `B` and `D` on the floor,
 so the last two are for the terminal alone.
+
+## In zsh
 
 **The marks are sent from two places, because they are two kinds of fact.**
 `C` and `D` are events — output started, a command ended — and go in
@@ -95,3 +100,52 @@ swallow the mark, and print a stray brace.
 and the prompt marks are expanded by zsh's own prompt machinery —
 which is the same standard the rest of the startup is held to
 ([`config/zsh-startup/`](/handbook/config/zsh-startup/README.md)).
+
+## In bash
+
+The marks mean the same things and are read by the same terminals.
+What differs is where a shell can put them,
+and bash gives less: `A`, `C` and `D` are sent, and `B` is not.
+
+**Nothing goes in `$PS1`.**
+zsh keeps `A` there because its line editor erases the prompt's lines
+before redrawing them; bash's does not,
+so a mark printed just before the prompt survives on the line it belongs to.
+That is the better place for it here,
+because `$PS1` in this configuration is not the shell's to keep:
+[bash-git-prompt](https://github.com/magicmonty/bash-git-prompt),
+which `~/.bashrc` sources, rebuilds the whole prompt string at every prompt.
+A mark added to `$PS1` would last exactly one prompt.
+
+`B` is the mark that has nowhere else to go —
+it belongs at the end of the prompt, which is to say inside `$PS1` —
+so it is the one bash does without.
+tmux never reads it, and what it costs is a terminal's ability
+to tell the prompt from the command typed after it.
+
+**`C` comes from `PS0`, which is bash's own answer to `preexec`.**
+`PS0` is printed once a command line has been read and before it runs,
+which is exactly what `C` means.
+It also carries the fact that a command ran at all:
+`${x:=y}` assigns as it expands,
+so the one expansion both marks the output and leaves the flag
+that the next prompt reads before deciding whether to send `D`.
+`PS0` arrived in bash 4.4,
+so a shell older than that — the `/bin/bash` macOS ships is 3.2 —
+marks its prompts and sends neither `C` nor `D`,
+which is a degradation and not a breakage.
+`promptvars` has to be on for the assignment to happen,
+and where it is off `PS0` is left unset rather than printed literally.
+
+**`A` and `D` are printed by a function at the head of `$PROMPT_COMMAND`.**
+The head matters: `$?` belongs to the command line only until the next thing
+in `$PROMPT_COMMAND` has run, and `~/.bashrc` syncs the history there.
+bash does not restore it between the parts the way zsh does between hooks.
+
+**Where Ghostty's integration is loaded, the marks are left to it,**
+as in zsh — but bash cannot ask the same question the same way.
+Ghostty installs its bash hooks *after* it has sourced the user's files,
+so at `~/.bashrc` time there is no function to look for
+and the variable that announced the injection has already been unset.
+What is still true is that Ghostty's own script is on the stack:
+it sources `~/.bashrc` itself, so `$BASH_SOURCE` names it.
