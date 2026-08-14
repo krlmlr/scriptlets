@@ -68,6 +68,7 @@ Windows is out of scope.
 | `bin/n`, `bin/bkg` — notify via `terminal-notifier` | `screenrc-xpra` — starts an xpra X11 session |
 | `bin/soffice-macos` — drives `/Applications/LibreOffice.app` | |
 | `bash_aliases_os` — `csv`/`csv2`/`tsv`, `bit` completion | `bash_aliases_os` — `pxc`, `xo`, the `xclip` key bindings, `/usr/lib/ccache` |
+| `homebrew/brew.env` — Homebrew's settings, in Homebrew's own format | |
 
 The shared [`rcm/bash_aliases`](/rcm/bash_aliases) sources
 `~/.bash_aliases_os` if it exists,
