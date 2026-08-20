@@ -19,6 +19,12 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
+# set PATH so it includes Homebrew's bin first if it exists
+# FIXME: This is set in /etc/paths.d, find a proper way
+if [ -d "/opt/homebrew/bin" ]; then
+    PATH="/opt/homebrew/bin:$PATH"
+fi
+
 # set PATH so it includes user's private bin if it exists
 #
 # The case guard is the one deviation from the stock file:
