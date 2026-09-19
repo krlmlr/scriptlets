@@ -24,4 +24,6 @@ and the same question brings both to the same leaf.
   grouped by what they are for, each with its status
 * [`testing/`](testing/) — the throw-away home directory,
   the checks, CI
-* [`meta/`](meta/) — the rules, the authoring checklist, the glossary
+* [`meta/`](meta/) — the rules of this tree, its forms and growth moves,
+  how prose is written here, the glossary, where evidence is kept,
+  and what this repository decides for itself
