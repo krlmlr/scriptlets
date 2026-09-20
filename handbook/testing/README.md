@@ -50,12 +50,12 @@ that sources [`tests/lib.sh`](/tests/lib.sh)
 for `pass`, `fail` and the assertions,
 and they run in name order:
 
-- `05-handbook`: the handbook holds its shape —
-  every directory has a `README.md`,
-  every subdirectory is in its parent's list,
-  every link resolves, and none reaches upward
-  ([`meta/handbook/`](/handbook/meta/handbook/README.md)
-  has the rules it enforces).
+- `05-handbook`: the handbook holds its shape,
+  checked by the script the `docs-consistency` skill carries
+  rather than by an implementation of its own
+  ([`meta/local/`](/handbook/meta/local/README.md) says what else runs it,
+  and [`meta/handbook/`](/handbook/meta/handbook/README.md)
+  points at the rules it enforces).
   It reads the repository, not the home directory,
   so it is first, before the installed checks.
 - `06-timing`: the clock behind the durations answers in milliseconds —
